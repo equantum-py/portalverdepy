@@ -105,14 +105,14 @@ export function MegaMenu() {
 
       <div
         className={cn(
-          'absolute left-0 top-[calc(100%+12px)] z-[80] w-[min(940px,calc(100vw-48px))] origin-top-left transition duration-200',
+          'fixed left-1/2 top-[118px] z-[999] w-[min(1120px,calc(100vw-40px))] -translate-x-1/2 origin-top transition duration-200',
           isOpen
             ? 'visible translate-y-0 scale-100 opacity-100'
             : 'invisible -translate-y-2 scale-[0.98] opacity-0'
         )}
       >
         <div className="overflow-hidden rounded-3xl border border-border bg-white shadow-[0_24px_70px_rgba(15,35,20,0.18)]">
-          <div className="grid lg:grid-cols-[1fr_1fr_280px]">
+          <div className="grid lg:grid-cols-[1fr_1fr_300px]">
             {menuGroups.map((group) => {
               const Icon = group.icon;
 

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 import { CatalogClient } from '@/components/catalog-client';
-import { products } from '@/lib/data';
+import { getPublicProducts } from '@/lib/products/catalog-products';
 
 export const metadata: Metadata = {
   title: 'Catálogo',
@@ -20,6 +20,7 @@ export default async function ShopPage({
   searchParams
 }: ShopPageProps) {
   const params = (await searchParams) ?? {};
+  const products = await getPublicProducts();
 
   return (
     <main className="container-shell py-4 sm:py-7 lg:py-10">

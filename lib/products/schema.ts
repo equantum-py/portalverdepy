@@ -21,8 +21,20 @@ const optionalNumber = z.preprocess(
   z.number().positive().optional()
 );
 
+const productImageUrlSchema = z
+  .string()
+  .trim()
+  .min(1, 'La imagen debe tener una dirección válida.')
+  .refine(
+    (value) =>
+      value.startsWith('/') ||
+      value.startsWith('https://') ||
+      value.startsWith('http://'),
+    'La dirección de la imagen no es válida.'
+  );
+
 export const productImageSchema = z.object({
-  imageUrl: z.string().url(),
+  imageUrl: productImageUrlSchema,
   storagePath: z.string().default(''),
   altText: z.string().default(''),
   orderIndex: z.number().int().nonnegative(),

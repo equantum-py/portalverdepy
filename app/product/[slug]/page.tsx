@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
@@ -8,14 +7,15 @@ import {
   CheckCircle2,
   ChevronRight,
   Clock3,
-  MapPin,
   PackageCheck,
   ShieldCheck,
   Sparkles
 } from 'lucide-react';
 
 import { ProductCard } from '@/components/product-card';
+import { ProductGallery } from '@/components/products/product-gallery';
 import { formatPricePYG, products } from '@/lib/data';
+import { getPublicProductBySlug } from '@/lib/products/public-products';
 import { WhatsAppIcon } from '@/components/icons';
 
 type ProductPageProps = {
@@ -26,7 +26,36 @@ export async function generateMetadata({
   params
 }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = products.find((item) => item.slug === slug);
+  const databaseProduct = await getPublicProductBySlug(slug);
+
+  const product = databaseProduct
+    ? {
+        ...databaseProduct,
+        category:
+          databaseProduct.categoryName ?? 'Productos',
+        image: databaseProduct.mainImage,
+        price: Number(databaseProduct.price ?? 0),
+        previousPrice:
+          databaseProduct.promo_price &&
+          Number(databaseProduct.promo_price) <
+            Number(databaseProduct.price)
+            ? Number(databaseProduct.price)
+            : undefined,
+        isOffer: Boolean(databaseProduct.promo_price),
+        description:
+          databaseProduct.full_description ??
+          databaseProduct.description ??
+          '',
+        seoDescription:
+          databaseProduct.seo_description ??
+          databaseProduct.description ??
+          '',
+        benefits: databaseProduct.features,
+        recommendations:
+          databaseProduct.recommendations,
+        relatedProducts: []
+      }
+    : products.find((item) => item.slug === slug);
 
   if (!product) {
     return {
@@ -44,18 +73,77 @@ export default async function ProductPage({
   params
 }: ProductPageProps) {
   const { slug } = await params;
-  const product = products.find((item) => item.slug === slug);
+
+  const databaseProduct =
+    await getPublicProductBySlug(slug);
+
+  const product = databaseProduct
+    ? {
+        ...databaseProduct,
+        category:
+          databaseProduct.categoryName ?? 'Productos',
+        image: databaseProduct.mainImage,
+        price: Number(databaseProduct.price ?? 0),
+        previousPrice:
+          databaseProduct.previousPrice === null
+            ? undefined
+            : Number(databaseProduct.previousPrice),
+        isOffer: Boolean(databaseProduct.promo_price),
+        description:
+          databaseProduct.full_description ??
+          databaseProduct.description ??
+          '',
+        seoDescription:
+          databaseProduct.seo_description ??
+          databaseProduct.description ??
+          '',
+        benefits: databaseProduct.features,
+        recommendations:
+          databaseProduct.recommendations,
+        relatedProducts: []
+      }
+    : products.find((item) => item.slug === slug);
 
   if (!product) {
     notFound();
   }
 
+  const galleryImages =
+    databaseProduct?.images?.length
+      ? databaseProduct.images.map(
+          (
+            image: {
+              imageUrl: string;
+              altText?: string | null;
+            }
+          ) => ({
+            imageUrl: image.imageUrl,
+            altText:
+              image.altText ||
+              databaseProduct.main_image_alt ||
+              product.name
+          })
+        )
+      : [
+          {
+            imageUrl:
+              databaseProduct?.mainImage ||
+              product.image ||
+              '/images/product-placeholder.webp',
+            altText: product.name
+          }
+        ];
+
   const relatedProducts =
     product.relatedProducts
-      ?.map((relatedSlug) =>
+      ?.map((relatedSlug: string) =>
         products.find((item) => item.slug === relatedSlug)
       )
-      .filter((item): item is NonNullable<typeof item> => Boolean(item)) || [];
+      .filter(
+        (
+          item: (typeof products)[number] | undefined
+        ): item is (typeof products)[number] => Boolean(item)
+      ) || [];
 
   const whatsappNumber = '595981077600';
 
@@ -64,15 +152,6 @@ export default async function ProductPage({
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     message
   )}`;
-
-  const discount =
-    product.previousPrice && product.previousPrice > product.price
-      ? Math.round(
-          ((product.previousPrice - product.price) /
-            product.previousPrice) *
-            100
-        )
-      : null;
 
   return (
     <>
@@ -117,55 +196,10 @@ export default async function ProductPage({
         <section className="grid items-start gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.9fr)] lg:gap-10">
           {/* Imagen */}
           <div className="lg:sticky lg:top-32">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-border bg-brand-50 shadow-sm sm:aspect-square sm:rounded-3xl">
-              <Image
-                src={product.image}
-                alt={product.name}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 620px"
-                className="object-cover transition duration-700 hover:scale-[1.03]"
-              />
-
-              <div className="absolute left-3 top-3 flex flex-wrap gap-2 sm:left-5 sm:top-5">
-                {product.isOffer ? (
-                  <span className="rounded-full bg-red-600 px-3 py-1.5 text-xs font-bold text-white shadow-md">
-                    Oferta
-                  </span>
-                ) : null}
-
-                {discount ? (
-                  <span className="rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-red-600 shadow-md backdrop-blur">
-                    Ahorrás {discount}%
-                  </span>
-                ) : null}
-              </div>
-
-              <div className="absolute inset-x-3 bottom-3 rounded-2xl border border-white/30 bg-brand-950/75 p-3 text-white backdrop-blur-md sm:inset-x-5 sm:bottom-5 sm:p-4">
-                <div className="grid grid-cols-3 divide-x divide-white/20 text-center">
-                  <div className="px-2">
-                    <ShieldCheck className="mx-auto h-5 w-5 text-brand-200" />
-                    <p className="mt-1 text-[10px] font-medium sm:text-xs">
-                      Garantía
-                    </p>
-                  </div>
-
-                  <div className="px-2">
-                    <MapPin className="mx-auto h-5 w-5 text-brand-200" />
-                    <p className="mt-1 text-[10px] font-medium sm:text-xs">
-                      Instalación
-                    </p>
-                  </div>
-
-                  <div className="px-2">
-                    <PackageCheck className="mx-auto h-5 w-5 text-brand-200" />
-                    <p className="mt-1 text-[10px] font-medium sm:text-xs">
-                      Calidad
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ProductGallery
+              productName={product.name}
+              images={galleryImages}
+            />
           </div>
 
           {/* Información del producto */}
@@ -277,7 +311,7 @@ export default async function ProductPage({
                   </summary>
 
                   <ul className="grid gap-2 border-t border-border px-4 py-4">
-                    {product.benefits.map((benefit) => (
+                    {product.benefits.map((benefit: string) => (
                       <li
                         key={benefit}
                         className="flex items-start gap-2 text-xs leading-5 text-text-soft"
@@ -300,7 +334,11 @@ export default async function ProductPage({
                   </div>
 
                   <div className="grid grid-cols-2 gap-2.5">
-                    {product.benefits.map((benefit, index) => {
+                    {product.benefits.map(
+                      (
+                        benefit: string,
+                        index: number
+                      ) => {
                       const icons = [
                         Sparkles,
                         ShieldCheck,
@@ -350,7 +388,7 @@ export default async function ProductPage({
                   </summary>
 
                   <ul className="grid gap-2 border-t border-border px-4 py-4">
-                    {product.recommendations.map((recommendation) => (
+                    {product.recommendations.map((recommendation: string) => (
                       <li
                         key={recommendation}
                         className="flex items-start gap-2 text-xs leading-5 text-text-soft"
@@ -372,7 +410,7 @@ export default async function ProductPage({
                   </h2>
 
                   <ul className="mt-4 grid gap-3">
-                    {product.recommendations.map((recommendation) => (
+                    {product.recommendations.map((recommendation: string) => (
                       <li
                         key={recommendation}
                         className="flex items-start gap-3 text-sm leading-6 text-text-soft"
@@ -467,7 +505,7 @@ export default async function ProductPage({
             </div>
 
             <div className="flex snap-x gap-3 overflow-x-auto pb-3 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-4">
-              {relatedProducts.map((relatedProduct) => (
+              {relatedProducts.map((relatedProduct: (typeof products)[number]) => (
                 <div
                   key={relatedProduct.id}
                   className="w-[72%] shrink-0 snap-start sm:w-auto"

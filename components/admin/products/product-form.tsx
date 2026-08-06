@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState } from 'react';
 import {
   useFieldArray,
   useForm,
@@ -82,11 +82,12 @@ export function ProductForm({
   initialValues
 }: ProductFormProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [isSaving, setIsSaving] = useState(false);
   const [slugEdited, setSlugEdited] = useState(
     mode === 'edit'
   );
   const [serverMessage, setServerMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const {
     register,
@@ -94,6 +95,7 @@ export function ProductForm({
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors }
   } = useForm<
     ProductFormInput,
@@ -140,10 +142,34 @@ export function ProductForm({
     name: 'recommendations'
   });
 
-  function submit(values: ProductFormValues) {
-    setServerMessage('');
+  function invalidSubmit(formErrors: typeof errors) {
+    console.error('Errores del formulario de producto:', formErrors);
 
-    startTransition(async () => {
+    const firstError = Object.values(formErrors)
+      .map((error) => error?.message)
+      .find((message): message is string => Boolean(message));
+
+    setServerMessage(
+      firstError ||
+        'Hay campos incompletos o con datos inválidos. Revisá los campos marcados en rojo.'
+    );
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
+
+  async function submit(values: ProductFormValues) {
+    if (isSaving) {
+      return;
+    }
+
+    setServerMessage('');
+    setSuccessMessage('');
+    setIsSaving(true);
+
+    try {
       const result =
         mode === 'edit' && productId
           ? await updateProductAction(productId, values)
@@ -153,17 +179,49 @@ export function ProductForm({
         setServerMessage(
           result.message || 'No se pudo guardar el producto.'
         );
+
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+
         return;
       }
 
-      router.push('/admin/productos');
+      reset(values);
+
+      setSuccessMessage(
+        mode === 'edit'
+          ? 'Producto actualizado correctamente.'
+          : 'Producto creado correctamente.'
+      );
+
       router.refresh();
-    });
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    } catch (error) {
+      console.error('Error al guardar el producto:', error);
+
+      setServerMessage(
+        'Ocurrió un error al guardar el producto. Intentá nuevamente.'
+      );
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
     <form
-      onSubmit={handleSubmit(submit)}
+      onSubmit={handleSubmit(submit, invalidSubmit)}
+      noValidate
       className="mx-auto w-full max-w-[1100px]"
     >
       <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -191,16 +249,16 @@ export function ProductForm({
 
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isSaving}
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-green-700 px-5 text-sm font-semibold text-white hover:bg-green-800 disabled:opacity-60"
         >
-          {isPending ? (
+          {isSaving ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <Save className="h-4 w-4" />
           )}
 
-          {isPending
+          {isSaving
             ? 'Guardando...'
             : mode === 'edit'
               ? 'Actualizar producto'
@@ -208,8 +266,20 @@ export function ProductForm({
         </button>
       </div>
 
+      {successMessage ? (
+        <div
+          role="status"
+          className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800"
+        >
+          ✅ {successMessage}
+        </div>
+      ) : null}
+
       {serverMessage ? (
-        <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div
+          role="alert"
+          className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
           {serverMessage}
         </div>
       ) : null}
@@ -669,16 +739,16 @@ export function ProductForm({
 
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isSaving}
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-green-700 px-5 text-sm font-semibold text-white hover:bg-green-800 disabled:opacity-60"
         >
-          {isPending ? (
+          {isSaving ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <Save className="h-4 w-4" />
           )}
 
-          {isPending
+          {isSaving
             ? 'Guardando...'
             : mode === 'edit'
               ? 'Actualizar producto'

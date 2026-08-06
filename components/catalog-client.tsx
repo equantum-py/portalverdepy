@@ -32,20 +32,29 @@ type CatalogClientProps = {
   initialCategory?: string;
 };
 
-const categoryLabels = [
-  'Todos',
-  'Césped',
-  'Paisajismo',
-  'Plantas',
-  'Mantenimiento de jardines',
-  'Piscinas'
-];
+
 
 export function CatalogClient({
   initialProducts,
   initialSearch = '',
   initialCategory = ''
 }: CatalogClientProps) {
+  const categoryLabels = useMemo(
+    () => [
+      'Todos',
+      ...Array.from(
+        new Set(
+          initialProducts
+            .map((product) => product.category)
+            .filter(Boolean)
+        )
+      ).sort((first, second) =>
+        first.localeCompare(second)
+      )
+    ],
+    [initialProducts]
+  );
+
   const highestProductPrice = useMemo(
     () =>
       Math.max(
