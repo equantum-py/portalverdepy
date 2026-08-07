@@ -79,7 +79,9 @@ create policy "Public can view home content images"
   on storage.objects
   for select
   to public
-  using (bucket_id = 'home-content-images');
+  using (
+    bucket_id = 'home-content-images'
+  );
 
 drop policy if exists "Admins can upload home content images"
   on storage.objects;

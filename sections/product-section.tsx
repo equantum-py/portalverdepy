@@ -16,8 +16,8 @@ export function ProductSection({
   if (!products.length) return null;
 
   return (
-    <section className="border-b border-border/70 py-5 last:border-none sm:py-8 lg:py-10">
-      <div className="mb-4 flex items-end justify-between gap-4 sm:mb-6">
+    <section className="border-b border-border/70 py-4 last:border-none sm:py-6 lg:py-6">
+      <div className="mb-4 flex items-end justify-between gap-4 sm:mb-5">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-700">
             Productos destacados

@@ -484,13 +484,18 @@ export function HomeContentForm({
 
         {/* HERO */}
         <Box title="Portada principal">
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              {...register('heroEnabled')}
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <Toggle
+              label="Mostrar portada principal"
+              registration={register('heroEnabled')}
+              checked={values.heroEnabled}
             />
-            Portada activa
-          </label>
+
+            <p className="mt-2 text-sm text-slate-500">
+              Desactivar esta opción oculta completamente el banner,
+              incluida la imagen.
+            </p>
+          </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Título principal">
@@ -592,7 +597,7 @@ export function HomeContentForm({
             </h3>
 
             <p className="mt-1 text-sm text-slate-500">
-              Elegí qué información se muestra encima de la fotografía.
+              Desactivá esta opción para mostrar solamente la imagen. También podés elegir qué elementos mostrar en Desktop y Mobile.
             </p>
 
             <div className="mt-4 space-y-3">
@@ -1211,15 +1216,21 @@ export function HomeContentForm({
                     )}
                   />
 
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      {...register(
-                        `sections.${index}.isActive`,
-                      )}
-                    />
-                    Activa
-                  </label>
+                  {values.sections[index]?.key === 'hero' ? (
+                    <span className="text-sm text-slate-500">
+                      Configurada en Portada principal
+                    </span>
+                  ) : (
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        {...register(
+                          `sections.${index}.isActive`,
+                        )}
+                      />
+                      Activa
+                    </label>
+                  )}
                 </div>
               ),
             )}

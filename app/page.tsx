@@ -26,17 +26,17 @@ export default async function HomePage() {
 
   return (
     <>
-      <main className="container-shell space-y-5 py-4 sm:space-y-6 sm:py-6 lg:py-10">
+      <main className="container-shell space-y-4 py-3 sm:space-y-5 sm:py-4 lg:py-6">
         {activeSections.map((section) => {
           if (section.key === "hero") {
             return (
               <div key={section.key}>
-                <div className="space-y-4 lg:hidden">
+                <div className="space-y-3 lg:hidden">
                   <CategorySidebar />
                   <HomeHero content={content} />
                 </div>
 
-                <div className="hidden gap-5 lg:grid lg:grid-cols-[280px_minmax(0,1fr)]">
+                <div className="hidden gap-4 lg:grid lg:grid-cols-[280px_minmax(0,1fr)]">
                   <CategorySidebar />
                   <HomeHero content={content} />
                 </div>

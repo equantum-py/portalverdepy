@@ -127,10 +127,12 @@ export const homeContentSchema = z.object({
     .min(1, 'El título de la portada es obligatorio.'),
   heroSubtitle: z.string(),
   heroDescription: z.string(),
+
   heroDesktopUrl: z.string(),
   heroDesktopPath: z.string(),
   heroMobileUrl: z.string(),
   heroMobilePath: z.string(),
+
   heroAlt: z.string(),
   heroAlignment: z.enum([
     'left',
@@ -149,6 +151,7 @@ export const homeContentSchema = z.object({
     .int()
     .min(0)
     .max(100),
+
   heroContentEnabled: z.boolean(),
   heroContentDesktop: z.boolean(),
   heroContentMobile: z.boolean(),
