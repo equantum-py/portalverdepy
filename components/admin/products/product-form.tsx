@@ -37,6 +37,7 @@ type CategoryOption = {
 
 type ProductFormProps = {
   categories: CategoryOption[];
+  availableProducts?: { id: string; name: string; slug: string }[];
   mode?: 'create' | 'edit';
   productId?: string;
   initialValues?: ProductFormValues;
@@ -68,6 +69,7 @@ const emptyProductValues: ProductFormValues = {
   features: [{ value: '' }],
   specifications: [{ key: '', value: '' }],
   recommendations: [{ value: '' }],
+  relatedProductSlugs: [],
   seoTitle: '',
   seoDescription: '',
   seoKeywords: '',
@@ -77,6 +79,7 @@ const emptyProductValues: ProductFormValues = {
 
 export function ProductForm({
   categories,
+  availableProducts = [],
   mode = 'create',
   productId,
   initialValues
@@ -113,6 +116,7 @@ export function ProductForm({
   }));
   const seoTitle = watch('seoTitle');
   const seoDescription = watch('seoDescription');
+  const relatedProductSlugs = watch('relatedProductSlugs') ?? [];
 
   useEffect(() => {
     if (!slugEdited) {
@@ -285,6 +289,36 @@ export function ProductForm({
       ) : null}
 
       <div className="space-y-6">
+        <Section
+          title="Productos relacionados"
+          description="Seleccioná productos complementarios para mostrar en la ficha pública."
+        >
+          {availableProducts.length ? (
+            <div className="grid gap-2 sm:grid-cols-2">
+              {availableProducts
+                .filter((product) => product.id !== productId)
+                .map((product) => (
+                  <label key={product.id} className="flex items-center gap-3 rounded-xl border border-slate-200 p-3 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={relatedProductSlugs.includes(product.slug)}
+                      onChange={(event) => setValue(
+                        'relatedProductSlugs',
+                        event.target.checked
+                          ? [...relatedProductSlugs, product.slug]
+                          : relatedProductSlugs.filter((slug) => slug !== product.slug),
+                        { shouldDirty: true, shouldValidate: true }
+                      )}
+                    />
+                    {product.name}
+                  </label>
+                ))}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-500">No hay otros productos disponibles.</p>
+          )}
+        </Section>
+
         <Section
           title="Información básica"
           description="Nombre, categoría, descripción y forma de venta."

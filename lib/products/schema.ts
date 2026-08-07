@@ -151,6 +151,8 @@ export const productFormSchema = z
       )
       .default([]),
 
+    relatedProductSlugs: z.array(z.string().min(1)).max(12).default([]),
+
     seoTitle: z.string().trim().max(70).default(''),
 
     seoDescription: z.string().trim().max(180).default(''),

@@ -8,7 +8,7 @@ import {
   PackageCheck
 } from 'lucide-react';
 
-import { formatPricePYG } from '@/lib/data';
+import { formatPricePYG } from '@/lib/format-price';
 import type { Product } from '@/lib/types';
 import { WhatsAppIcon } from '@/components/icons';
 

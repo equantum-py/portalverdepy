@@ -15,11 +15,13 @@ import { LawnMowerIcon, WhatsAppIcon } from '@/components/icons';
 import { QuoteCounter } from '@/components/quote-counter';
 import { Logo } from '@/components/logo';
 import { MegaMenu } from '@/components/navigation/mega-menu';
-import { categories, formatPricePYG, products } from '@/lib/data';
+import { formatPricePYG } from '@/lib/format-price';
+import type { Category, Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { createWhatsAppUrl } from '@/lib/site-config';
+import type { HomeContentValues } from '@/lib/home-content/schema';
 
-export function Header() {
+export function Header({ categories, products, homeContent }: { categories: Category[]; products: Product[]; homeContent: HomeContentValues }) {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -46,7 +48,7 @@ export function Header() {
         return matchesSearch && matchesCategory;
       })
       .slice(0, 6);
-  }, [search, selectedCategory]);
+  }, [products, search, selectedCategory]);
 
   const handleSearch = () => {
     const query = search.trim();
@@ -76,50 +78,47 @@ export function Header() {
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
+  const navigationHref = (item: HomeContentValues['navigation'][number]) => {
+    if(item.linkType==='category') return `/shop?category=${encodeURIComponent(categories.find(category=>category.id===item.targetId)?.name||'')}`;
+    if(item.linkType==='product') return `/product/${products.find(product=>product.id===item.targetId)?.slug||''}`;
+    return item.url;
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-white/95 shadow-sm backdrop-blur-xl">
       {/* Barra promocional */}
-      <div className="border-b border-brand-100 bg-brand-50">
+      {homeContent.promoEnabled && <div className="border-b border-brand-100 bg-brand-50">
         <div className="container-shell flex h-9 items-center gap-3 overflow-hidden text-xs">
           <div className="min-w-0 flex-1 overflow-hidden whitespace-nowrap">
-            <div className="animate-marquee inline-flex items-center font-medium text-brand-800">
+            <div className={`${homeContent.promoScroll?'animate-marquee':''} inline-flex items-center font-medium text-brand-800`} style={{animationDuration:`${homeContent.promoSpeed}s`}}>
               <span>
-                🌱 Césped Esmeralda desde Gs. 31.000 m² con instalación incluida
-              </span>
-
-              <span className="mx-8 hidden sm:inline">
-                🌿 Césped resistente todo el año
-              </span>
-
-              <span className="mr-8 hidden lg:inline">
-                🏡 Instalación profesional en Asunción y Gran Asunción
+                {homeContent.promoIcon} {homeContent.promoText}
               </span>
             </div>
           </div>
 
           <a
-            href={createWhatsAppUrl('Hola, quiero recibir asesoramiento de Portal Verde.')}
-            target="_blank"
+            href={homeContent.promoUrl || createWhatsAppUrl('Hola, quiero recibir asesoramiento de Portal Verde.')}
+            target={homeContent.promoNewTab?'_blank':undefined}
             rel="noopener noreferrer"
             className="inline-flex shrink-0 items-center gap-1.5 font-semibold text-brand-800 transition hover:text-brand-600"
           >
             <WhatsAppIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">WhatsApp</span>
+            <span className="hidden sm:inline">{homeContent.promoButtonText}</span>
           </a>
         </div>
-      </div>
+      </div>}
 
       {/* Cabecera desktop */}
       <div className="container-shell">
         <div className="flex min-h-[72px] items-center gap-4 py-3 lg:min-h-[82px] lg:gap-7">
-          <Link
+          {homeContent.logoEnabled && <Link
             href="/"
             aria-label="Ir al inicio de Portal Verde"
             className="shrink-0"
           >
-            <Logo />
-          </Link>
+            <Logo desktopUrl={homeContent.logoDesktopUrl} mobileUrl={homeContent.logoMobileUrl} alt={homeContent.logoAlt}/>
+          </Link>}
 
           {/* Buscador desktop */}
           <div className="relative hidden min-w-0 flex-1 md:block">
@@ -269,14 +268,16 @@ export function Header() {
             aria-label="Navegación principal"
             className="ml-auto hidden shrink-0 items-center gap-2 lg:flex"
           >
-            <MegaMenu />
+            <MegaMenu categories={categories} products={products} homeContent={homeContent} />
 
-            <Link
-              href="/trabajos"
+            {homeContent.navigation.filter(item=>item.isActive).sort((a,b)=>a.sortOrder-b.sortOrder).map(item=><Link
+              key={item.name}
+              href={navigationHref(item)}
+              target={item.newTab?'_blank':undefined}
               className="inline-flex h-11 items-center rounded-xl bg-brand-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-800 hover:shadow-soft"
             >
-              Trabajos
-            </Link>
+              {item.name}
+            </Link>)}
 
             <Link
               href="/cart"
@@ -419,14 +420,14 @@ export function Header() {
           </Link>
 
           <a
-            href={createWhatsAppUrl('Hola, quiero recibir asesoramiento de Portal Verde.')}
+            href={homeContent.whatsappUrl||createWhatsAppUrl('Hola, quiero recibir asesoramiento de Portal Verde.')}
             target="_blank"
             rel="noopener noreferrer"
             onClick={closeMobileMenu}
             className="mt-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-semibold text-white"
           >
             <WhatsAppIcon className="h-5 w-5" />
-            Consultar por WhatsApp
+            {homeContent.whatsappText}
           </a>
         </nav>
       </div>

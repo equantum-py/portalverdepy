@@ -1,9 +1,14 @@
 import type { MetadataRoute } from 'next';
 
-import { products } from '@/lib/data';
+import { getPublicCategories } from '@/lib/categories/public-categories';
+import { getPublicProducts } from '@/lib/products/catalog-products';
 import { siteConfig } from '@/lib/site-config';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [products, categories] = await Promise.all([
+    getPublicProducts(),
+    getPublicCategories()
+  ]);
   const updatedAt = new Date();
 
   const staticPages: MetadataRoute.Sitemap = [
@@ -34,5 +39,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8
   }));
 
-  return [...staticPages, ...productPages];
+  const categoryPages: MetadataRoute.Sitemap = categories.map((category) => ({
+    url: `${siteConfig.url}/shop?category=${encodeURIComponent(category.name)}`,
+    lastModified: updatedAt,
+    changeFrequency: 'weekly',
+    priority: 0.7
+  }));
+
+  return [...staticPages, ...categoryPages, ...productPages];
 }

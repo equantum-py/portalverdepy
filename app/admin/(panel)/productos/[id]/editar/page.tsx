@@ -61,7 +61,8 @@ export default async function EditProductPage({
     priceTiersResult,
     featuresResult,
     specificationsResult,
-    recommendationsResult
+    recommendationsResult,
+    availableProductsResult
   ] = await Promise.all([
     supabase
       .from('products')
@@ -86,7 +87,8 @@ export default async function EditProductPage({
         seo_description,
         seo_keywords,
         main_image_alt,
-        canonical_url
+        canonical_url,
+        related_product_slugs
       `)
       .eq('id', id)
       .single(),
@@ -141,7 +143,13 @@ export default async function EditProductPage({
       .from('product_recommendations')
       .select('recommendation_text, order_index')
       .eq('product_id', id)
-      .order('order_index', { ascending: true })
+      .order('order_index', { ascending: true }),
+
+    supabase
+      .from('products')
+      .select('id, name, slug')
+      .neq('id', id)
+      .order('name', { ascending: true })
   ]);
 
   if (productResult.error || !productResult.data) {
@@ -257,6 +265,12 @@ export default async function EditProductPage({
           )
         : [{ value: '' }],
 
+    relatedProductSlugs: Array.isArray(product.related_product_slugs)
+      ? product.related_product_slugs.filter(
+          (slug: unknown): slug is string => typeof slug === 'string'
+        )
+      : [],
+
     seoTitle: product.seo_title ?? '',
     seoDescription: product.seo_description ?? '',
 
@@ -273,6 +287,7 @@ export default async function EditProductPage({
       mode="edit"
       productId={id}
       categories={categoriesResult.data ?? []}
+      availableProducts={availableProductsResult.data ?? []}
       initialValues={initialValues}
     />
   );

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 
 import { WhatsAppIcon } from '@/components/icons';
+import type {HomeContentValues} from '@/lib/home-content/schema';
 
 const whatsappNumber = '595981077600';
 
@@ -18,7 +19,7 @@ const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
   whatsappMessage
 )}`;
 
-export function HomeHero() {
+export function HomeHero({content}:{content:HomeContentValues}) {
   return (
     <section
       aria-labelledby="home-hero-title"
@@ -26,24 +27,32 @@ export function HomeHero() {
     >
       {/* Imagen de fondo */}
       <Image
-        src="/images/banners/slide-2-desktop.webp"
-        alt="Servicio profesional de jardinería y mantenimiento de césped"
+        src={content.heroDesktopUrl}
+        alt={content.heroAlt}
         fill
         priority
         sizes="(max-width: 1024px) 100vw, 900px"
-        className="object-cover object-left"
+        className="hidden object-cover object-left sm:block"
+      />
+      <Image
+        src={content.heroMobileUrl}
+        alt={content.heroAlt}
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover sm:hidden"
       />
 
       {/* Capas para mejorar la lectura */}
-      <div className="absolute inset-0 bg-gradient-to-r from-brand-950/95 via-brand-950/75 to-brand-950/10" />
+      {content.heroOverlay&&<div className="absolute inset-0 bg-brand-950" style={{opacity:content.heroOverlayIntensity/100}} />}
       <div className="absolute inset-0 bg-gradient-to-t from-brand-950/80 via-transparent to-transparent lg:hidden" />
 
       <div className="relative flex min-h-[430px] items-end p-5 sm:min-h-[480px] sm:p-8 lg:min-h-[470px] lg:items-center lg:p-10 xl:p-12">
-        <div className="max-w-xl">
+        <div className={`max-w-xl ${content.heroAlignment==='center'?'mx-auto text-center':content.heroAlignment==='right'?'ml-auto text-right':''}`}>
           {/* Etiqueta */}
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md sm:text-sm">
             <ShieldCheck className="h-4 w-4 text-brand-200" />
-            Instalación profesional garantizada
+            {content.heroSubtitle}
           </div>
 
           {/* Título */}
@@ -51,13 +60,12 @@ export function HomeHero() {
             id="home-hero-title"
             className="max-w-lg text-3xl font-semibold leading-[1.08] tracking-tight text-white sm:text-4xl lg:text-5xl"
           >
-            Transformamos tu espacio en un jardín que se disfruta
+            {content.heroTitle}
           </h1>
 
           {/* Descripción */}
           <p className="mt-4 max-w-lg text-sm leading-6 text-white/85 sm:text-base sm:leading-7">
-            Venta e instalación de césped natural con asesoramiento profesional
-            en Asunción y Gran Asunción.
+            {content.heroDescription}
           </p>
 
           {/* Precio */}

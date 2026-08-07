@@ -41,7 +41,12 @@ export default async function NewProductPage() {
     );
   }
 
+  const { data: products } = await supabase
+    .from('products')
+    .select('id, name, slug')
+    .order('name', { ascending: true });
+
   return (
-    <ProductForm categories={categories ?? []} />
+    <ProductForm categories={categories ?? []} availableProducts={products ?? []} />
   );
 }
