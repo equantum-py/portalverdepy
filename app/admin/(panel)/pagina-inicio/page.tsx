@@ -1,0 +1,13 @@
+import { HomeContentForm } from '@/components/admin/home-content/home-content-form';
+import { getHomeContent } from '@/lib/home-content/public';
+import { createClient } from '@/lib/supabase/server';
+
+export default async function HomeContentPage() {
+  const supabase = await createClient();
+  const [content, categories, products] = await Promise.all([
+    getHomeContent(),
+    supabase.from('categories').select('id,name').eq('is_active', true).order('name'),
+    supabase.from('products').select('id,name').eq('is_active', true).order('name')
+  ]);
+  return <HomeContentForm initialValues={content} categories={categories.data ?? []} products={products.data ?? []} />;
+}

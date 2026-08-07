@@ -5,6 +5,9 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { siteConfig } from '@/lib/site-config';
 
 import { RouteShell } from '@/components/route-shell';
+import { getPublicCategories } from '@/lib/categories/public-categories';
+import { getPublicProducts } from '@/lib/products/catalog-products';
+import { getHomeContent } from '@/lib/home-content/public';
 
 import './globals.css';
 import '../styles/design-tokens.css';
@@ -72,17 +75,23 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [categories, products, homeContent] = await Promise.all([
+    getPublicCategories(),
+    getPublicProducts(),
+    getHomeContent()
+  ]);
+
   return (
     <html lang="es-PY">
       <body
         className={`${manrope.variable} bg-[#f8faf8] font-sans text-[#172019] antialiased`}
       >
-<main><RouteShell>{children}</RouteShell></main>
+<main><RouteShell categories={categories} products={products} homeContent={homeContent}>{children}</RouteShell></main>
 <SpeedInsights />
       </body>
     </html>
