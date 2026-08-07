@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+import {
+  heroCarouselSettingsSchema,
+  heroSlideSchema,
+} from './hero-schema';
+
 const navigationItemSchema = z.object({
   name: z
     .string()
@@ -121,18 +126,21 @@ export const homeContentSchema = z.object({
   whatsappText: z.string(),
   whatsappUrl: z.string(),
 
+  /*
+   * Configuración antigua del Hero.
+   * Se conserva como fallback y para mantener compatibilidad
+   * mientras el nuevo carrusel se encuentra activo.
+   */
   heroEnabled: z.boolean(),
   heroTitle: z
     .string()
     .min(1, 'El título de la portada es obligatorio.'),
   heroSubtitle: z.string(),
   heroDescription: z.string(),
-
   heroDesktopUrl: z.string(),
   heroDesktopPath: z.string(),
   heroMobileUrl: z.string(),
   heroMobilePath: z.string(),
-
   heroAlt: z.string(),
   heroAlignment: z.enum([
     'left',
@@ -145,13 +153,11 @@ export const homeContentSchema = z.object({
     .int()
     .min(0)
     .max(90),
-
   heroShadowIntensity: z
     .number()
     .int()
     .min(0)
     .max(100),
-
   heroContentEnabled: z.boolean(),
   heroContentDesktop: z.boolean(),
   heroContentMobile: z.boolean(),
@@ -164,6 +170,12 @@ export const homeContentSchema = z.object({
   heroShowPrimaryButton: z.boolean(),
   heroShowSecondaryButton: z.boolean(),
   heroShowBenefits: z.boolean(),
+
+  /*
+   * Nuevo sistema de múltiples banners.
+   */
+  carousel: heroCarouselSettingsSchema,
+  heroSlides: z.array(heroSlideSchema),
 
   servicesEnabled: z.boolean(),
   servicesTitle: z

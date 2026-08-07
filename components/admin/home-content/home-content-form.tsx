@@ -8,7 +8,11 @@ import {
   Save,
   Trash2,
 } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import {
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 import {
   useFieldArray,
   useForm,
@@ -16,7 +20,7 @@ import {
 } from 'react-hook-form';
 
 import { saveHomeContentAction } from '@/app/admin/(panel)/pagina-inicio/actions';
-import { HeroImageUploader } from './hero-image-uploader';
+import { HeroCarouselEditor } from './hero-carousel-editor';
 import { HomeHero } from '@/sections/home-hero';
 import {
   homeContentSchema,
@@ -36,8 +40,19 @@ type ProductOption = {
   name: string;
 };
 
+type HeroCarouselEditorProps =
+  ComponentProps<typeof HeroCarouselEditor>;
+
+type HomeContentInitialValues =
+  HomeContentValues & {
+    heroSlides:
+      HeroCarouselEditorProps['initialSlides'];
+    carousel:
+      HeroCarouselEditorProps['initialSettings'];
+  };
+
 type HomeContentFormProps = {
-  initialValues: HomeContentValues;
+  initialValues: HomeContentInitialValues;
   categories: CategoryOption[];
   products: ProductOption[];
 };
@@ -482,219 +497,11 @@ export function HomeContentForm({
           </ArrayEditor>
         </Box>
 
-        {/* HERO */}
-        <Box title="Portada principal">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <Toggle
-              label="Mostrar portada principal"
-              registration={register('heroEnabled')}
-              checked={values.heroEnabled}
-            />
-
-            <p className="mt-2 text-sm text-slate-500">
-              Desactivar esta opción oculta completamente el banner,
-              incluida la imagen.
-            </p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Título principal">
-              <input
-                className={input}
-                {...register('heroTitle')}
-              />
-            </Field>
-
-            <Field label="Subtítulo">
-              <input
-                className={input}
-                {...register('heroSubtitle')}
-              />
-            </Field>
-
-            <Field label="Descripción">
-              <textarea
-                className={`${input} h-24 py-2`}
-                {...register('heroDescription')}
-              />
-            </Field>
-
-            <Field label="Texto alternativo">
-              <input
-                className={input}
-                {...register('heroAlt')}
-              />
-            </Field>
-
-            <HeroImageUploader
-              label="Imagen Desktop"
-              recommendedSize="1920 × 650 px"
-              aspect="desktop"
-              url={values.heroDesktopUrl}
-              path={values.heroDesktopPath}
-              onChange={({ url, path }) => {
-                setValue('heroDesktopUrl', url, { shouldDirty: true });
-                setValue('heroDesktopPath', path, { shouldDirty: true });
-              }}
-            />
-
-            <HeroImageUploader
-              label="Imagen Mobile"
-              recommendedSize="750 × 507 px"
-              aspect="mobile"
-              url={values.heroMobileUrl}
-              path={values.heroMobilePath}
-              onChange={({ url, path }) => {
-                setValue('heroMobileUrl', url, { shouldDirty: true });
-                setValue('heroMobilePath', path, { shouldDirty: true });
-              }}
-            />
-
-            <Field label="Alineación">
-              <select
-                className={input}
-                {...register('heroAlignment')}
-              >
-                <option value="left">
-                  Izquierda
-                </option>
-                <option value="center">
-                  Centro
-                </option>
-                <option value="right">
-                  Derecha
-                </option>
-              </select>
-            </Field>
-
-            <Field label={`Intensidad de sombra: ${values.heroOverlayIntensity}%`}>
-              <input
-                type="range"
-                min={0}
-                max={90}
-                className="mt-3 h-2 w-full cursor-pointer accent-green-700"
-                {...register(
-                  'heroOverlayIntensity',
-                  {
-                    valueAsNumber: true,
-                  },
-                )}
-              />
-            </Field>
-          </div>
-
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              {...register('heroOverlay')}
-            />
-            Aplicar sombra sobre la imagen
-          </label>
-
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <h3 className="font-semibold text-slate-950">
-              Contenido sobre el banner
-            </h3>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Desactivá esta opción para mostrar solamente la imagen. También podés elegir qué elementos mostrar en Desktop y Mobile.
-            </p>
-
-            <div className="mt-4 space-y-3">
-              <Toggle
-                label="Mostrar contenido sobre el banner"
-                registration={register('heroContentEnabled')}
-                checked={values.heroContentEnabled}
-              />
-
-              <div
-                className={`grid gap-3 border-t pt-4 sm:grid-cols-2 lg:grid-cols-3 ${
-                  values.heroContentEnabled
-                    ? ''
-                    : 'pointer-events-none opacity-45'
-                }`}
-                aria-disabled={!values.heroContentEnabled}
-              >
-                <Toggle
-                  label="Mostrar en Desktop"
-                  registration={register('heroContentDesktop')}
-                  checked={values.heroContentDesktop}
-                  disabled={!values.heroContentEnabled}
-                />
-
-                <Toggle
-                  label="Mostrar en Mobile"
-                  registration={register('heroContentMobile')}
-                  checked={values.heroContentMobile}
-                  disabled={!values.heroContentEnabled}
-                />
-
-                <Toggle
-                  label="Mostrar etiqueta"
-                  registration={register('heroShowLabel')}
-                  checked={values.heroShowLabel}
-                  disabled={!values.heroContentEnabled}
-                />
-
-                <Toggle
-                  label="Mostrar título"
-                  registration={register('heroShowTitle')}
-                  checked={values.heroShowTitle}
-                  disabled={!values.heroContentEnabled}
-                />
-
-                <Toggle
-                  label="Mostrar subtítulo"
-                  registration={register('heroShowSubtitle')}
-                  checked={values.heroShowSubtitle}
-                  disabled={!values.heroContentEnabled}
-                />
-
-                <Toggle
-                  label="Mostrar descripción"
-                  registration={register('heroShowDescription')}
-                  checked={values.heroShowDescription}
-                  disabled={!values.heroContentEnabled}
-                />
-
-                <Toggle
-                  label="Mostrar precio"
-                  registration={register('heroShowPrice')}
-                  checked={values.heroShowPrice}
-                  disabled={!values.heroContentEnabled}
-                />
-
-                <Toggle
-                  label="Mostrar “Instalación incluida”"
-                  registration={register('heroShowInstallationBadge')}
-                  checked={values.heroShowInstallationBadge}
-                  disabled={!values.heroContentEnabled}
-                />
-
-                <Toggle
-                  label="Mostrar botón principal"
-                  registration={register('heroShowPrimaryButton')}
-                  checked={values.heroShowPrimaryButton}
-                  disabled={!values.heroContentEnabled}
-                />
-
-                <Toggle
-                  label="Mostrar botón secundario"
-                  registration={register('heroShowSecondaryButton')}
-                  checked={values.heroShowSecondaryButton}
-                  disabled={!values.heroContentEnabled}
-                />
-
-                <Toggle
-                  label="Mostrar beneficios"
-                  registration={register('heroShowBenefits')}
-                  checked={values.heroShowBenefits}
-                  disabled={!values.heroContentEnabled}
-                />
-              </div>
-            </div>
-          </div>
-        </Box>
+        {/* CARRUSEL PRINCIPAL */}
+        <HeroCarouselEditor
+          initialSlides={initialValues.heroSlides}
+          initialSettings={initialValues.carousel}
+        />
 
         {/* SERVICIOS */}
         <Box title="Sección de servicios">

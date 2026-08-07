@@ -1,10 +1,10 @@
-import { CategorySidebar } from "@/components/category-sidebar";
-import { WhatsAppFloating } from "@/components/whatsapp-floating";
-import { getHomeContent } from "@/lib/home-content/public";
-import { getPublicProducts } from "@/lib/products/catalog-products";
-import { HomeHero } from "@/sections/home-hero";
-import { ProductSection } from "@/sections/product-section";
-import { ServicesSection } from "@/sections/services-section";
+import { CategorySidebar } from '@/components/category-sidebar';
+import { WhatsAppFloating } from '@/components/whatsapp-floating';
+import { getHomeContent } from '@/lib/home-content/public';
+import { getPublicProducts } from '@/lib/products/catalog-products';
+import { HomeHero } from '@/sections/home-hero';
+import { ProductSection } from '@/sections/product-section';
+import { ServicesSection } from '@/sections/services-section';
 
 export default async function HomePage() {
   const [products, content] = await Promise.all([
@@ -13,24 +13,25 @@ export default async function HomePage() {
   ]);
 
   const cesped = products.filter(
-    (product) => product.category === "Césped",
+    (product) => product.category === 'Césped',
   );
 
   const paisajismo = products.filter(
-    (product) => product.category === "Paisajismo",
+    (product) => product.category === 'Paisajismo',
   );
 
   const activeSections = [...content.sections]
     .filter((section) => section.isActive)
-    .sort((first, second) => {
-      return first.sortOrder - second.sortOrder;
-    });
+    .sort(
+      (first, second) =>
+        first.sortOrder - second.sortOrder,
+    );
 
   return (
     <>
       <main className="container-shell space-y-5 py-4 sm:space-y-6 sm:py-5 lg:py-6">
         {activeSections.map((section) => {
-          if (section.key === "hero") {
+          if (section.key === 'hero') {
             if (!content.heroEnabled) {
               return null;
             }
@@ -64,7 +65,7 @@ export default async function HomePage() {
             );
           }
 
-          if (section.key === "products-grass") {
+          if (section.key === 'products-grass') {
             return (
               <ProductSection
                 key={section.key}
@@ -74,7 +75,7 @@ export default async function HomePage() {
             );
           }
 
-          if (section.key === "services") {
+          if (section.key === 'services') {
             if (!content.servicesEnabled) {
               return null;
             }
@@ -84,7 +85,9 @@ export default async function HomePage() {
             );
           }
 
-          if (section.key === "products-landscaping") {
+          if (
+            section.key === 'products-landscaping'
+          ) {
             return (
               <ProductSection
                 key={section.key}

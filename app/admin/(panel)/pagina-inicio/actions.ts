@@ -7,6 +7,12 @@ import {
   type HomeContentValues,
 } from "@/lib/home-content/schema";
 import { createClient } from "@/lib/supabase/server";
+import {
+  heroCarouselSettingsSchema,
+  heroSlideSchema,
+  type HeroCarouselSettings,
+  type HeroSlide,
+} from "@/lib/home-content/hero-schema";
 
 export type HomeContentActionResult = {
   success: boolean;
@@ -459,4 +465,216 @@ export async function saveHomeContentAction(
     success: true,
     message: "Contenido actualizado correctamente.",
   };
+}
+
+async function requireAdmin() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Tu sesión venció." } as const;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role,is_active")
+    .eq("id", user.id)
+    .single();
+  if (profile?.role !== "admin" || !profile.is_active)
+    return { error: "No tenés permisos." } as const;
+  return { supabase } as const;
+}
+
+function slideRow(slide: HeroSlide) {
+  return {
+    name: slide.name,
+    is_active: slide.isActive,
+    sort_order: slide.sortOrder,
+    desktop_url: slide.desktopUrl || null,
+    desktop_path: slide.desktopPath || null,
+    mobile_url: slide.mobileUrl || null,
+    mobile_path: slide.mobilePath || null,
+    alt_text: slide.altText,
+    content_enabled: slide.contentEnabled,
+    content_desktop: slide.contentDesktop,
+    content_mobile: slide.contentMobile,
+    show_label: slide.showLabel,
+    label: slide.label || null,
+    show_title: slide.showTitle,
+    title: slide.title || null,
+    show_subtitle: slide.showSubtitle,
+    subtitle: slide.subtitle || null,
+    show_description: slide.showDescription,
+    description: slide.description || null,
+    show_price: slide.showPrice,
+    price_text: slide.priceText || null,
+    show_installation_badge: slide.showInstallationBadge,
+    installation_badge_text: slide.installationBadgeText || null,
+    show_primary_button: slide.showPrimaryButton,
+    primary_button_text: slide.primaryButtonText || null,
+    primary_button_url: slide.primaryButtonUrl || null,
+    primary_button_new_tab: slide.primaryButtonNewTab,
+    show_secondary_button: slide.showSecondaryButton,
+    secondary_button_text: slide.secondaryButtonText || null,
+    secondary_button_url: slide.secondaryButtonUrl || null,
+    secondary_button_new_tab: slide.secondaryButtonNewTab,
+    show_benefits: slide.showBenefits,
+    benefits: slide.benefits,
+    alignment: slide.alignment,
+    overlay_enabled: slide.overlayEnabled,
+    overlay_intensity: slide.overlayIntensity,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+function refreshHero() {
+  revalidatePath("/");
+  revalidatePath("/admin/pagina-inicio");
+}
+
+export async function createHeroSlideAction(input: HeroSlide) {
+  const parsed = heroSlideSchema.safeParse(input);
+  if (!parsed.success)
+    return {
+      success: false,
+      message: parsed.error.issues[0]?.message ?? "Revisá la diapositiva.",
+    };
+  const auth = await requireAdmin();
+  if ("error" in auth) return { success: false, message: auth.error };
+  const { data, error } = await auth.supabase
+    .from("home_hero_slides")
+    .insert({ id: parsed.data.id, ...slideRow(parsed.data) })
+    .select("id")
+    .single();
+  if (error) return { success: false, message: error.message };
+  refreshHero();
+  return { success: true, id: data.id, message: "Diapositiva creada." };
+}
+
+export async function updateHeroSlideAction(input: HeroSlide) {
+  const parsed = heroSlideSchema.safeParse(input);
+  if (!parsed.success)
+    return {
+      success: false,
+      message: parsed.error.issues[0]?.message ?? "Revisá la diapositiva.",
+    };
+  const auth = await requireAdmin();
+  if ("error" in auth) return { success: false, message: auth.error };
+  const { data: previous } = await auth.supabase
+    .from("home_hero_slides")
+    .select("desktop_path,mobile_path")
+    .eq("id", parsed.data.id)
+    .single();
+  const { error } = await auth.supabase
+    .from("home_hero_slides")
+    .update(slideRow(parsed.data))
+    .eq("id", parsed.data.id);
+  if (error) return { success: false, message: error.message };
+  const replacedPaths = [
+    previous?.desktop_path !== parsed.data.desktopPath
+      ? previous?.desktop_path
+      : null,
+    previous?.mobile_path !== parsed.data.mobilePath
+      ? previous?.mobile_path
+      : null,
+  ].filter(Boolean) as string[];
+  if (replacedPaths.length) {
+    const { data: references } = await auth.supabase
+      .from("home_hero_slides")
+      .select("desktop_path,mobile_path");
+    const usedPaths = new Set(
+      (references ?? [])
+        .flatMap((slide) => [slide.desktop_path, slide.mobile_path])
+        .filter(Boolean),
+    );
+    const unusedPaths = replacedPaths.filter((path) => !usedPaths.has(path));
+    if (unusedPaths.length)
+      await auth.supabase.storage
+        .from("home-content-images")
+        .remove(unusedPaths);
+  }
+  refreshHero();
+  return { success: true, message: "Diapositiva guardada." };
+}
+
+export async function deleteHeroSlideAction(id: string) {
+  const auth = await requireAdmin();
+  if ("error" in auth) return { success: false, message: auth.error };
+  const { data: slide, error: readError } = await auth.supabase
+    .from("home_hero_slides")
+    .select("desktop_path,mobile_path")
+    .eq("id", id)
+    .single();
+  if (readError) return { success: false, message: readError.message };
+  const { error } = await auth.supabase
+    .from("home_hero_slides")
+    .delete()
+    .eq("id", id);
+  if (error) return { success: false, message: error.message };
+  const deletedPaths = [slide.desktop_path, slide.mobile_path].filter(
+    Boolean,
+  ) as string[];
+  if (deletedPaths.length) {
+    const { data: references } = await auth.supabase
+      .from("home_hero_slides")
+      .select("desktop_path,mobile_path");
+    const usedPaths = new Set(
+      (references ?? [])
+        .flatMap((item) => [item.desktop_path, item.mobile_path])
+        .filter(Boolean),
+    );
+    const unusedPaths = deletedPaths.filter((path) => !usedPaths.has(path));
+    if (unusedPaths.length)
+      await auth.supabase.storage
+        .from("home-content-images")
+        .remove(unusedPaths);
+  }
+  refreshHero();
+  return { success: true, message: "Diapositiva eliminada." };
+}
+
+export async function reorderHeroSlidesAction(
+  items: { id: string; sortOrder: number }[],
+) {
+  const auth = await requireAdmin();
+  if ("error" in auth) return { success: false, message: auth.error };
+  for (const item of items) {
+    if (!Number.isInteger(item.sortOrder) || item.sortOrder < 0)
+      return { success: false, message: "El orden no es válido." };
+    const { error } = await auth.supabase
+      .from("home_hero_slides")
+      .update({ sort_order: item.sortOrder })
+      .eq("id", item.id);
+    if (error) return { success: false, message: error.message };
+  }
+  refreshHero();
+  return { success: true, message: "Orden actualizado." };
+}
+
+export async function saveHeroCarouselSettingsAction(
+  input: HeroCarouselSettings,
+) {
+  const parsed = heroCarouselSettingsSchema.safeParse(input);
+  if (!parsed.success)
+    return {
+      success: false,
+      message: "El intervalo debe estar entre 3 y 30 segundos.",
+    };
+  const auth = await requireAdmin();
+  if ("error" in auth) return { success: false, message: auth.error };
+  const v = parsed.data;
+  const { error } = await auth.supabase
+    .from("home_page_settings")
+    .update({
+      hero_carousel_enabled: v.carouselEnabled,
+      hero_carousel_autoplay: v.carouselAutoplay,
+      hero_carousel_interval: v.carouselInterval,
+      hero_carousel_manual_navigation: v.carouselManualNavigation,
+      hero_carousel_show_arrows: v.carouselShowArrows,
+      hero_carousel_show_dots: v.carouselShowDots,
+      hero_carousel_pause_on_hover: v.carouselPauseOnHover,
+      hero_carousel_loop: v.carouselLoop,
+    })
+    .eq("id", true);
+  if (error) return { success: false, message: error.message };
+  refreshHero();
+  return { success: true, message: "Configuración del carrusel guardada." };
 }
