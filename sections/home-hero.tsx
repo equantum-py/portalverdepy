@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 
 import { WhatsAppIcon } from '@/components/icons';
+import type { HomeContentValues } from '@/lib/home-content/schema';
 
 const whatsappNumber = '595981077600';
 
@@ -18,21 +19,45 @@ const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
   whatsappMessage
 )}`;
 
-export function HomeHero() {
+type HomeHeroProps = {
+  content: Pick<
+    HomeContentValues,
+    | 'heroDesktopUrl'
+    | 'heroMobileUrl'
+    | 'heroAlt'
+  >;
+};
+
+export function HomeHero({ content }: HomeHeroProps) {
+  const hasDesktopImage = Boolean(content.heroDesktopUrl);
+  const hasMobileImage = Boolean(content.heroMobileUrl);
+
   return (
     <section
       aria-labelledby="home-hero-title"
       className="relative isolate overflow-hidden rounded-3xl bg-brand-950 shadow-soft"
     >
       {/* Imagen de fondo */}
-      <Image
-        src="/images/banners/slide-2-desktop.webp"
-        alt="Servicio profesional de jardinería y mantenimiento de césped"
-        fill
-        priority
-        sizes="(max-width: 1024px) 100vw, 900px"
-        className="object-cover object-left"
-      />
+      {hasDesktopImage ? (
+        <Image
+          src={content.heroDesktopUrl}
+          alt={content.heroAlt}
+          fill
+          priority
+          sizes="(max-width: 1024px) 100vw, 900px"
+          className={hasMobileImage ? 'hidden object-cover object-left sm:block' : 'object-cover object-left'}
+        />
+      ) : null}
+      {hasMobileImage ? (
+        <Image
+          src={content.heroMobileUrl}
+          alt={content.heroAlt}
+          fill
+          priority
+          sizes="(max-width: 640px) 100vw, 900px"
+          className={hasDesktopImage ? 'object-cover object-left sm:hidden' : 'object-cover object-left'}
+        />
+      ) : null}
 
       {/* Capas para mejorar la lectura */}
       <div className="absolute inset-0 bg-gradient-to-r from-brand-950/95 via-brand-950/75 to-brand-950/10" />

@@ -106,13 +106,9 @@ export const homeContentSchema = z.object({
     .min(1, 'El título de la portada es obligatorio.'),
   heroSubtitle: z.string(),
   heroDescription: z.string(),
-  heroDesktopUrl: z
-    .string()
-    .min(1, 'La imagen desktop del Hero es obligatoria.'),
+  heroDesktopUrl: z.string(),
   heroDesktopPath: z.string(),
-  heroMobileUrl: z
-    .string()
-    .min(1, 'La imagen mobile del Hero es obligatoria.'),
+  heroMobileUrl: z.string(),
   heroMobilePath: z.string(),
   heroAlt: z.string(),
   heroAlignment: z.enum(['left', 'center', 'right']),
