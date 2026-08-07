@@ -121,9 +121,11 @@ export function HomeHero({
           : 'Portada principal'
       }
       className={`relative isolate overflow-hidden rounded-3xl bg-brand-950 shadow-soft ${
-        isMobilePreview
-          ? 'min-h-[460px]'
-          : 'min-h-[430px] sm:min-h-[480px] lg:min-h-[470px]'
+        previewViewport === 'mobile'
+          ? 'aspect-[4/5]'
+          : previewViewport === 'desktop'
+            ? 'aspect-[1920/650]'
+            : 'aspect-[4/5] lg:aspect-[1920/650]'
       }`}
     >
       {previewViewport ? (
@@ -134,7 +136,7 @@ export function HomeHero({
             fill
             priority={false}
             sizes="900px"
-            className="object-cover object-left"
+            className="object-contain object-center"
           />
         ) : null
       ) : (
@@ -148,8 +150,8 @@ export function HomeHero({
               sizes="(max-width: 1024px) 100vw, 900px"
               className={
                 content.heroMobileUrl
-                  ? 'hidden object-cover object-left lg:block'
-                  : 'object-cover object-left'
+                  ? 'hidden object-contain object-center lg:block'
+                  : 'object-contain object-center'
               }
             />
           ) : null}
@@ -163,8 +165,8 @@ export function HomeHero({
               sizes="100vw"
               className={
                 content.heroDesktopUrl
-                  ? 'object-cover object-left lg:hidden'
-                  : 'object-cover object-left'
+                  ? 'object-contain object-center lg:hidden'
+                  : 'object-contain object-center'
               }
             />
           ) : null}
@@ -192,12 +194,12 @@ export function HomeHero({
       ) : null}
 
       <div
-        className={`relative flex ${horizontalClass} ${
+        className={`absolute inset-0 flex ${horizontalClass} ${
           isMobilePreview
-            ? 'min-h-[460px] items-end p-5'
+            ? 'items-end p-5'
             : previewViewport === 'desktop'
-              ? 'min-h-[470px] items-center p-8 lg:p-10'
-              : 'min-h-[430px] items-end p-5 sm:min-h-[480px] sm:p-8 lg:min-h-[470px] lg:items-center lg:p-10 xl:p-12'
+              ? 'items-center p-8 lg:p-10'
+              : 'items-end p-5 sm:p-8 lg:items-center lg:p-10 xl:p-12'
         }`}
       >
         <div
