@@ -12,10 +12,12 @@ import { useState, type ReactNode } from 'react';
 import {
   useFieldArray,
   useForm,
+  type UseFormRegisterReturn,
 } from 'react-hook-form';
 
 import { saveHomeContentAction } from '@/app/admin/(panel)/pagina-inicio/actions';
 import { HeroImageUploader } from './hero-image-uploader';
+import { HomeHero } from '@/sections/home-hero';
 import {
   homeContentSchema,
   type HomeContentValues,
@@ -583,6 +585,110 @@ export function HomeContentForm({
             />
             Aplicar sombra sobre la imagen
           </label>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <h3 className="font-semibold text-slate-950">
+              Contenido sobre el banner
+            </h3>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Elegí qué información se muestra encima de la fotografía.
+            </p>
+
+            <div className="mt-4 space-y-3">
+              <Toggle
+                label="Mostrar contenido sobre el banner"
+                registration={register('heroContentEnabled')}
+                checked={values.heroContentEnabled}
+              />
+
+              <div
+                className={`grid gap-3 border-t pt-4 sm:grid-cols-2 lg:grid-cols-3 ${
+                  values.heroContentEnabled
+                    ? ''
+                    : 'pointer-events-none opacity-45'
+                }`}
+                aria-disabled={!values.heroContentEnabled}
+              >
+                <Toggle
+                  label="Mostrar en Desktop"
+                  registration={register('heroContentDesktop')}
+                  checked={values.heroContentDesktop}
+                  disabled={!values.heroContentEnabled}
+                />
+
+                <Toggle
+                  label="Mostrar en Mobile"
+                  registration={register('heroContentMobile')}
+                  checked={values.heroContentMobile}
+                  disabled={!values.heroContentEnabled}
+                />
+
+                <Toggle
+                  label="Mostrar etiqueta"
+                  registration={register('heroShowLabel')}
+                  checked={values.heroShowLabel}
+                  disabled={!values.heroContentEnabled}
+                />
+
+                <Toggle
+                  label="Mostrar título"
+                  registration={register('heroShowTitle')}
+                  checked={values.heroShowTitle}
+                  disabled={!values.heroContentEnabled}
+                />
+
+                <Toggle
+                  label="Mostrar subtítulo"
+                  registration={register('heroShowSubtitle')}
+                  checked={values.heroShowSubtitle}
+                  disabled={!values.heroContentEnabled}
+                />
+
+                <Toggle
+                  label="Mostrar descripción"
+                  registration={register('heroShowDescription')}
+                  checked={values.heroShowDescription}
+                  disabled={!values.heroContentEnabled}
+                />
+
+                <Toggle
+                  label="Mostrar precio"
+                  registration={register('heroShowPrice')}
+                  checked={values.heroShowPrice}
+                  disabled={!values.heroContentEnabled}
+                />
+
+                <Toggle
+                  label="Mostrar “Instalación incluida”"
+                  registration={register('heroShowInstallationBadge')}
+                  checked={values.heroShowInstallationBadge}
+                  disabled={!values.heroContentEnabled}
+                />
+
+                <Toggle
+                  label="Mostrar botón principal"
+                  registration={register('heroShowPrimaryButton')}
+                  checked={values.heroShowPrimaryButton}
+                  disabled={!values.heroContentEnabled}
+                />
+
+                <Toggle
+                  label="Mostrar botón secundario"
+                  registration={register('heroShowSecondaryButton')}
+                  checked={values.heroShowSecondaryButton}
+                  disabled={!values.heroContentEnabled}
+                />
+
+                <Toggle
+                  label="Mostrar beneficios"
+                  registration={register('heroShowBenefits')}
+                  checked={values.heroShowBenefits}
+                  disabled={!values.heroContentEnabled}
+                />
+              </div>
+            </div>
+          </div>
         </Box>
 
         {/* SERVICIOS */}
@@ -1167,21 +1273,10 @@ export function HomeContentForm({
             )}
 
             {values.heroEnabled && (
-              <div className="relative min-h-52 overflow-hidden bg-slate-900 p-6 text-white">
-                <div className="relative z-10 max-w-xl">
-                  <p className="text-xs uppercase tracking-wider">
-                    {values.heroSubtitle}
-                  </p>
-
-                  <h2 className="mt-2 text-2xl font-semibold">
-                    {values.heroTitle}
-                  </h2>
-
-                  <p className="mt-2 text-sm text-white/80">
-                    {values.heroDescription}
-                  </p>
-                </div>
-              </div>
+              <HomeHero
+                content={values}
+                previewViewport={preview}
+              />
             )}
 
             {values.servicesEnabled && (
@@ -1292,6 +1387,50 @@ function ArrayEditor({
         {fields.map(children)}
       </div>
     </div>
+  );
+}
+
+
+function Toggle({
+  label,
+  registration,
+  checked,
+  disabled = false,
+}: {
+  label: string;
+  registration: UseFormRegisterReturn;
+  checked: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <label
+      className={`flex items-center justify-between gap-4 rounded-xl bg-white px-4 py-3 text-sm font-medium shadow-sm ring-1 ring-slate-200 ${
+        disabled
+          ? 'cursor-not-allowed opacity-60'
+          : 'cursor-pointer'
+      }`}
+    >
+      <span>{label}</span>
+
+      <span
+        className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition ${
+          checked ? 'bg-green-700' : 'bg-slate-300'
+        }`}
+      >
+        <input
+          type="checkbox"
+          disabled={disabled}
+          className="peer sr-only"
+          {...registration}
+        />
+
+        <span
+          className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition ${
+            checked ? 'left-6' : 'left-1'
+          }`}
+        />
+      </span>
+    </label>
   );
 }
 

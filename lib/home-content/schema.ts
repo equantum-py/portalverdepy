@@ -1,8 +1,14 @@
 import { z } from 'zod';
 
 const navigationItemSchema = z.object({
-  name: z.string().trim().min(1, 'El nombre es obligatorio.'),
-  url: z.string().trim().min(1, 'La URL es obligatoria.'),
+  name: z
+    .string()
+    .trim()
+    .min(1, 'El nombre es obligatorio.'),
+  url: z
+    .string()
+    .trim()
+    .min(1, 'La URL es obligatoria.'),
   linkType: z.enum([
     'internal',
     'category',
@@ -17,14 +23,20 @@ const navigationItemSchema = z.object({
 });
 
 const serviceTagSchema = z.object({
-  label: z.string().trim().min(1, 'El texto es obligatorio.'),
+  label: z
+    .string()
+    .trim()
+    .min(1, 'El texto es obligatorio.'),
   icon: z.string(),
   sortOrder: z.number().int().min(0),
   isActive: z.boolean(),
 });
 
 const megaColumnSchema = z.object({
-  title: z.string().trim().min(1, 'El título es obligatorio.'),
+  title: z
+    .string()
+    .trim()
+    .min(1, 'El título es obligatorio.'),
   icon: z.string(),
   categoryId: z.string(),
   viewAllLabel: z.string(),
@@ -35,10 +47,16 @@ const megaColumnSchema = z.object({
 });
 
 const megaServiceSchema = z.object({
-  title: z.string().trim().min(1, 'El título es obligatorio.'),
+  title: z
+    .string()
+    .trim()
+    .min(1, 'El título es obligatorio.'),
   description: z.string().trim(),
   icon: z.string(),
-  url: z.string().trim().min(1, 'La URL es obligatoria.'),
+  url: z
+    .string()
+    .trim()
+    .min(1, 'La URL es obligatoria.'),
   sortOrder: z.number().int().min(0),
   isActive: z.boolean(),
 });
@@ -49,7 +67,10 @@ const globalButtonSchema = z.object({
     .string()
     .trim()
     .min(1, 'El texto del botón es obligatorio.'),
-  url: z.string().trim().min(1, 'La URL es obligatoria.'),
+  url: z
+    .string()
+    .trim()
+    .min(1, 'La URL es obligatoria.'),
   linkType: z.enum([
     'internal',
     'external',
@@ -111,9 +132,35 @@ export const homeContentSchema = z.object({
   heroMobileUrl: z.string(),
   heroMobilePath: z.string(),
   heroAlt: z.string(),
-  heroAlignment: z.enum(['left', 'center', 'right']),
+  heroAlignment: z.enum([
+    'left',
+    'center',
+    'right',
+  ]),
   heroOverlay: z.boolean(),
-  heroOverlayIntensity: z.number().int().min(0).max(90),
+  heroOverlayIntensity: z
+    .number()
+    .int()
+    .min(0)
+    .max(90),
+
+  heroShadowIntensity: z
+    .number()
+    .int()
+    .min(0)
+    .max(100),
+  heroContentEnabled: z.boolean(),
+  heroContentDesktop: z.boolean(),
+  heroContentMobile: z.boolean(),
+  heroShowLabel: z.boolean(),
+  heroShowTitle: z.boolean(),
+  heroShowSubtitle: z.boolean(),
+  heroShowDescription: z.boolean(),
+  heroShowPrice: z.boolean(),
+  heroShowInstallationBadge: z.boolean(),
+  heroShowPrimaryButton: z.boolean(),
+  heroShowSecondaryButton: z.boolean(),
+  heroShowBenefits: z.boolean(),
 
   servicesEnabled: z.boolean(),
   servicesTitle: z

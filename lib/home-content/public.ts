@@ -37,13 +37,28 @@ export const defaultHomeContent: HomeContentValues = {
     'Venta e instalación de césped natural con asesoramiento profesional en Asunción y Gran Asunción.',
   heroDesktopUrl: '/images/banners/slide-2-desktop.webp',
   heroDesktopPath: '',
-  heroMobileUrl: '/images/banners/slide-2-desktop.webp',
+  heroMobileUrl: '/images/banners/slide-2-mobile.webp',
   heroMobilePath: '',
   heroAlt:
     'Servicio profesional de jardinería y mantenimiento de césped',
   heroAlignment: 'left',
   heroOverlay: true,
   heroOverlayIntensity: 75,
+
+  // Controles visuales agregados por complete-product-management.
+  heroShadowIntensity: 75,
+  heroContentEnabled: true,
+  heroContentDesktop: true,
+  heroContentMobile: true,
+  heroShowLabel: true,
+  heroShowTitle: true,
+  heroShowSubtitle: true,
+  heroShowDescription: true,
+  heroShowPrice: true,
+  heroShowInstallationBadge: true,
+  heroShowPrimaryButton: true,
+  heroShowSecondaryButton: true,
+  heroShowBenefits: true,
 
   servicesEnabled: true,
   servicesTitle:
@@ -322,6 +337,46 @@ export async function getHomeContent(): Promise<HomeContentValues> {
       heroOverlayIntensity:
         values.hero_overlay_intensity ??
         defaultHomeContent.heroOverlayIntensity,
+
+      heroShadowIntensity:
+        values.hero_shadow_intensity ??
+        defaultHomeContent.heroShadowIntensity,
+      heroContentEnabled:
+        values.hero_content_enabled ??
+        defaultHomeContent.heroContentEnabled,
+      heroContentDesktop:
+        values.hero_content_desktop ??
+        defaultHomeContent.heroContentDesktop,
+      heroContentMobile:
+        values.hero_content_mobile ??
+        defaultHomeContent.heroContentMobile,
+      heroShowLabel:
+        values.hero_show_label ??
+        defaultHomeContent.heroShowLabel,
+      heroShowTitle:
+        values.hero_show_title ??
+        defaultHomeContent.heroShowTitle,
+      heroShowSubtitle:
+        values.hero_show_subtitle ??
+        defaultHomeContent.heroShowSubtitle,
+      heroShowDescription:
+        values.hero_show_description ??
+        defaultHomeContent.heroShowDescription,
+      heroShowPrice:
+        values.hero_show_price ??
+        defaultHomeContent.heroShowPrice,
+      heroShowInstallationBadge:
+        values.hero_show_installation_badge ??
+        defaultHomeContent.heroShowInstallationBadge,
+      heroShowPrimaryButton:
+        values.hero_show_primary_button ??
+        defaultHomeContent.heroShowPrimaryButton,
+      heroShowSecondaryButton:
+        values.hero_show_secondary_button ??
+        defaultHomeContent.heroShowSecondaryButton,
+      heroShowBenefits:
+        values.hero_show_benefits ??
+        defaultHomeContent.heroShowBenefits,
 
       servicesEnabled:
         values.services_enabled ??
