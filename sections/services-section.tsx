@@ -1,7 +1,11 @@
-export function ServicesSection() {
+import {getHomeContent} from '@/lib/home-content/public';
+export async function ServicesSection() {
+  const content=await getHomeContent(); if(!content.servicesEnabled)return null;
   const whatsappNumber = '595981077600';
   const message = 'Hola, quiero consultar sobre servicios de Portal Verde.';
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+  const primaryButton=content.buttons.find(button=>button.placement==='services-primary'&&button.isActive);
+  const secondaryButton=content.buttons.find(button=>button.placement==='services-secondary'&&button.isActive);
 
   return (
     <section className="rounded-xl border border-border bg-white p-4 sm:p-5">
@@ -11,39 +15,40 @@ export function ServicesSection() {
         {/* Texto */}
         <div>
           <h2 className="text-lg font-bold text-text-strong sm:text-xl">
-            Soluciones para transformar y mantener tus espacios verdes
+            {content.servicesTitle}
           </h2>
 
           <p className="mt-1 text-sm text-text-soft">
-            Además de productos, ofrecemos servicios especializados en jardinería, césped y mantenimiento.
+            {content.servicesDescription}
           </p>
 
           <div className="mt-3 flex gap-2">
-            <a
-              href={whatsappUrl}
-              target="_blank"
+            {primaryButton&&<a
+              href={primaryButton.url||whatsappUrl}
+              target={primaryButton.newTab?'_blank':undefined}
               className="rounded-md bg-dark-green px-4 py-2 text-xs font-semibold text-white hover:bg-primary"
             >
-              Solicitar servicio por WhatsApp
-            </a>
+              {primaryButton.text}
+            </a>}
 
-            <a
-              href="/shop"
+            {secondaryButton&&<a
+              href={secondaryButton.url}
+              target={secondaryButton.newTab?'_blank':undefined}
               className="rounded-md border px-4 py-2 text-xs font-semibold"
             >
-              Ver productos
-            </a>
+              {secondaryButton.text}
+            </a>}
           </div>
         </div>
 
         {/* Servicios tipo tags */}
         <div className="flex flex-wrap gap-2">
-          {['Empastado', 'Jardinería', 'Poda de árboles', 'Mantenimiento'].map((item) => (
+          {content.tags.filter(item=>item.isActive).sort((a,b)=>a.sortOrder-b.sortOrder).map((item) => (
             <span
-              key={item}
+              key={item.label}
               className="rounded-full bg-soft-green px-3 py-1 text-xs font-semibold text-dark-green"
             >
-              {item}
+              {item.label}
             </span>
           ))}
         </div>

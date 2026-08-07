@@ -1,5 +1,14 @@
 # Portal Verde Ecommerce Starter (Next.js)
 
+## Administración del catálogo
+
+Productos y Categorías se gestionan en `/admin/productos` y
+`/admin/categorias` usando Supabase, Server Actions y validación Zod. Aplicar
+las migraciones antes de desplegar con `npx supabase db push`. Los buckets
+`product-images` y `category-images` admiten JPG, PNG y WebP de hasta 5 MB.
+La eliminación de categorías asociadas a productos está bloqueada en la
+aplicación y en la clave foránea.
+
 Starter profesional de ecommerce para **Portal Verde**, construido con **Next.js App Router**, **TypeScript**, **Tailwind CSS** y **ESLint**, listo para producción y despliegue en **Vercel**.
 
 ## Stack técnico

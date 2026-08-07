@@ -31,7 +31,7 @@ export const adminNavigation = [
   },
   {
     title: 'Página de inicio',
-    href: '/admin/inicio',
+    href: '/admin/pagina-inicio',
     icon: Home
   },
   {

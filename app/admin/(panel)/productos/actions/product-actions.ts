@@ -112,6 +112,7 @@ function buildProductPayload(values: ProductFormValues) {
     recommendations: values.recommendations.map(
       (item) => item.value
     ),
+    related_product_slugs: values.relatedProductSlugs,
 
     is_offer: Boolean(values.promoPrice),
     is_featured: values.isFeatured,

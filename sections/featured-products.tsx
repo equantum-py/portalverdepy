@@ -1,7 +1,10 @@
 import { ProductCard } from '@/components/product-card';
-import { featuredProducts } from '@/lib/data';
+import { getPublicProducts } from '@/lib/products/catalog-products';
 
-export function FeaturedProductsSection() {
+export async function FeaturedProductsSection() {
+  const featuredProducts = (await getPublicProducts()).filter(
+    (product) => product.isFeatured
+  );
   return (
     <section className="section-space pt-0">
       <div className="container-shell">

@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
-import { formatPricePYG } from '@/lib/data';
+import { formatPricePYG } from '@/lib/format-price';
 import {
   getQuoteItems,
   saveQuoteItems,
