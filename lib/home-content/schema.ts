@@ -1,15 +1,98 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-const orderedItem = z.object({ name: z.string().trim().min(1), url: z.string().trim().min(1), sortOrder: z.number().int().min(0), isActive: z.boolean() });
-const serviceItem = z.object({ title: z.string().trim().min(1), description: z.string().trim(), icon: z.string(), url: z.string().trim().min(1), sortOrder: z.number().int().min(0), isActive: z.boolean() });
-const button = z.object({ placement: z.string(), text: z.string().trim().min(1), url: z.string().trim().min(1), linkType: z.enum(['internal','external','whatsapp','anchor']), icon: z.string(), variant: z.string(), sortOrder: z.number().int().min(0), isActive: z.boolean(), newTab: z.boolean() });
+const orderedItem = z.object({
+  name: z.string().trim().min(1),
+  url: z.string().trim().min(1),
+  sortOrder: z.number().int().min(0),
+  isActive: z.boolean(),
+});
+const serviceItem = z.object({
+  title: z.string().trim().min(1),
+  description: z.string().trim(),
+  icon: z.string(),
+  url: z.string().trim().min(1),
+  sortOrder: z.number().int().min(0),
+  isActive: z.boolean(),
+});
+const button = z.object({
+  placement: z.string(),
+  text: z.string().trim().min(1),
+  url: z.string().trim().min(1),
+  linkType: z.enum(["internal", "external", "whatsapp", "anchor"]),
+  icon: z.string(),
+  variant: z.string(),
+  sortOrder: z.number().int().min(0),
+  isActive: z.boolean(),
+  newTab: z.boolean(),
+});
 
 export const homeContentSchema = z.object({
-  promoEnabled: z.boolean(), promoText: z.string().trim().min(1), promoIcon: z.string().max(20), promoUrl: z.string(), promoButtonText: z.string(), promoScroll: z.boolean(), promoSpeed: z.number().int().min(5).max(120), promoNewTab: z.boolean(),
-  logoEnabled: z.boolean(), logoDesktopUrl: z.string().min(1), logoMobileUrl: z.string().min(1), logoAlt: z.string().min(1), whatsappEnabled: z.boolean(),
-  servicesEnabled: z.boolean(), servicesTitle: z.string().min(1), servicesDescription: z.string(), megaMenuEnabled: z.boolean(), megaServicesTitle: z.string(), megaServicesDescription: z.string(),
-  navigation: z.array(orderedItem), tags: z.array(z.object({ label: z.string().min(1), sortOrder: z.number().int().min(0), isActive: z.boolean() })),
-  megaColumns: z.array(z.object({title:z.string().min(1),icon:z.string(),categoryId:z.string(),viewAllLabel:z.string(),viewAllUrl:z.string(),sortOrder:z.number().int().min(0),isActive:z.boolean(),productIds:z.array(z.string())})),
-  megaServices: z.array(serviceItem), buttons: z.array(button), sections: z.array(z.object({key:z.string(),title:z.string(),sortOrder:z.number().int().min(0),isActive:z.boolean()}))
+  promoEnabled: z.boolean(),
+  promoText: z.string().trim().min(1),
+  promoIcon: z.string().max(20),
+  promoUrl: z.string(),
+  promoButtonText: z.string(),
+  promoScroll: z.boolean(),
+  promoSpeed: z.number().int().min(5).max(120),
+  promoNewTab: z.boolean(),
+  logoEnabled: z.boolean(),
+  logoDesktopUrl: z.string().min(1),
+  logoMobileUrl: z.string().min(1),
+  logoAlt: z.string().min(1),
+  whatsappEnabled: z.boolean(),
+  heroDesktopUrl: z.string(),
+  heroDesktopPath: z.string(),
+  heroMobileUrl: z.string(),
+  heroMobilePath: z.string(),
+  heroShadowIntensity: z.number().int().min(0).max(100),
+  heroEnabled: z.boolean(),
+  heroContentEnabled: z.boolean(),
+  heroContentDesktop: z.boolean(),
+  heroContentMobile: z.boolean(),
+  heroShowLabel: z.boolean(),
+  heroShowTitle: z.boolean(),
+  heroShowSubtitle: z.boolean(),
+  heroShowDescription: z.boolean(),
+  heroShowPrice: z.boolean(),
+  heroShowInstallationBadge: z.boolean(),
+  heroShowPrimaryButton: z.boolean(),
+  heroShowSecondaryButton: z.boolean(),
+  heroShowBenefits: z.boolean(),
+  servicesEnabled: z.boolean(),
+  servicesTitle: z.string().min(1),
+  servicesDescription: z.string(),
+  megaMenuEnabled: z.boolean(),
+  megaServicesTitle: z.string(),
+  megaServicesDescription: z.string(),
+  navigation: z.array(orderedItem),
+  tags: z.array(
+    z.object({
+      label: z.string().min(1),
+      sortOrder: z.number().int().min(0),
+      isActive: z.boolean(),
+    }),
+  ),
+  megaColumns: z.array(
+    z.object({
+      title: z.string().min(1),
+      icon: z.string(),
+      categoryId: z.string(),
+      viewAllLabel: z.string(),
+      viewAllUrl: z.string(),
+      sortOrder: z.number().int().min(0),
+      isActive: z.boolean(),
+      productIds: z.array(z.string()),
+    }),
+  ),
+  megaServices: z.array(serviceItem),
+  buttons: z.array(button),
+  sections: z.array(
+    z.object({
+      key: z.string(),
+      title: z.string(),
+      sortOrder: z.number().int().min(0),
+      isActive: z.boolean(),
+    }),
+  ),
 });
 export type HomeContentValues = z.infer<typeof homeContentSchema>;
