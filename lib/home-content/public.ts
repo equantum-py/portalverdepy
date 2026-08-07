@@ -2,10 +2,6 @@ import { createClient } from '@/lib/supabase/server';
 
 import type { HomeContentValues } from './schema';
 
-type MegaProductRelation = {
-  product_id: string;
-  sort_order: number;
-};
 
 export const defaultHomeContent: HomeContentValues = {
   promoEnabled: true,
@@ -59,18 +55,69 @@ export const defaultHomeContent: HomeContentValues = {
   heroShowPrimaryButton: true,
   heroShowSecondaryButton: true,
   heroShowBenefits: true,
-
+  carousel: {
+    carouselEnabled: true,
+    carouselAutoplay: true,
+    carouselInterval: 5000,
+    carouselManualNavigation: true,
+    carouselShowArrows: true,
+    carouselShowDots: true,
+    carouselPauseOnHover: true,
+    carouselLoop: true,
+  },
+  heroSlides: [
+    {
+      id: "00000000-0000-4000-8000-000000000001",
+      name: "Diapositiva principal",
+      isActive: true,
+      sortOrder: 0,
+      desktopUrl: "/images/banners/slide-2-desktop.webp",
+      desktopPath: "",
+      mobileUrl: "/images/banners/slide-2-mobile.webp",
+      mobilePath: "",
+      altText: "Portal Verde",
+      contentEnabled: true,
+      contentDesktop: true,
+      contentMobile: true,
+      showLabel: true,
+      label: "Instalación profesional garantizada",
+      showTitle: true,
+      title: "Transformamos tu espacio en un jardín que se disfruta",
+      showSubtitle: true,
+      subtitle: "Césped natural de primera calidad",
+      showDescription: true,
+      description:
+        "Venta e instalación de césped natural con asesoramiento profesional en Asunción y Gran Asunción.",
+      showPrice: true,
+      priceText: "Gs. 31.000 m²",
+      showInstallationBadge: true,
+      installationBadgeText: "Instalación incluida",
+      showPrimaryButton: true,
+      primaryButtonText: "Solicitar presupuesto",
+      primaryButtonUrl: "https://wa.me/595981077600",
+      primaryButtonNewTab: true,
+      showSecondaryButton: true,
+      secondaryButtonText: "Ver catálogo",
+      secondaryButtonUrl: "/shop",
+      secondaryButtonNewTab: false,
+      showBenefits: true,
+      benefits: [
+        "Asesoramiento personalizado",
+        "Trabajo garantizado",
+        "Atención profesional",
+      ],
+      alignment: "left",
+      overlayEnabled: true,
+      overlayIntensity: 75,
+    },
+  ],
   servicesEnabled: true,
-  servicesTitle:
-    'Soluciones para transformar y mantener tus espacios verdes',
+  servicesTitle: "Soluciones para transformar y mantener tus espacios verdes",
   servicesDescription:
-    'Además de productos, ofrecemos servicios especializados en jardinería, césped y mantenimiento.',
-
+    "Además de productos, ofrecemos servicios especializados en jardinería, césped y mantenimiento.",
   megaMenuEnabled: true,
-  megaServicesTitle: 'Servicios Portal Verde',
-  megaServicesDescription:
-    'Una solución completa para tu espacio',
-
+  megaServicesTitle: "Servicios Portal Verde",
+  megaServicesDescription: "Una solución completa para tu espacio",
   navigation: [
     {
       name: 'Trabajos',
@@ -82,28 +129,21 @@ export const defaultHomeContent: HomeContentValues = {
       isActive: true,
     },
   ],
-
-  tags: [
-    'Empastado',
-    'Jardinería',
-    'Poda de árboles',
-    'Mantenimiento',
-  ].map((label, sortOrder) => ({
-    label,
-    icon: 'Leaf',
-    sortOrder,
-    isActive: true,
-  })),
-
+  tags: ["Empastado", "Jardinería", "Poda de árboles", "Mantenimiento"].map(
+    (label, sortOrder) => ({
+      label,
+      icon: 'Leaf',
+      sortOrder,
+      isActive: true,
+    }),
+  ),
   megaColumns: [],
-
   megaServices: [
     {
-      title: 'Instalación de césped',
-      description:
-        'Preparación e instalación profesional.',
-      icon: 'Leaf',
-      url: '/trabajos',
+      title: "Instalación de césped",
+      description: "Preparación e instalación profesional.",
+      icon: "Leaf",
+      url: "/trabajos",
       sortOrder: 0,
       isActive: true,
     },
@@ -187,7 +227,6 @@ export const defaultHomeContent: HomeContentValues = {
 export async function getHomeContent(): Promise<HomeContentValues> {
   try {
     const supabase = await createClient();
-
     const [
       settings,
       navigation,
@@ -196,277 +235,196 @@ export async function getHomeContent(): Promise<HomeContentValues> {
       buttons,
       columns,
       sections,
+      heroSlides,
     ] = await Promise.all([
       supabase
-        .from('home_page_settings')
-        .select('*')
-        .eq('id', true)
+        .from("home_page_settings")
+        .select("*")
+        .eq("id", true)
         .maybeSingle(),
-
+      supabase.from("home_navigation_items").select("*").order("sort_order"),
+      supabase.from("home_service_tags").select("*").order("sort_order"),
+      supabase.from("home_mega_services").select("*").order("sort_order"),
+      supabase.from("home_global_buttons").select("*").order("sort_order"),
       supabase
-        .from('home_navigation_items')
-        .select('*')
-        .order('sort_order'),
-
-      supabase
-        .from('home_service_tags')
-        .select('*')
-        .order('sort_order'),
-
-      supabase
-        .from('home_mega_services')
-        .select('*')
-        .order('sort_order'),
-
-      supabase
-        .from('home_global_buttons')
-        .select('*')
-        .order('sort_order'),
-
-      supabase
-        .from('home_mega_columns')
-        .select(
-          `
-            *,
-            home_mega_products(
-              product_id,
-              sort_order
-            )
-          `,
-        )
-        .order('sort_order'),
-
-      supabase
-        .from('home_sections_config')
-        .select('*')
-        .order('sort_order'),
+        .from("home_mega_columns")
+        .select("*,home_mega_products(product_id,sort_order)")
+        .order("sort_order"),
+      supabase.from("home_sections_config").select("*").order("sort_order"),
+      supabase.from("home_hero_slides").select("*").order("sort_order"),
     ]);
-
-    if (!settings.data) {
-      return defaultHomeContent;
-    }
-
-    const values = settings.data;
-
+    if (!settings.data) return defaultHomeContent;
+    const s = settings.data;
     return {
       ...defaultHomeContent,
-
-      promoEnabled:
-        values.promo_enabled ??
-        defaultHomeContent.promoEnabled,
-      promoText:
-        values.promo_text ??
-        defaultHomeContent.promoText,
-      promoIcon:
-        values.promo_icon ??
-        defaultHomeContent.promoIcon,
-      promoUrl:
-        values.promo_url ??
-        defaultHomeContent.promoUrl,
-      promoButtonText:
-        values.promo_button_text ??
-        defaultHomeContent.promoButtonText,
-      promoScroll:
-        values.promo_scroll ??
-        defaultHomeContent.promoScroll,
-      promoSpeed:
-        values.promo_speed ??
-        defaultHomeContent.promoSpeed,
-      promoNewTab:
-        values.promo_new_tab ??
-        defaultHomeContent.promoNewTab,
-
-      logoEnabled:
-        values.logo_enabled ??
-        defaultHomeContent.logoEnabled,
-      logoDesktopUrl:
-        values.logo_desktop_url ??
-        defaultHomeContent.logoDesktopUrl,
-      logoDesktopPath:
-        values.logo_desktop_path ?? '',
-      logoMobileUrl:
-        values.logo_mobile_url ??
-        defaultHomeContent.logoMobileUrl,
-      logoMobilePath:
-        values.logo_mobile_path ?? '',
-      logoAlt:
-        values.logo_alt ??
-        defaultHomeContent.logoAlt,
-
-      whatsappEnabled:
-        values.whatsapp_enabled ??
-        defaultHomeContent.whatsappEnabled,
-      whatsappText:
-        values.whatsapp_text ??
-        defaultHomeContent.whatsappText,
-      whatsappUrl:
-        values.whatsapp_url ??
-        defaultHomeContent.whatsappUrl,
-
+      heroDesktopUrl: s.hero_desktop_url ?? defaultHomeContent.heroDesktopUrl,
+      heroDesktopPath: s.hero_desktop_path ?? "",
+      heroMobileUrl: s.hero_mobile_url ?? defaultHomeContent.heroMobileUrl,
+      heroMobilePath: s.hero_mobile_path ?? "",
+      heroShadowIntensity: s.hero_shadow_intensity ?? 75,
       heroEnabled:
-        values.hero_enabled ??
-        defaultHomeContent.heroEnabled,
+        s.hero_enabled ?? defaultHomeContent.heroEnabled,
       heroTitle:
-        values.hero_title ??
-        defaultHomeContent.heroTitle,
+        s.hero_title ?? defaultHomeContent.heroTitle,
       heroSubtitle:
-        values.hero_subtitle ??
-        defaultHomeContent.heroSubtitle,
+        s.hero_subtitle ?? defaultHomeContent.heroSubtitle,
       heroDescription:
-        values.hero_description ??
-        defaultHomeContent.heroDescription,
-      heroDesktopUrl:
-        values.hero_desktop_url ??
-        defaultHomeContent.heroDesktopUrl,
-      heroDesktopPath:
-        values.hero_desktop_path ?? '',
-      heroMobileUrl:
-        values.hero_mobile_url ??
-        defaultHomeContent.heroMobileUrl,
-      heroMobilePath:
-        values.hero_mobile_path ?? '',
+        s.hero_description ?? defaultHomeContent.heroDescription,
       heroAlt:
-        values.hero_alt ??
-        defaultHomeContent.heroAlt,
+        s.hero_alt ?? defaultHomeContent.heroAlt,
       heroAlignment:
-        values.hero_alignment ??
-        defaultHomeContent.heroAlignment,
+        s.hero_alignment ?? defaultHomeContent.heroAlignment,
       heroOverlay:
-        values.hero_overlay ??
-        defaultHomeContent.heroOverlay,
+        s.hero_overlay ?? defaultHomeContent.heroOverlay,
       heroOverlayIntensity:
-        values.hero_overlay_intensity ??
+        s.hero_overlay_intensity ??
         defaultHomeContent.heroOverlayIntensity,
-
-      heroShadowIntensity:
-        values.hero_shadow_intensity ??
-        defaultHomeContent.heroShadowIntensity,
-      heroContentEnabled:
-        values.hero_content_enabled ??
-        defaultHomeContent.heroContentEnabled,
-      heroContentDesktop:
-        values.hero_content_desktop ??
-        defaultHomeContent.heroContentDesktop,
-      heroContentMobile:
-        values.hero_content_mobile ??
-        defaultHomeContent.heroContentMobile,
-      heroShowLabel:
-        values.hero_show_label ??
-        defaultHomeContent.heroShowLabel,
-      heroShowTitle:
-        values.hero_show_title ??
-        defaultHomeContent.heroShowTitle,
-      heroShowSubtitle:
-        values.hero_show_subtitle ??
-        defaultHomeContent.heroShowSubtitle,
-      heroShowDescription:
-        values.hero_show_description ??
-        defaultHomeContent.heroShowDescription,
-      heroShowPrice:
-        values.hero_show_price ??
-        defaultHomeContent.heroShowPrice,
-      heroShowInstallationBadge:
-        values.hero_show_installation_badge ??
-        defaultHomeContent.heroShowInstallationBadge,
-      heroShowPrimaryButton:
-        values.hero_show_primary_button ??
-        defaultHomeContent.heroShowPrimaryButton,
-      heroShowSecondaryButton:
-        values.hero_show_secondary_button ??
-        defaultHomeContent.heroShowSecondaryButton,
-      heroShowBenefits:
-        values.hero_show_benefits ??
-        defaultHomeContent.heroShowBenefits,
-
-      servicesEnabled:
-        values.services_enabled ??
-        defaultHomeContent.servicesEnabled,
-      servicesTitle:
-        values.services_title ??
-        defaultHomeContent.servicesTitle,
-      servicesDescription:
-        values.services_description ??
-        defaultHomeContent.servicesDescription,
-
-      megaMenuEnabled:
-        values.mega_menu_enabled ??
-        defaultHomeContent.megaMenuEnabled,
-      megaServicesTitle:
-        values.mega_services_title ??
-        defaultHomeContent.megaServicesTitle,
-      megaServicesDescription:
-        values.mega_services_description ??
-        defaultHomeContent.megaServicesDescription,
-
-      navigation: (navigation.data ?? []).map((item) => ({
-        name: item.name,
-        url: item.url,
-        linkType: item.link_type ?? 'internal',
-        targetId: item.target_id ?? '',
-        newTab: item.new_tab ?? false,
-        sortOrder: item.sort_order,
-        isActive: item.is_active,
+      heroContentEnabled: s.hero_content_enabled ?? true,
+      heroContentDesktop: s.hero_content_desktop ?? true,
+      heroContentMobile: s.hero_content_mobile ?? true,
+      heroShowLabel: s.hero_show_label ?? true,
+      heroShowTitle: s.hero_show_title ?? true,
+      heroShowSubtitle: s.hero_show_subtitle ?? true,
+      heroShowDescription: s.hero_show_description ?? true,
+      heroShowPrice: s.hero_show_price ?? true,
+      heroShowInstallationBadge: s.hero_show_installation_badge ?? true,
+      heroShowPrimaryButton: s.hero_show_primary_button ?? true,
+      heroShowSecondaryButton: s.hero_show_secondary_button ?? true,
+      heroShowBenefits: s.hero_show_benefits ?? true,
+      carousel: {
+        carouselEnabled: s.hero_carousel_enabled ?? true,
+        carouselAutoplay: s.hero_carousel_autoplay ?? true,
+        carouselInterval: s.hero_carousel_interval ?? 5000,
+        carouselManualNavigation: s.hero_carousel_manual_navigation ?? true,
+        carouselShowArrows: s.hero_carousel_show_arrows ?? true,
+        carouselShowDots: s.hero_carousel_show_dots ?? true,
+        carouselPauseOnHover: s.hero_carousel_pause_on_hover ?? true,
+        carouselLoop: s.hero_carousel_loop ?? true,
+      },
+      heroSlides: heroSlides.data?.length
+        ? heroSlides.data.map((slide) => ({
+            id: slide.id,
+            name: slide.name,
+            isActive: slide.is_active,
+            sortOrder: slide.sort_order,
+            desktopUrl: slide.desktop_url ?? "",
+            desktopPath: slide.desktop_path ?? "",
+            mobileUrl: slide.mobile_url ?? "",
+            mobilePath: slide.mobile_path ?? "",
+            altText: slide.alt_text,
+            contentEnabled: slide.content_enabled,
+            contentDesktop: slide.content_desktop,
+            contentMobile: slide.content_mobile,
+            showLabel: slide.show_label,
+            label: slide.label ?? "",
+            showTitle: slide.show_title,
+            title: slide.title ?? "",
+            showSubtitle: slide.show_subtitle,
+            subtitle: slide.subtitle ?? "",
+            showDescription: slide.show_description,
+            description: slide.description ?? "",
+            showPrice: slide.show_price,
+            priceText: slide.price_text ?? "",
+            showInstallationBadge: slide.show_installation_badge,
+            installationBadgeText: slide.installation_badge_text ?? "",
+            showPrimaryButton: slide.show_primary_button,
+            primaryButtonText: slide.primary_button_text ?? "",
+            primaryButtonUrl: slide.primary_button_url ?? "",
+            primaryButtonNewTab: slide.primary_button_new_tab,
+            showSecondaryButton: slide.show_secondary_button,
+            secondaryButtonText: slide.secondary_button_text ?? "",
+            secondaryButtonUrl: slide.secondary_button_url ?? "",
+            secondaryButtonNewTab: slide.secondary_button_new_tab,
+            showBenefits: slide.show_benefits,
+            benefits: Array.isArray(slide.benefits) ? slide.benefits : [],
+            alignment: slide.alignment,
+            overlayEnabled: slide.overlay_enabled,
+            overlayIntensity: slide.overlay_intensity,
+          }))
+        : defaultHomeContent.heroSlides,
+      promoEnabled: s.promo_enabled,
+      promoText: s.promo_text,
+      promoIcon: s.promo_icon,
+      promoUrl: s.promo_url,
+      promoButtonText: s.promo_button_text,
+      promoScroll: s.promo_scroll,
+      promoSpeed: s.promo_speed,
+      promoNewTab: s.promo_new_tab,
+      logoEnabled: s.logo_enabled,
+      logoDesktopUrl:
+        s.logo_desktop_url ?? defaultHomeContent.logoDesktopUrl,
+      logoDesktopPath: s.logo_desktop_path ?? '',
+      logoMobileUrl:
+        s.logo_mobile_url ?? defaultHomeContent.logoMobileUrl,
+      logoMobilePath: s.logo_mobile_path ?? '',
+      logoAlt:
+        s.logo_alt ?? defaultHomeContent.logoAlt,
+      whatsappEnabled:
+        s.whatsapp_enabled ?? defaultHomeContent.whatsappEnabled,
+      whatsappText:
+        s.whatsapp_text ?? defaultHomeContent.whatsappText,
+      whatsappUrl:
+        s.whatsapp_url ?? defaultHomeContent.whatsappUrl,
+      servicesEnabled: s.services_enabled,
+      servicesTitle: s.services_title,
+      servicesDescription: s.services_description,
+      megaMenuEnabled: s.mega_menu_enabled,
+      megaServicesTitle: s.mega_services_title,
+      megaServicesDescription: s.mega_services_description,
+      navigation: (navigation.data ?? []).map((i) => ({
+        name: i.name,
+        url: i.url,
+        linkType: i.link_type ?? 'internal',
+        targetId: i.target_id ?? '',
+        newTab: i.new_tab ?? false,
+        sortOrder: i.sort_order,
+        isActive: i.is_active,
       })),
-
-      tags: (tags.data ?? []).map((item) => ({
-        label: item.label,
-        icon: item.icon ?? 'Leaf',
-        sortOrder: item.sort_order,
-        isActive: item.is_active,
+      tags: (tags.data ?? []).map((i) => ({
+        label: i.label,
+        icon: i.icon ?? 'Leaf',
+        sortOrder: i.sort_order,
+        isActive: i.is_active,
       })),
-
-      megaColumns: (columns.data ?? []).map((column) => {
-        const relatedProducts = (
-          column.home_mega_products ?? []
-        ) as MegaProductRelation[];
-
-        return {
-          title: column.title,
-          icon: column.icon,
-          categoryId: column.category_id ?? '',
-          viewAllLabel: column.view_all_label,
-          viewAllUrl: column.view_all_url,
-          sortOrder: column.sort_order,
-          isActive: column.is_active,
-          productIds: relatedProducts
-            .sort(
-              (first, second) =>
-                first.sort_order - second.sort_order,
-            )
-            .map((product) => product.product_id),
-        };
-      }),
-
-      megaServices: (services.data ?? []).map(
-        (item) => ({
-          title: item.title,
-          description: item.description,
-          icon: item.icon,
-          url: item.url,
-          sortOrder: item.sort_order,
-          isActive: item.is_active,
-        }),
-      ),
-
-      sections: (sections.data ?? []).map(
-        (item) => ({
-          key: item.section_key,
-          title: item.title,
-          sortOrder: item.sort_order,
-          isActive: item.is_active,
-        }),
-      ),
-
-      buttons: (buttons.data ?? []).map((item) => ({
-        placement: item.placement,
-        text: item.text,
-        url: item.url,
-        linkType: item.link_type,
-        icon: item.icon,
-        variant: item.variant,
-        sortOrder: item.sort_order,
-        isActive: item.is_active,
-        newTab: item.new_tab,
+      megaColumns: (columns.data ?? []).map((i) => ({
+        title: i.title,
+        icon: i.icon,
+        categoryId: i.category_id ?? "",
+        viewAllLabel: i.view_all_label,
+        viewAllUrl: i.view_all_url,
+        sortOrder: i.sort_order,
+        isActive: i.is_active,
+        productIds: (i.home_mega_products ?? [])
+          .sort(
+            (a: { sort_order: number }, b: { sort_order: number }) =>
+              a.sort_order - b.sort_order,
+          )
+          .map((p: { product_id: string }) => p.product_id),
+      })),
+      sections: (sections.data ?? []).map((i) => ({
+        key: i.section_key,
+        title: i.title,
+        sortOrder: i.sort_order,
+        isActive: i.is_active,
+      })),
+      megaServices: (services.data ?? []).map((i) => ({
+        title: i.title,
+        description: i.description,
+        icon: i.icon,
+        url: i.url,
+        sortOrder: i.sort_order,
+        isActive: i.is_active,
+      })),
+      buttons: (buttons.data ?? []).map((i) => ({
+        placement: i.placement,
+        text: i.text,
+        url: i.url,
+        linkType: i.link_type,
+        icon: i.icon,
+        variant: i.variant,
+        sortOrder: i.sort_order,
+        isActive: i.is_active,
+        newTab: i.new_tab,
       })),
     };
   } catch {
