@@ -29,8 +29,6 @@ type CategoryProductCount = {
 
 const PAGE_SIZE = 10;
 
-// Fuerza que el listado refleje los cambios realizados
-// mediante las Server Actions.
 export const dynamic = 'force-dynamic';
 
 export default async function CategoriesPage({

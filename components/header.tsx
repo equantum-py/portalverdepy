@@ -8,10 +8,13 @@ import {
   ChevronDown,
   Menu,
   Search,
-  X
+  X,
 } from 'lucide-react';
 
-import { LawnMowerIcon, WhatsAppIcon } from '@/components/icons';
+import {
+  LawnMowerIcon,
+  WhatsAppIcon,
+} from '@/components/icons';
 import { QuoteCounter } from '@/components/quote-counter';
 import { Logo } from '@/components/logo';
 import { MegaMenu } from '@/components/navigation/mega-menu';
@@ -21,11 +24,21 @@ import { cn } from '@/lib/utils';
 import { createWhatsAppUrl } from '@/lib/site-config';
 import type { HomeContentValues } from '@/lib/home-content/schema';
 
-export function Header({ categories, products, homeContent }: { categories: Category[]; products: Product[]; homeContent: HomeContentValues }) {
+export function Header({
+  categories,
+  products,
+  homeContent,
+}: {
+  categories: Category[];
+  products: Product[];
+  homeContent: HomeContentValues;
+}) {
   const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] =
+    useState('');
   const [isFocused, setIsFocused] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] =
+    useState(false);
 
   const router = useRouter();
 
@@ -42,7 +55,8 @@ export function Header({ categories, products, homeContent }: { categories: Cate
           product.category.toLowerCase().includes(term);
 
         const matchesCategory = selectedCategory
-          ? product.category.toLowerCase() === selectedCategory.toLowerCase()
+          ? product.category.toLowerCase() ===
+            selectedCategory.toLowerCase()
           : true;
 
         return matchesSearch && matchesCategory;
@@ -79,41 +93,101 @@ export function Header({ categories, products, homeContent }: { categories: Cate
     setIsMobileMenuOpen(false);
   };
 
+  const navigationHref = (
+    item: HomeContentValues['navigation'][number],
+  ) => {
+    if (item.linkType === 'category') {
+      const category = categories.find(
+        (currentCategory) =>
+          currentCategory.id === item.targetId,
+      );
+
+      return `/shop?category=${encodeURIComponent(
+        category?.name || '',
+      )}`;
+    }
+
+    if (item.linkType === 'product') {
+      const product = products.find(
+        (currentProduct) =>
+          currentProduct.id === item.targetId,
+      );
+
+      return `/product/${product?.slug || ''}`;
+    }
+
+    return item.url;
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-white/95 shadow-sm backdrop-blur-xl">
       {/* Barra promocional */}
-      {homeContent.promoEnabled && <div className="border-b border-brand-100 bg-brand-50">
-        <div className="container-shell flex h-9 items-center gap-3 overflow-hidden text-xs">
-          <div className="min-w-0 flex-1 overflow-hidden whitespace-nowrap">
-            <div className={`${homeContent.promoScroll?'animate-marquee':''} inline-flex items-center font-medium text-brand-800`} style={{animationDuration:`${homeContent.promoSpeed}s`}}>
-              <span>
-                {homeContent.promoIcon} {homeContent.promoText}
-              </span>
+      {homeContent.promoEnabled && (
+        <div className="border-b border-brand-100 bg-brand-50">
+          <div className="container-shell flex h-9 items-center gap-3 overflow-hidden text-xs">
+            <div className="min-w-0 flex-1 overflow-hidden whitespace-nowrap">
+              <div
+                className={`${
+                  homeContent.promoScroll
+                    ? 'animate-marquee'
+                    : ''
+                } inline-flex items-center font-medium text-brand-800`}
+                style={{
+                  animationDuration: `${homeContent.promoSpeed}s`,
+                }}
+              >
+                <span>
+                  {homeContent.promoIcon}{' '}
+                  {homeContent.promoText}
+                </span>
+              </div>
             </div>
-          </div>
 
-          <a
-            href={homeContent.promoUrl || createWhatsAppUrl('Hola, quiero recibir asesoramiento de Portal Verde.')}
-            target={homeContent.promoNewTab?'_blank':undefined}
-            rel="noopener noreferrer"
-            className="inline-flex shrink-0 items-center gap-1.5 font-semibold text-brand-800 transition hover:text-brand-600"
-          >
-            <WhatsAppIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">{homeContent.promoButtonText}</span>
-          </a>
+            <a
+              href={
+                homeContent.promoUrl ||
+                createWhatsAppUrl(
+                  'Hola, quiero recibir asesoramiento de Portal Verde.',
+                )
+              }
+              target={
+                homeContent.promoNewTab
+                  ? '_blank'
+                  : undefined
+              }
+              rel={
+                homeContent.promoNewTab
+                  ? 'noopener noreferrer'
+                  : undefined
+              }
+              className="inline-flex shrink-0 items-center gap-1.5 font-semibold text-brand-800 transition hover:text-brand-600"
+            >
+              <WhatsAppIcon className="h-4 w-4" />
+
+              <span className="hidden sm:inline">
+                {homeContent.promoButtonText}
+              </span>
+            </a>
+          </div>
         </div>
-      </div>}
+      )}
 
       {/* Cabecera desktop */}
       <div className="container-shell">
         <div className="flex min-h-[72px] items-center gap-4 py-3 lg:min-h-[82px] lg:gap-7">
-          {homeContent.logoEnabled && <Link
-            href="/"
-            aria-label="Ir al inicio de Portal Verde"
-            className="shrink-0"
-          >
-            <Logo desktopUrl={homeContent.logoDesktopUrl} mobileUrl={homeContent.logoMobileUrl} alt={homeContent.logoAlt}/>
-          </Link>}
+          {homeContent.logoEnabled && (
+            <Link
+              href="/"
+              aria-label="Ir al inicio de Portal Verde"
+              className="shrink-0"
+            >
+              <Logo
+                desktopUrl={homeContent.logoDesktopUrl}
+                mobileUrl={homeContent.logoMobileUrl}
+                alt={homeContent.logoAlt}
+              />
+            </Link>
+          )}
 
           {/* Buscador desktop */}
           <div className="relative hidden min-w-0 flex-1 md:block">
@@ -122,14 +196,16 @@ export function Header({ categories, products, homeContent }: { categories: Cate
                 'flex h-12 items-stretch overflow-hidden rounded-2xl border bg-white transition-all duration-200',
                 isFocused
                   ? 'border-brand-400 ring-4 ring-brand-100'
-                  : 'border-border hover:border-brand-300'
+                  : 'border-border hover:border-brand-300',
               )}
             >
               <div className="relative hidden sm:block">
                 <select
                   value={selectedCategory}
                   onChange={(event) =>
-                    setSelectedCategory(event.target.value)
+                    setSelectedCategory(
+                      event.target.value,
+                    )
                   }
                   aria-label="Seleccionar categoría"
                   className="h-full w-36 cursor-pointer appearance-none border-r border-border bg-brand-50 pl-4 pr-9 text-sm font-medium text-brand-900 outline-none"
@@ -137,7 +213,10 @@ export function Header({ categories, products, homeContent }: { categories: Cate
                   <option value="">Todas</option>
 
                   {categories.map((category) => (
-                    <option key={category.id} value={category.name}>
+                    <option
+                      key={category.id}
+                      value={category.name}
+                    >
                       {category.name}
                     </option>
                   ))}
@@ -159,13 +238,20 @@ export function Header({ categories, products, homeContent }: { categories: Cate
                   type="search"
                   placeholder="Buscar césped, granza, pisos y servicios..."
                   value={search}
-                  onChange={(event) => setSearch(event.target.value)}
+                  onChange={(event) =>
+                    setSearch(event.target.value)
+                  }
                   onFocus={() => setIsFocused(true)}
                   onBlur={() =>
-                    setTimeout(() => setIsFocused(false), 150)
+                    setTimeout(
+                      () => setIsFocused(false),
+                      150,
+                    )
                   }
                   onKeyDown={(event) => {
-                    if (event.key === 'Enter') handleSearch();
+                    if (event.key === 'Enter') {
+                      handleSearch();
+                    }
                   }}
                   className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm text-text-strong outline-none placeholder:text-slate-400"
                 />
@@ -201,7 +287,9 @@ export function Header({ categories, products, homeContent }: { categories: Cate
                           <button
                             type="button"
                             onMouseDown={() =>
-                              handleSuggestionClick(product.slug)
+                              handleSuggestionClick(
+                                product.slug,
+                              )
                             }
                             className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-brand-50"
                           >
@@ -226,7 +314,9 @@ export function Header({ categories, products, homeContent }: { categories: Cate
                             </div>
 
                             <p className="shrink-0 text-sm font-bold text-brand-700">
-                              {formatPricePYG(product.price)}
+                              {formatPricePYG(
+                                product.price,
+                              )}
                             </p>
                           </button>
                         </li>
@@ -263,15 +353,37 @@ export function Header({ categories, products, homeContent }: { categories: Cate
             aria-label="Navegación principal"
             className="ml-auto hidden shrink-0 items-center gap-2 lg:flex"
           >
-            <MegaMenu categories={categories} products={products} homeContent={homeContent} />
+            <MegaMenu
+              categories={categories}
+              products={products}
+              homeContent={homeContent}
+            />
 
-            {homeContent.navigation.filter(item=>item.isActive).sort((a,b)=>a.sortOrder-b.sortOrder).map(item=><Link
-              key={item.name}
-              href={item.url}
-              className="inline-flex h-11 items-center rounded-xl bg-brand-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-800 hover:shadow-soft"
-            >
-              {item.name}
-            </Link>)}
+            {homeContent.navigation
+              .filter((item) => item.isActive)
+              .sort(
+                (a, b) =>
+                  a.sortOrder - b.sortOrder,
+              )
+              .map((item) => (
+                <Link
+                  key={item.name}
+                  href={navigationHref(item)}
+                  target={
+                    item.newTab
+                      ? '_blank'
+                      : undefined
+                  }
+                  rel={
+                    item.newTab
+                      ? 'noopener noreferrer'
+                      : undefined
+                  }
+                  className="inline-flex h-11 items-center rounded-xl bg-brand-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-800 hover:shadow-soft"
+                >
+                  {item.name}
+                </Link>
+              ))}
 
             <Link
               href="/cart"
@@ -299,11 +411,15 @@ export function Header({ categories, products, homeContent }: { categories: Cate
             <button
               type="button"
               aria-label={
-                isMobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'
+                isMobileMenuOpen
+                  ? 'Cerrar menú'
+                  : 'Abrir menú'
               }
               aria-expanded={isMobileMenuOpen}
               onClick={() =>
-                setIsMobileMenuOpen((current) => !current)
+                setIsMobileMenuOpen(
+                  (current) => !current,
+                )
               }
               className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-brand-700 text-white"
             >
@@ -328,9 +444,13 @@ export function Header({ categories, products, homeContent }: { categories: Cate
               type="search"
               placeholder="¿Qué estás buscando?"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) =>
+                setSearch(event.target.value)
+              }
               onKeyDown={(event) => {
-                if (event.key === 'Enter') handleSearch();
+                if (event.key === 'Enter') {
+                  handleSearch();
+                }
               }}
               className="min-w-0 flex-1 bg-transparent px-3 text-sm outline-none"
             />
@@ -353,7 +473,7 @@ export function Header({ categories, products, homeContent }: { categories: Cate
           'overflow-hidden border-t border-border bg-white transition-all duration-300 lg:hidden',
           isMobileMenuOpen
             ? 'max-h-96 opacity-100'
-            : 'max-h-0 border-t-transparent opacity-0'
+            : 'max-h-0 border-t-transparent opacity-0',
         )}
       >
         <nav
@@ -396,7 +516,7 @@ export function Header({ categories, products, homeContent }: { categories: Cate
               </Link>
 
               <Link
-                href="/shop?category=Mantenimiento de jardines"
+                href="/shop?category=Mantenimiento%20de%20jardines"
                 onClick={closeMobileMenu}
                 className="rounded-xl bg-white px-3 py-3 text-xs font-semibold text-brand-800 shadow-sm"
               >
@@ -405,24 +525,51 @@ export function Header({ categories, products, homeContent }: { categories: Cate
             </div>
           </div>
 
-          <Link
-            href="/trabajos"
-            onClick={closeMobileMenu}
-            className="rounded-xl px-4 py-3 text-sm font-semibold text-text-strong transition hover:bg-brand-50"
-          >
-            Nuestros trabajos
-          </Link>
+          {homeContent.navigation
+            .filter((item) => item.isActive)
+            .sort(
+              (a, b) =>
+                a.sortOrder - b.sortOrder,
+            )
+            .map((item) => (
+              <Link
+                key={`mobile-${item.name}`}
+                href={navigationHref(item)}
+                target={
+                  item.newTab
+                    ? '_blank'
+                    : undefined
+                }
+                rel={
+                  item.newTab
+                    ? 'noopener noreferrer'
+                    : undefined
+                }
+                onClick={closeMobileMenu}
+                className="rounded-xl px-4 py-3 text-sm font-semibold text-text-strong transition hover:bg-brand-50"
+              >
+                {item.name}
+              </Link>
+            ))}
 
-          <a
-            href={createWhatsAppUrl('Hola, quiero recibir asesoramiento de Portal Verde.')}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={closeMobileMenu}
-            className="mt-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-semibold text-white"
-          >
-            <WhatsAppIcon className="h-5 w-5" />
-            Consultar por WhatsApp
-          </a>
+          {homeContent.whatsappEnabled && (
+            <a
+              href={
+                homeContent.whatsappUrl ||
+                createWhatsAppUrl(
+                  'Hola, quiero recibir asesoramiento de Portal Verde.',
+                )
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={closeMobileMenu}
+              className="mt-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-semibold text-white"
+            >
+              <WhatsAppIcon className="h-5 w-5" />
+
+              {homeContent.whatsappText}
+            </a>
+          )}
         </nav>
       </div>
     </header>

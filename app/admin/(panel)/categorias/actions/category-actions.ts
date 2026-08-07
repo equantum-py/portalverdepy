@@ -37,7 +37,9 @@ async function requireAdministrator() {
   }
 
   if (!profile?.is_active || profile.role !== 'admin') {
-    throw new Error('No tenés permisos para administrar categorías.');
+    throw new Error(
+      'No tenés permisos para administrar categorías.',
+    );
   }
 
   return supabase;
@@ -51,20 +53,29 @@ function payload(values: CategoryFormValues) {
     sort_order: values.sortOrder,
     is_active: values.isActive,
     is_featured: values.isFeatured,
+
     image_url: values.mainImage?.imageUrl ?? null,
-    image_storage_path: values.mainImage?.storagePath ?? null,
-    desktop_banner_url: values.desktopBanner?.imageUrl ?? null,
+    image_storage_path:
+      values.mainImage?.storagePath ?? null,
+
+    desktop_banner_url:
+      values.desktopBanner?.imageUrl ?? null,
     desktop_banner_storage_path:
       values.desktopBanner?.storagePath ?? null,
-    mobile_banner_url: values.mobileBanner?.imageUrl ?? null,
+
+    mobile_banner_url:
+      values.mobileBanner?.imageUrl ?? null,
     mobile_banner_storage_path:
       values.mobileBanner?.storagePath ?? null,
+
     seo_title: values.seoTitle || null,
     seo_description: values.seoDescription || null,
+
     seo_keywords: values.seoKeywords
       .split(',')
       .map((item) => item.trim())
       .filter(Boolean),
+
     image_alt: values.imageAlt || values.name,
     canonical_url: values.canonicalUrl || null,
   };
@@ -161,7 +172,10 @@ export async function updateCategoryAction(
 
     const supabase = await requireAdministrator();
 
-    const { data: current, error: currentError } = await supabase
+    const {
+      data: current,
+      error: currentError,
+    } = await supabase
       .from('categories')
       .select(
         `
@@ -195,7 +209,9 @@ export async function updateCategoryAction(
       };
     }
 
-    const retainedPaths = new Set(imagePaths(parsed.data));
+    const retainedPaths = new Set(
+      imagePaths(parsed.data),
+    );
 
     const removedPaths = [
       current.image_storage_path,
@@ -240,7 +256,9 @@ export async function setCategoryFlagAction(
 
     const { error } = await supabase
       .from('categories')
-      .update({ [field]: value })
+      .update({
+        [field]: value,
+      })
       .eq('id', id);
 
     if (error) {
@@ -291,7 +309,10 @@ export async function deleteCategoryAction(
       };
     }
 
-    const { data: category, error: categoryError } = await supabase
+    const {
+      data: category,
+      error: categoryError,
+    } = await supabase
       .from('categories')
       .select(
         `
