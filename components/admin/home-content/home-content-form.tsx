@@ -15,6 +15,7 @@ import {
 } from 'react-hook-form';
 
 import { saveHomeContentAction } from '@/app/admin/(panel)/pagina-inicio/actions';
+import { HeroImageUploader } from './hero-image-uploader';
 import {
   homeContentSchema,
   type HomeContentValues,
@@ -54,6 +55,7 @@ export function HomeContentForm({
     register,
     control,
     handleSubmit,
+    setValue,
     watch,
   } = useForm<HomeContentValues>({
     resolver: zodResolver(homeContentSchema),
@@ -517,33 +519,29 @@ export function HomeContentForm({
               />
             </Field>
 
-            <Field label="Imagen Desktop">
-              <input
-                className={input}
-                {...register('heroDesktopUrl')}
-              />
-            </Field>
+            <HeroImageUploader
+              label="Imagen Desktop"
+              recommendedSize="1920 × 650 px"
+              aspect="desktop"
+              url={values.heroDesktopUrl}
+              path={values.heroDesktopPath}
+              onChange={({ url, path }) => {
+                setValue('heroDesktopUrl', url, { shouldDirty: true });
+                setValue('heroDesktopPath', path, { shouldDirty: true });
+              }}
+            />
 
-            <Field label="Ruta Storage Desktop">
-              <input
-                className={input}
-                {...register('heroDesktopPath')}
-              />
-            </Field>
-
-            <Field label="Imagen Mobile">
-              <input
-                className={input}
-                {...register('heroMobileUrl')}
-              />
-            </Field>
-
-            <Field label="Ruta Storage Mobile">
-              <input
-                className={input}
-                {...register('heroMobilePath')}
-              />
-            </Field>
+            <HeroImageUploader
+              label="Imagen Mobile"
+              recommendedSize="1080 × 1350 px"
+              aspect="mobile"
+              url={values.heroMobileUrl}
+              path={values.heroMobilePath}
+              onChange={({ url, path }) => {
+                setValue('heroMobileUrl', url, { shouldDirty: true });
+                setValue('heroMobilePath', path, { shouldDirty: true });
+              }}
+            />
 
             <Field label="Alineación">
               <select
@@ -562,12 +560,12 @@ export function HomeContentForm({
               </select>
             </Field>
 
-            <Field label="Intensidad de sombra">
+            <Field label={`Intensidad de sombra: ${values.heroOverlayIntensity}%`}>
               <input
-                type="number"
+                type="range"
                 min={0}
                 max={90}
-                className={input}
+                className="mt-3 h-2 w-full cursor-pointer accent-green-700"
                 {...register(
                   'heroOverlayIntensity',
                   {
