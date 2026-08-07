@@ -122,10 +122,10 @@ export function HomeHero({
       }
       className={`relative isolate overflow-hidden rounded-3xl bg-brand-950 shadow-soft ${
         previewViewport === 'mobile'
-          ? 'aspect-[4/5]'
+          ? 'aspect-[750/507]'
           : previewViewport === 'desktop'
             ? 'aspect-[1920/650]'
-            : 'aspect-[4/5] lg:aspect-[1920/650]'
+            : 'aspect-[750/507] lg:aspect-[1920/650]'
       }`}
     >
       {previewViewport ? (
@@ -165,7 +165,7 @@ export function HomeHero({
               sizes="100vw"
               className={
                 content.heroDesktopUrl
-                  ? 'object-cover object-left lg:hidden'
+                  ? 'object-contain object-center lg:hidden'
                   : 'object-contain object-center'
               }
             />

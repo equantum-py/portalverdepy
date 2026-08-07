@@ -540,7 +540,7 @@ export function HomeContentForm({
 
             <HeroImageUploader
               label="Imagen Mobile"
-              recommendedSize="1080 × 1350 px"
+              recommendedSize="750 × 507 px"
               aspect="mobile"
               url={values.heroMobileUrl}
               path={values.heroMobilePath}

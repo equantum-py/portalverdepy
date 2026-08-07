@@ -110,8 +110,8 @@ export async function CategorySidebar() {
       </section>
 
       {/* Sidebar desktop */}
-      <aside className="hidden rounded-2xl border border-border bg-white p-5 shadow-sm lg:block">
-        <div className="mb-4">
+      <aside className="hidden self-start rounded-2xl border border-border bg-white p-4 shadow-sm lg:block">
+        <div className="mb-3">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-700">
             Navegación
           </p>
@@ -121,12 +121,12 @@ export async function CategorySidebar() {
           </h2>
         </div>
 
-        <ul className="space-y-2">
+        <ul className="space-y-1.5">
           {principales.map((category) => (
             <li key={category.id}>
               <Link
                 href={categoryHref(category.name)}
-                className="flex items-center justify-between rounded-xl bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800 transition hover:bg-brand-100"
+                className="flex items-center justify-between rounded-xl bg-brand-50 px-4 py-2.5 text-sm font-semibold text-brand-800 transition hover:bg-brand-100"
               >
                 {category.name}
 
@@ -139,7 +139,7 @@ export async function CategorySidebar() {
         </ul>
 
         {secundarios.length > 0 && (
-          <div className="mt-5 border-t border-border pt-4">
+          <div className="mt-4 border-t border-border pt-3">
             <p className="mb-2 text-xs font-medium uppercase tracking-wide text-text-soft">
               Más opciones
             </p>
@@ -149,7 +149,7 @@ export async function CategorySidebar() {
                 <li key={category.id}>
                   <Link
                     href={categoryHref(category.name)}
-                    className="block rounded-xl px-3 py-2.5 text-sm text-text-strong transition hover:bg-brand-50 hover:text-brand-800"
+                    className="block rounded-xl px-3 py-2 text-sm text-text-strong transition hover:bg-brand-50 hover:text-brand-800"
                   >
                     {category.name}
                   </Link>
@@ -161,7 +161,7 @@ export async function CategorySidebar() {
 
         <Link
           href="/shop"
-          className="mt-5 inline-flex w-full items-center justify-center rounded-xl border border-brand-200 px-4 py-3 text-sm font-semibold text-brand-800 transition hover:bg-brand-50"
+          className="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-brand-200 px-4 py-2.5 text-sm font-semibold text-brand-800 transition hover:bg-brand-50"
         >
           Ver catálogo completo
         </Link>
