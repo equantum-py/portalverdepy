@@ -1,7 +1,8 @@
 import { CategoryCard } from '@/components/category-card';
-import { categories } from '@/lib/data';
+import { getPublicCategories } from '@/lib/categories/public-categories';
 
-export function FeaturedCategoriesSection() {
+export async function FeaturedCategoriesSection() {
+  const categories = await getPublicCategories();
   return (
     <section className="section-space pt-0">
       <div className="container-shell">

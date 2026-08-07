@@ -29,7 +29,7 @@ type CategoryProductCount = {
 
 const PAGE_SIZE = 10;
 
-// Fuerza que el listado refleje siempre los cambios realizados
+// Fuerza que el listado refleje los cambios realizados
 // mediante las Server Actions.
 export const dynamic = 'force-dynamic';
 
@@ -39,6 +39,7 @@ export default async function CategoriesPage({
   const params = await searchParams;
 
   const requestedPage = Number(params.page);
+
   const page =
     Number.isFinite(requestedPage) && requestedPage > 0
       ? Math.floor(requestedPage)
@@ -101,6 +102,7 @@ export default async function CategoriesPage({
     .range(from, to);
 
   const totalCategories = count ?? 0;
+
   const totalPages = Math.max(
     1,
     Math.ceil(totalCategories / PAGE_SIZE),
@@ -392,6 +394,7 @@ export default async function CategoriesPage({
                         <p className="text-xs text-slate-500">
                           Productos
                         </p>
+
                         <p className="mt-1 font-semibold text-slate-900">
                           {productCount}
                         </p>
@@ -401,6 +404,7 @@ export default async function CategoriesPage({
                         <p className="text-xs text-slate-500">
                           Orden
                         </p>
+
                         <p className="mt-1 font-semibold text-slate-900">
                           {category.sort_order}
                         </p>

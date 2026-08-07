@@ -22,6 +22,7 @@ export type Product = {
   isBestSeller?: boolean;
   isOffer?: boolean;
   isRecommended?: boolean;
+  isFeatured?: boolean;
   previousPrice?: number;
   includesInstallation?: boolean;
   inStock?: boolean;

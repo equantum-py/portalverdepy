@@ -14,7 +14,9 @@ import {
 
 import { ProductCard } from '@/components/product-card';
 import { ProductGallery } from '@/components/products/product-gallery';
-import { formatPricePYG, products } from '@/lib/data';
+import { formatPricePYG } from '@/lib/format-price';
+import { getPublicProducts } from '@/lib/products/catalog-products';
+import type { Product } from '@/lib/types';
 import { getPublicProductBySlug } from '@/lib/products/public-products';
 import { WhatsAppIcon } from '@/components/icons';
 
@@ -55,7 +57,7 @@ export async function generateMetadata({
           databaseProduct.recommendations,
         relatedProducts: []
       }
-    : products.find((item) => item.slug === slug);
+    : null;
 
   if (!product) {
     return {
@@ -64,8 +66,17 @@ export async function generateMetadata({
   }
 
   return {
-    title: product.name,
-    description: product.seoDescription || product.description
+    title: databaseProduct?.seo_title || product.name,
+    description: product.seoDescription || product.description,
+    alternates: databaseProduct?.canonical_url
+      ? { canonical: databaseProduct.canonical_url }
+      : undefined,
+    keywords: databaseProduct?.seo_keywords ?? undefined,
+    openGraph: {
+      title: databaseProduct?.seo_title || product.name,
+      description: product.seoDescription || product.description,
+      images: [{ url: databaseProduct?.mainImage || '' }]
+    }
   };
 }
 
@@ -102,7 +113,7 @@ export default async function ProductPage({
           databaseProduct.recommendations,
         relatedProducts: []
       }
-    : products.find((item) => item.slug === slug);
+    : null;
 
   if (!product) {
     notFound();
@@ -134,16 +145,12 @@ export default async function ProductPage({
           }
         ];
 
-  const relatedProducts =
-    product.relatedProducts
-      ?.map((relatedSlug: string) =>
-        products.find((item) => item.slug === relatedSlug)
-      )
-      .filter(
-        (
-          item: (typeof products)[number] | undefined
-        ): item is (typeof products)[number] => Boolean(item)
-      ) || [];
+  const publicProducts = await getPublicProducts();
+  const relatedProducts: Product[] = (databaseProduct?.relatedProductSlugs ?? [])
+    .map((relatedSlug: string) =>
+      publicProducts.find((item: Product) => item.slug === relatedSlug)
+    )
+    .filter((item: Product | undefined): item is Product => Boolean(item));
 
   const whatsappNumber = '595981077600';
 
@@ -155,6 +162,35 @@ export default async function ProductPage({
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: product.name,
+            description: product.seoDescription || product.description,
+            image: galleryImages.map(
+              (image: { imageUrl: string }) => image.imageUrl
+            ),
+            offers: {
+              '@type': 'Offer',
+              priceCurrency: databaseProduct?.currency || 'PYG',
+              price: product.price,
+              availability: product.in_stock === false
+                ? 'https://schema.org/OutOfStock'
+                : 'https://schema.org/InStock'
+            },
+            additionalProperty: (databaseProduct?.specifications ?? []).map(
+              (specification: { key: string; value: string }) => ({
+                '@type': 'PropertyValue',
+                name: specification.key,
+                value: specification.value
+              })
+            )
+          }).replace(/</g, '\\u003c')
+        }}
+      />
       <main className="container-shell pb-28 pt-4 sm:pb-12 sm:pt-7 lg:pt-10">
         {/* Navegación */}
         <nav
@@ -505,7 +541,7 @@ export default async function ProductPage({
             </div>
 
             <div className="flex snap-x gap-3 overflow-x-auto pb-3 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-4">
-              {relatedProducts.map((relatedProduct: (typeof products)[number]) => (
+              {relatedProducts.map((relatedProduct: Product) => (
                 <div
                   key={relatedProduct.id}
                   className="w-[72%] shrink-0 snap-start sm:w-auto"

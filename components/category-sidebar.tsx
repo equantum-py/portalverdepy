@@ -6,7 +6,7 @@ import {
   Sprout
 } from 'lucide-react';
 
-import { categories } from '@/lib/data';
+import { getPublicCategories } from '@/lib/categories/public-categories';
 
 const mobileCategories = [
   {
@@ -39,7 +39,8 @@ function categoryHref(category: string) {
   return `/shop?category=${encodeURIComponent(category)}`;
 }
 
-export function CategorySidebar() {
+export async function CategorySidebar() {
+  const categories = await getPublicCategories();
   const principales = categories.filter(
     (category) =>
       category.name === 'Césped' || category.name === 'Paisajismo'

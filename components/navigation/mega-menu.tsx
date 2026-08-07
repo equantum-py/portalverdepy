@@ -12,29 +12,9 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-import { products } from '@/lib/data';
+import type { Category, Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
-
-const menuGroups = [
-  {
-    title: 'Césped natural',
-    description: 'Variedades para jardines y espacios exteriores.',
-    href: '/shop?category=Césped',
-    icon: Leaf,
-    products: products
-      .filter((product) => product.category === 'Césped')
-      .slice(0, 4)
-  },
-  {
-    title: 'Paisajismo',
-    description: 'Pisos, granza, separadores y terminaciones.',
-    href: '/shop?category=Paisajismo',
-    icon: TreePine,
-    products: products
-      .filter((product) => product.category === 'Paisajismo')
-      .slice(0, 4)
-  }
-];
+import type { HomeContentValues } from '@/lib/home-content/schema';
 
 const serviceLinks = [
   {
@@ -63,13 +43,34 @@ const serviceLinks = [
   }
 ];
 
-export function MegaMenu() {
+export function MegaMenu({ categories, products, homeContent }: { categories: Category[]; products: Product[]; homeContent: HomeContentValues }) {
   const [isOpen, setIsOpen] = useState(false);
+  const fallbackGroups = categories.slice(0, 2).map((category, index) => ({
+    title: category.name,
+    description: category.description || 'Productos seleccionados para tu espacio.',
+    href: `/shop?category=${encodeURIComponent(category.name)}`,
+    icon: index === 0 ? Leaf : TreePine,
+    products: products.filter((product) => product.category === category.name).slice(0, 4)
+  }));
+  const menuGroups = homeContent.megaColumns.length
+    ? homeContent.megaColumns.filter(column=>column.isActive).sort((a,b)=>a.sortOrder-b.sortOrder).map((column,index)=>({
+        title:column.title,
+        description:categories.find(category=>category.id===column.categoryId)?.description||'Productos seleccionados para tu espacio.',
+        href:column.viewAllUrl,
+        linkLabel:column.viewAllLabel,
+        icon:index===0?Leaf:TreePine,
+        products:column.productIds.map(id=>products.find(product=>product.id===id)).filter((product):product is Product=>Boolean(product))
+      }))
+    : fallbackGroups.map(group=>({...group,linkLabel:'Ver toda la categoría'}));
 
   const closeMenu = () => {
     setIsOpen(false);
   };
 
+  if (!homeContent.megaMenuEnabled) return null;
+  const configuredServices=homeContent.megaServices.filter(item=>item.isActive).sort((a,b)=>a.sortOrder-b.sortOrder);
+  const workButton=homeContent.buttons.find(item=>item.placement==='mega-work'&&item.isActive);
+  const ctaButton=homeContent.buttons.find(item=>item.placement==='mega-cta'&&item.isActive);
   return (
     <div
       className="relative"
@@ -172,7 +173,7 @@ export function MegaMenu() {
                     onClick={closeMenu}
                     className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-700 transition hover:text-brand-900"
                   >
-                    Ver toda la categoría
+                    {group.linkLabel}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </section>
@@ -181,21 +182,21 @@ export function MegaMenu() {
 
             <aside className="bg-brand-950 p-5 text-white lg:p-6">
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-200">
-                Servicios Portal Verde
+                {homeContent.megaServicesTitle}
               </p>
 
               <h3 className="mt-2 text-xl font-semibold leading-tight">
-                Una solución completa para tu espacio
+                {homeContent.megaServicesDescription}
               </h3>
 
               <div className="mt-5 space-y-2">
-                {serviceLinks.map((service) => {
-                  const Icon = service.icon;
+                {configuredServices.map((service) => {
+                  const Icon = serviceLinks.find(item=>item.icon.displayName===service.icon)?.icon ?? Leaf;
 
                   return (
                     <Link
                       key={service.title}
-                      href={service.href}
+                      href={service.url}
                       onClick={closeMenu}
                       className="group flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-3 transition hover:bg-white/10"
                     >
@@ -215,14 +216,14 @@ export function MegaMenu() {
                 })}
               </div>
 
-              <Link
-                href="/trabajos"
+              {workButton&&<Link
+                href={workButton.url}
                 onClick={closeMenu}
                 className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-brand-950 transition hover:bg-brand-100"
               >
-                Ver trabajos realizados
+                {workButton.text}
                 <ArrowRight className="h-4 w-4" />
-              </Link>
+              </Link>}
             </aside>
           </div>
 
@@ -231,13 +232,13 @@ export function MegaMenu() {
               ¿No sabés qué producto necesitás? Nuestro equipo puede orientarte.
             </p>
 
-            <Link
-              href="/cart"
+            {ctaButton&&<Link
+              href={ctaButton.url}
               onClick={closeMenu}
               className="shrink-0 text-xs font-semibold text-brand-800"
             >
-              Preparar presupuesto →
-            </Link>
+              {ctaButton.text} →
+            </Link>}
           </div>
         </div>
       </div>

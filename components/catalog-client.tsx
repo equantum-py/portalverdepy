@@ -15,7 +15,7 @@ import {
 import { useMemo, useState } from 'react';
 
 import { ProductCard } from '@/components/product-card';
-import { formatPricePYG } from '@/lib/data';
+import { formatPricePYG } from '@/lib/format-price';
 import type { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
