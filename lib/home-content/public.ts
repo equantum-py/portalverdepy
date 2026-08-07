@@ -1,26 +1,52 @@
-import { createClient } from "@/lib/supabase/server";
-import type { HomeContentValues } from "./schema";
+import { createClient } from '@/lib/supabase/server';
+
+import type { HomeContentValues } from './schema';
+
+type MegaProductRelation = {
+  product_id: string;
+  sort_order: number;
+};
 
 export const defaultHomeContent: HomeContentValues = {
   promoEnabled: true,
-  promoText: "Césped Esmeralda desde Gs. 31.000 m² con instalación incluida",
-  promoIcon: "🌱",
-  promoUrl: "https://wa.me/595981077600",
-  promoButtonText: "WhatsApp",
+  promoText:
+    'Césped Esmeralda desde Gs. 31.000 m² con instalación incluida',
+  promoIcon: '🌱',
+  promoUrl: 'https://wa.me/595981077600',
+  promoButtonText: 'WhatsApp',
   promoScroll: true,
   promoSpeed: 24,
   promoNewTab: true,
+
   logoEnabled: true,
-  logoDesktopUrl: "/images/logo-desktop.png",
-  logoMobileUrl: "/images/logo-mobile.png",
-  logoAlt: "Portal Verde",
+  logoDesktopUrl: '/images/logo-desktop.png',
+  logoDesktopPath: '',
+  logoMobileUrl: '/images/logo-mobile.png',
+  logoMobilePath: '',
+  logoAlt: 'Portal Verde',
+
   whatsappEnabled: true,
-  heroDesktopUrl: "/images/banners/slide-2-desktop.webp",
-  heroDesktopPath: "",
-  heroMobileUrl: "/images/banners/slide-2-mobile.webp",
-  heroMobilePath: "",
-  heroShadowIntensity: 75,
+  whatsappText: 'Consultar por WhatsApp',
+  whatsappUrl: 'https://wa.me/595981077600',
+
   heroEnabled: true,
+  heroTitle:
+    'Transformamos tu espacio en un jardín que se disfruta',
+  heroSubtitle: 'Instalación profesional garantizada',
+  heroDescription:
+    'Venta e instalación de césped natural con asesoramiento profesional en Asunción y Gran Asunción.',
+  heroDesktopUrl: '/images/banners/slide-2-desktop.webp',
+  heroDesktopPath: '',
+  heroMobileUrl: '/images/banners/slide-2-mobile.webp',
+  heroMobilePath: '',
+  heroAlt:
+    'Servicio profesional de jardinería y mantenimiento de césped',
+  heroAlignment: 'left',
+  heroOverlay: true,
+  heroOverlayIntensity: 75,
+
+  // Controles visuales agregados por complete-product-management.
+  heroShadowIntensity: 75,
   heroContentEnabled: true,
   heroContentDesktop: true,
   heroContentMobile: true,
@@ -97,10 +123,23 @@ export const defaultHomeContent: HomeContentValues = {
   megaServicesTitle: "Servicios Portal Verde",
   megaServicesDescription: "Una solución completa para tu espacio",
   navigation: [
-    { name: "Trabajos", url: "/trabajos", sortOrder: 0, isActive: true },
+    {
+      name: 'Trabajos',
+      url: '/trabajos',
+      linkType: 'internal',
+      targetId: '',
+      newTab: false,
+      sortOrder: 0,
+      isActive: true,
+    },
   ],
   tags: ["Empastado", "Jardinería", "Poda de árboles", "Mantenimiento"].map(
-    (label, sortOrder) => ({ label, sortOrder, isActive: true }),
+    (label, sortOrder) => ({
+      label,
+      icon: 'Leaf',
+      sortOrder,
+      isActive: true,
+    }),
   ),
   megaColumns: [],
   megaServices: [
@@ -113,58 +152,75 @@ export const defaultHomeContent: HomeContentValues = {
       isActive: true,
     },
   ],
+
   sections: [
-    { key: "hero", title: "Portada", sortOrder: 0, isActive: true },
-    { key: "products-grass", title: "Césped", sortOrder: 1, isActive: true },
-    { key: "services", title: "Servicios", sortOrder: 2, isActive: true },
     {
-      key: "products-landscaping",
-      title: "Paisajismo",
+      key: 'hero',
+      title: 'Portada',
+      sortOrder: 0,
+      isActive: true,
+    },
+    {
+      key: 'products-grass',
+      title: 'Césped',
+      sortOrder: 1,
+      isActive: true,
+    },
+    {
+      key: 'services',
+      title: 'Servicios',
+      sortOrder: 2,
+      isActive: true,
+    },
+    {
+      key: 'products-landscaping',
+      title: 'Paisajismo',
       sortOrder: 3,
       isActive: true,
     },
   ],
+
   buttons: [
     {
-      placement: "services-primary",
-      text: "Solicitar servicio por WhatsApp",
-      url: "https://wa.me/595981077600",
-      linkType: "whatsapp",
-      icon: "WhatsApp",
-      variant: "primary",
+      placement: 'services-primary',
+      text: 'Solicitar servicio por WhatsApp',
+      url: 'https://wa.me/595981077600',
+      linkType: 'whatsapp',
+      icon: 'WhatsApp',
+      variant: 'primary',
       sortOrder: 0,
       isActive: true,
       newTab: true,
     },
     {
-      placement: "services-secondary",
-      text: "Ver productos",
-      url: "/shop",
-      linkType: "internal",
-      icon: "",
-      variant: "secondary",
+      placement: 'services-secondary',
+      text: 'Ver productos',
+      url: '/shop',
+      linkType: 'internal',
+      icon: '',
+      variant: 'secondary',
       sortOrder: 1,
       isActive: true,
       newTab: false,
     },
     {
-      placement: "mega-work",
-      text: "Ver trabajos realizados",
-      url: "/trabajos",
-      linkType: "internal",
-      icon: "",
-      variant: "primary",
+      placement: 'mega-work',
+      text: 'Ver trabajos realizados',
+      url: '/trabajos',
+      linkType: 'internal',
+      icon: '',
+      variant: 'primary',
       sortOrder: 0,
       isActive: true,
       newTab: false,
     },
     {
-      placement: "mega-cta",
-      text: "Preparar presupuesto",
-      url: "/cart",
-      linkType: "internal",
-      icon: "",
-      variant: "link",
+      placement: 'mega-cta',
+      text: 'Preparar presupuesto',
+      url: '/cart',
+      linkType: 'internal',
+      icon: '',
+      variant: 'link',
       sortOrder: 0,
       isActive: true,
       newTab: false,
@@ -210,7 +266,23 @@ export async function getHomeContent(): Promise<HomeContentValues> {
       heroMobileUrl: s.hero_mobile_url ?? defaultHomeContent.heroMobileUrl,
       heroMobilePath: s.hero_mobile_path ?? "",
       heroShadowIntensity: s.hero_shadow_intensity ?? 75,
-      heroEnabled: s.hero_enabled ?? true,
+      heroEnabled:
+        s.hero_enabled ?? defaultHomeContent.heroEnabled,
+      heroTitle:
+        s.hero_title ?? defaultHomeContent.heroTitle,
+      heroSubtitle:
+        s.hero_subtitle ?? defaultHomeContent.heroSubtitle,
+      heroDescription:
+        s.hero_description ?? defaultHomeContent.heroDescription,
+      heroAlt:
+        s.hero_alt ?? defaultHomeContent.heroAlt,
+      heroAlignment:
+        s.hero_alignment ?? defaultHomeContent.heroAlignment,
+      heroOverlay:
+        s.hero_overlay ?? defaultHomeContent.heroOverlay,
+      heroOverlayIntensity:
+        s.hero_overlay_intensity ??
+        defaultHomeContent.heroOverlayIntensity,
       heroContentEnabled: s.hero_content_enabled ?? true,
       heroContentDesktop: s.hero_content_desktop ?? true,
       heroContentMobile: s.hero_content_mobile ?? true,
@@ -283,10 +355,20 @@ export async function getHomeContent(): Promise<HomeContentValues> {
       promoSpeed: s.promo_speed,
       promoNewTab: s.promo_new_tab,
       logoEnabled: s.logo_enabled,
-      logoDesktopUrl: s.logo_desktop_url,
-      logoMobileUrl: s.logo_mobile_url,
-      logoAlt: s.logo_alt,
-      whatsappEnabled: s.whatsapp_enabled,
+      logoDesktopUrl:
+        s.logo_desktop_url ?? defaultHomeContent.logoDesktopUrl,
+      logoDesktopPath: s.logo_desktop_path ?? '',
+      logoMobileUrl:
+        s.logo_mobile_url ?? defaultHomeContent.logoMobileUrl,
+      logoMobilePath: s.logo_mobile_path ?? '',
+      logoAlt:
+        s.logo_alt ?? defaultHomeContent.logoAlt,
+      whatsappEnabled:
+        s.whatsapp_enabled ?? defaultHomeContent.whatsappEnabled,
+      whatsappText:
+        s.whatsapp_text ?? defaultHomeContent.whatsappText,
+      whatsappUrl:
+        s.whatsapp_url ?? defaultHomeContent.whatsappUrl,
       servicesEnabled: s.services_enabled,
       servicesTitle: s.services_title,
       servicesDescription: s.services_description,
@@ -296,11 +378,15 @@ export async function getHomeContent(): Promise<HomeContentValues> {
       navigation: (navigation.data ?? []).map((i) => ({
         name: i.name,
         url: i.url,
+        linkType: i.link_type ?? 'internal',
+        targetId: i.target_id ?? '',
+        newTab: i.new_tab ?? false,
         sortOrder: i.sort_order,
         isActive: i.is_active,
       })),
       tags: (tags.data ?? []).map((i) => ({
         label: i.label,
+        icon: i.icon ?? 'Leaf',
         sortOrder: i.sort_order,
         isActive: i.is_active,
       })),
