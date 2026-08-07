@@ -12,9 +12,12 @@ import { useState, type ReactNode } from 'react';
 import {
   useFieldArray,
   useForm,
+  type UseFormRegisterReturn,
 } from 'react-hook-form';
 
 import { saveHomeContentAction } from '@/app/admin/(panel)/pagina-inicio/actions';
+import { HeroImageUploader } from './hero-image-uploader';
+import { HomeHero } from '@/sections/home-hero';
 import {
   homeContentSchema,
   type HomeContentValues,
@@ -54,6 +57,7 @@ export function HomeContentForm({
     register,
     control,
     handleSubmit,
+    setValue,
     watch,
   } = useForm<HomeContentValues>({
     resolver: zodResolver(homeContentSchema),
@@ -517,33 +521,75 @@ export function HomeContentForm({
               />
             </Field>
 
-            <Field label="Imagen Desktop">
-              <input
-                className={input}
-                {...register('heroDesktopUrl')}
-              />
-            </Field>
+            <HeroImageUploader
+              label="Imagen Desktop"
+              recommendedSize="1920 × 650 px"
+              aspect="desktop"
+              url={values.heroDesktopUrl}
+              path={values.heroDesktopPath}
+              onChange={({ url, path }) => {
+                setValue('heroDesktopUrl', url, { shouldDirty: true });
+                setValue('heroDesktopPath', path, { shouldDirty: true });
+              }}
+            />
 
-            <Field label="Ruta Storage Desktop">
-              <input
-                className={input}
-                {...register('heroDesktopPath')}
-              />
-            </Field>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 md:col-span-2">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 className="font-semibold text-slate-900">
+                    Contenido sobre el banner
+                  </h3>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Elegí qué información acompaña a la fotografía.
+                  </p>
+                </div>
+                <Toggle
+                  label="Mostrar contenido sobre el banner"
+                  checked={values.heroContentEnabled}
+                  registration={register('heroContentEnabled')}
+                />
+              </div>
 
-            <Field label="Imagen Mobile">
-              <input
-                className={input}
-                {...register('heroMobileUrl')}
-              />
-            </Field>
+              <fieldset
+                disabled={!values.heroContentEnabled}
+                className="mt-4 border-t border-slate-200 pt-4 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Mostrar contenido en
+                </p>
+                <div className="mb-5 flex flex-wrap gap-3">
+                  <Toggle label="Desktop" checked={values.heroContentDesktop} registration={register('heroContentDesktop')} />
+                  <Toggle label="Mobile" checked={values.heroContentMobile} registration={register('heroContentMobile')} />
+                </div>
 
-            <Field label="Ruta Storage Mobile">
-              <input
-                className={input}
-                {...register('heroMobilePath')}
-              />
-            </Field>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Elementos visibles
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <Toggle label="Etiqueta" checked={values.heroShowLabel} registration={register('heroShowLabel')} />
+                  <Toggle label="Título" checked={values.heroShowTitle} registration={register('heroShowTitle')} />
+                  <Toggle label="Subtítulo" checked={values.heroShowSubtitle} registration={register('heroShowSubtitle')} />
+                  <Toggle label="Descripción" checked={values.heroShowDescription} registration={register('heroShowDescription')} />
+                  <Toggle label="Precio" checked={values.heroShowPrice} registration={register('heroShowPrice')} />
+                  <Toggle label="Instalación incluida" checked={values.heroShowInstallationBadge} registration={register('heroShowInstallationBadge')} />
+                  <Toggle label="Botón principal" checked={values.heroShowPrimaryButton} registration={register('heroShowPrimaryButton')} />
+                  <Toggle label="Botón secundario" checked={values.heroShowSecondaryButton} registration={register('heroShowSecondaryButton')} />
+                  <Toggle label="Beneficios" checked={values.heroShowBenefits} registration={register('heroShowBenefits')} />
+                </div>
+              </fieldset>
+            </div>
+
+            <HeroImageUploader
+              label="Imagen Mobile"
+              recommendedSize="1080 × 1350 px"
+              aspect="mobile"
+              url={values.heroMobileUrl}
+              path={values.heroMobilePath}
+              onChange={({ url, path }) => {
+                setValue('heroMobileUrl', url, { shouldDirty: true });
+                setValue('heroMobilePath', path, { shouldDirty: true });
+              }}
+            />
 
             <Field label="Alineación">
               <select
@@ -562,12 +608,12 @@ export function HomeContentForm({
               </select>
             </Field>
 
-            <Field label="Intensidad de sombra">
+            <Field label={`Intensidad de sombra: ${values.heroOverlayIntensity}%`}>
               <input
-                type="number"
+                type="range"
                 min={0}
                 max={90}
-                className={input}
+                className="mt-3 h-2 w-full cursor-pointer accent-green-700"
                 {...register(
                   'heroOverlayIntensity',
                   {
@@ -1169,21 +1215,7 @@ export function HomeContentForm({
             )}
 
             {values.heroEnabled && (
-              <div className="relative min-h-52 overflow-hidden bg-slate-900 p-6 text-white">
-                <div className="relative z-10 max-w-xl">
-                  <p className="text-xs uppercase tracking-wider">
-                    {values.heroSubtitle}
-                  </p>
-
-                  <h2 className="mt-2 text-2xl font-semibold">
-                    {values.heroTitle}
-                  </h2>
-
-                  <p className="mt-2 text-sm text-white/80">
-                    {values.heroDescription}
-                  </p>
-                </div>
-              </div>
+              <HomeHero content={values} previewMode={preview} />
             )}
 
             {values.servicesEnabled && (
@@ -1255,6 +1287,26 @@ function Field({
       </span>
 
       {children}
+    </label>
+  );
+}
+
+function Toggle({
+  label,
+  checked,
+  registration,
+}: {
+  label: string;
+  checked: boolean;
+  registration: UseFormRegisterReturn;
+}) {
+  return (
+    <label className="flex min-h-10 cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm has-[:disabled]:cursor-not-allowed">
+      <span>{label}</span>
+      <span className={`relative h-6 w-11 shrink-0 rounded-full transition ${checked ? 'bg-green-700' : 'bg-slate-300'}`}>
+        <input type="checkbox" className="peer sr-only" {...registration} />
+        <span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
+      </span>
     </label>
   );
 }

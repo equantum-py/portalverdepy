@@ -106,18 +106,26 @@ export const homeContentSchema = z.object({
     .min(1, 'El título de la portada es obligatorio.'),
   heroSubtitle: z.string(),
   heroDescription: z.string(),
-  heroDesktopUrl: z
-    .string()
-    .min(1, 'La imagen desktop del Hero es obligatoria.'),
+  heroDesktopUrl: z.string(),
   heroDesktopPath: z.string(),
-  heroMobileUrl: z
-    .string()
-    .min(1, 'La imagen mobile del Hero es obligatoria.'),
+  heroMobileUrl: z.string(),
   heroMobilePath: z.string(),
   heroAlt: z.string(),
   heroAlignment: z.enum(['left', 'center', 'right']),
   heroOverlay: z.boolean(),
   heroOverlayIntensity: z.number().int().min(0).max(90),
+  heroContentEnabled: z.boolean(),
+  heroContentDesktop: z.boolean(),
+  heroContentMobile: z.boolean(),
+  heroShowLabel: z.boolean(),
+  heroShowTitle: z.boolean(),
+  heroShowSubtitle: z.boolean(),
+  heroShowDescription: z.boolean(),
+  heroShowPrice: z.boolean(),
+  heroShowInstallationBadge: z.boolean(),
+  heroShowPrimaryButton: z.boolean(),
+  heroShowSecondaryButton: z.boolean(),
+  heroShowBenefits: z.boolean(),
 
   servicesEnabled: z.boolean(),
   servicesTitle: z
