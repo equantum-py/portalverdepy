@@ -60,9 +60,7 @@ export default async function HomePage() {
             );
           }
 
-          if (
-            section.key === "products-landscaping"
-          ) {
+          if (section.key === "products-landscaping") {
             return (
               <ProductSection
                 key={section.key}
