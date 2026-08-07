@@ -1,13 +1,38 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+
 import {
   homeContentSchema,
   type HomeContentValues,
 } from "@/lib/home-content/schema";
 import { createClient } from "@/lib/supabase/server";
+import {
+  heroCarouselSettingsSchema,
+  heroSlideSchema,
+  type HeroCarouselSettings,
+  type HeroSlide,
+} from "@/lib/home-content/hero-schema";
 
-export async function saveHomeContentAction(input: HomeContentValues) {
+export type HomeContentActionResult = {
+  success: boolean;
+  message: string;
+};
+
+type PreviousSettings = {
+  logo_desktop_url: string | null;
+  logo_desktop_path: string | null;
+  logo_mobile_url: string | null;
+  logo_mobile_path: string | null;
+  hero_desktop_url: string | null;
+  hero_desktop_path: string | null;
+  hero_mobile_url: string | null;
+  hero_mobile_path: string | null;
+};
+
+export async function saveHomeContentAction(
+  input: HomeContentValues,
+): Promise<HomeContentActionResult> {
   const parsed = homeContentSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -30,11 +55,18 @@ export async function saveHomeContentAction(input: HomeContentValues) {
     };
   }
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role,is_active")
     .eq("id", user.id)
     .single();
+
+  if (profileError) {
+    return {
+      success: false,
+      message: "No se pudo verificar tu perfil.",
+    };
+  }
 
   if (profile?.role !== "admin" || !profile.is_active) {
     return {
@@ -43,280 +75,446 @@ export async function saveHomeContentAction(input: HomeContentValues) {
     };
   }
 
-  const v = parsed.data;
+  const values = parsed.data;
 
-  // Guardamos las rutas anteriores para poder eliminar
-  // del Storage las imágenes reemplazadas.
-  const { data: previousSettings } = await supabase
+  const {
+    data: previousSettings,
+    error: previousSettingsError,
+  } = await supabase
     .from("home_page_settings")
-    .select("hero_desktop_path,hero_mobile_path")
+    .select(
+      [
+        "logo_desktop_url",
+        "logo_desktop_path",
+        "logo_mobile_url",
+        "logo_mobile_path",
+        "hero_desktop_url",
+        "hero_desktop_path",
+        "hero_mobile_url",
+        "hero_mobile_path",
+      ].join(","),
+    )
     .eq("id", true)
-    .maybeSingle();
+    .maybeSingle<PreviousSettings>();
 
-  const { error } = await supabase
-    .from("home_page_settings")
-    .upsert({
-      id: true,
-
-      // Barra promocional
-      promo_enabled: v.promoEnabled,
-      promo_text: v.promoText,
-      promo_icon: v.promoIcon,
-      promo_url: v.promoUrl,
-      promo_button_text: v.promoButtonText,
-      promo_scroll: v.promoScroll,
-      promo_speed: v.promoSpeed,
-      promo_new_tab: v.promoNewTab,
-
-      // Logo
-      logo_enabled: v.logoEnabled,
-      logo_desktop_url: v.logoDesktopUrl,
-      logo_mobile_url: v.logoMobileUrl,
-      logo_alt: v.logoAlt,
-
-      // WhatsApp
-      whatsapp_enabled: v.whatsappEnabled,
-
-      // Hero general
-      hero_enabled: v.heroEnabled,
-      hero_title: v.heroTitle,
-      hero_subtitle: v.heroSubtitle,
-      hero_description: v.heroDescription,
-
-      hero_desktop_url: v.heroDesktopUrl,
-      hero_desktop_path: v.heroDesktopPath,
-      hero_mobile_url: v.heroMobileUrl,
-      hero_mobile_path: v.heroMobilePath,
-
-      hero_alt: v.heroAlt,
-      hero_alignment: v.heroAlignment,
-      hero_overlay: v.heroOverlay,
-      hero_overlay_intensity: v.heroOverlayIntensity,
-
-      // Nueva configuración del contenido visual del Hero
-      hero_shadow_intensity: v.heroShadowIntensity,
-      hero_content_enabled: v.heroContentEnabled,
-      hero_content_desktop: v.heroContentDesktop,
-      hero_content_mobile: v.heroContentMobile,
-
-      hero_show_label: v.heroShowLabel,
-      hero_show_title: v.heroShowTitle,
-      hero_show_subtitle: v.heroShowSubtitle,
-      hero_show_description: v.heroShowDescription,
-      hero_show_price: v.heroShowPrice,
-      hero_show_installation_badge:
-        v.heroShowInstallationBadge,
-      hero_show_primary_button:
-        v.heroShowPrimaryButton,
-      hero_show_secondary_button:
-        v.heroShowSecondaryButton,
-      hero_show_benefits: v.heroShowBenefits,
-
-      // Servicios
-      services_enabled: v.servicesEnabled,
-      services_title: v.servicesTitle,
-      services_description: v.servicesDescription,
-
-      // Mega menú
-      mega_menu_enabled: v.megaMenuEnabled,
-      mega_services_title: v.megaServicesTitle,
-      mega_services_description:
-        v.megaServicesDescription,
-
-      updated_at: new Date().toISOString(),
-    });
-
-  if (error) {
+  if (previousSettingsError) {
     return {
       success: false,
-      message: error.message,
+      message: previousSettingsError.message,
     };
   }
 
-  // Limpiar relaciones actuales
-  for (const table of [
+  const nextLogoDesktopUrl =
+    values.logoDesktopUrl || previousSettings?.logo_desktop_url || null;
+  const nextLogoDesktopPath =
+    values.logoDesktopPath || previousSettings?.logo_desktop_path || null;
+  const nextLogoMobileUrl =
+    values.logoMobileUrl || previousSettings?.logo_mobile_url || null;
+  const nextLogoMobilePath =
+    values.logoMobilePath || previousSettings?.logo_mobile_path || null;
+  const nextHeroDesktopUrl =
+    values.heroDesktopUrl || previousSettings?.hero_desktop_url || null;
+  const nextHeroDesktopPath =
+    values.heroDesktopPath || previousSettings?.hero_desktop_path || null;
+  const nextHeroMobileUrl =
+    values.heroMobileUrl || previousSettings?.hero_mobile_url || null;
+  const nextHeroMobilePath =
+    values.heroMobilePath || previousSettings?.hero_mobile_path || null;
+
+  const { error: settingsError } = await supabase
+    .from("home_page_settings")
+    .upsert({
+      id: true,
+      promo_enabled: values.promoEnabled,
+      promo_text: values.promoText,
+      promo_icon: values.promoIcon,
+      promo_url: values.promoUrl,
+      promo_button_text: values.promoButtonText,
+      promo_scroll: values.promoScroll,
+      promo_speed: values.promoSpeed,
+      promo_new_tab: values.promoNewTab,
+      logo_enabled: values.logoEnabled,
+      logo_desktop_url: nextLogoDesktopUrl,
+      logo_desktop_path: nextLogoDesktopPath,
+      logo_mobile_url: nextLogoMobileUrl,
+      logo_mobile_path: nextLogoMobilePath,
+      logo_alt: values.logoAlt,
+      whatsapp_enabled: values.whatsappEnabled,
+      whatsapp_text: values.whatsappText,
+      whatsapp_url: values.whatsappUrl,
+      hero_enabled: values.heroEnabled,
+      hero_title: values.heroTitle,
+      hero_subtitle: values.heroSubtitle,
+      hero_description: values.heroDescription,
+      hero_desktop_url: nextHeroDesktopUrl,
+      hero_desktop_path: nextHeroDesktopPath,
+      hero_mobile_url: nextHeroMobileUrl,
+      hero_mobile_path: nextHeroMobilePath,
+      hero_alt: values.heroAlt,
+      hero_alignment: values.heroAlignment,
+      hero_overlay: values.heroOverlay,
+      hero_overlay_intensity: values.heroOverlayIntensity,
+      hero_shadow_intensity: values.heroShadowIntensity,
+      hero_content_enabled: values.heroContentEnabled,
+      hero_content_desktop: values.heroContentDesktop,
+      hero_content_mobile: values.heroContentMobile,
+      hero_show_label: values.heroShowLabel,
+      hero_show_title: values.heroShowTitle,
+      hero_show_subtitle: values.heroShowSubtitle,
+      hero_show_description: values.heroShowDescription,
+      hero_show_price: values.heroShowPrice,
+      hero_show_installation_badge: values.heroShowInstallationBadge,
+      hero_show_primary_button: values.heroShowPrimaryButton,
+      hero_show_secondary_button: values.heroShowSecondaryButton,
+      hero_show_benefits: values.heroShowBenefits,
+      services_enabled: values.servicesEnabled,
+      services_title: values.servicesTitle,
+      services_description: values.servicesDescription,
+      mega_menu_enabled: values.megaMenuEnabled,
+      mega_services_title: values.megaServicesTitle,
+      mega_services_description: values.megaServicesDescription,
+      updated_at: new Date().toISOString(),
+    });
+
+  if (settingsError) {
+    return { success: false, message: settingsError.message };
+  }
+
+  const relationalTables = [
     "home_navigation_items",
     "home_service_tags",
     "home_mega_columns",
     "home_mega_services",
     "home_global_buttons",
-  ] as const) {
+  ] as const;
+
+  for (const table of relationalTables) {
     const { error: deleteError } = await supabase
       .from(table)
       .delete()
       .not("id", "is", null);
+    if (deleteError) return { success: false, message: deleteError.message };
+  }
 
-    if (deleteError) {
-      return {
-        success: false,
-        message: deleteError.message,
-      };
+  if (values.navigation.length > 0) {
+    const { error } = await supabase.from("home_navigation_items").insert(
+      values.navigation.map((item) => ({
+        name: item.name,
+        url: item.url,
+        link_type: item.linkType,
+        target_id: item.targetId || null,
+        new_tab: item.newTab,
+        sort_order: item.sortOrder,
+        is_active: item.isActive,
+      })),
+    );
+    if (error) return { success: false, message: error.message };
+  }
+
+  if (values.tags.length > 0) {
+    const { error } = await supabase.from("home_service_tags").insert(
+      values.tags.map((item) => ({
+        label: item.label,
+        icon: item.icon,
+        sort_order: item.sortOrder,
+        is_active: item.isActive,
+      })),
+    );
+    if (error) return { success: false, message: error.message };
+  }
+
+  if (values.megaServices.length > 0) {
+    const { error } = await supabase.from("home_mega_services").insert(
+      values.megaServices.map((item) => ({
+        title: item.title,
+        description: item.description,
+        icon: item.icon,
+        url: item.url,
+        sort_order: item.sortOrder,
+        is_active: item.isActive,
+      })),
+    );
+    if (error) return { success: false, message: error.message };
+  }
+
+  if (values.buttons.length > 0) {
+    const { error } = await supabase.from("home_global_buttons").insert(
+      values.buttons.map((item) => ({
+        placement: item.placement,
+        text: item.text,
+        url: item.url,
+        link_type: item.linkType,
+        icon: item.icon,
+        variant: item.variant,
+        sort_order: item.sortOrder,
+        is_active: item.isActive,
+        new_tab: item.newTab,
+      })),
+    );
+    if (error) return { success: false, message: error.message };
+  }
+
+  for (const column of values.megaColumns) {
+    const { data, error } = await supabase
+      .from("home_mega_columns")
+      .insert({
+        title: column.title,
+        icon: column.icon,
+        category_id: column.categoryId || null,
+        view_all_label: column.viewAllLabel,
+        view_all_url: column.viewAllUrl,
+        sort_order: column.sortOrder,
+        is_active: column.isActive,
+      })
+      .select("id")
+      .single();
+    if (error) return { success: false, message: error.message };
+
+    if (column.productIds.length > 0) {
+      const { error: productsError } = await supabase
+        .from("home_mega_products")
+        .insert(
+          column.productIds.map((productId, sortOrder) => ({
+            column_id: data.id,
+            product_id: productId,
+            sort_order: sortOrder,
+          })),
+        );
+      if (productsError) return { success: false, message: productsError.message };
     }
   }
 
-  // Navegación, etiquetas, servicios y botones
-  const operations = [
-    v.navigation.length &&
-      supabase.from("home_navigation_items").insert(
-        v.navigation.map((i) => ({
-          name: i.name,
-          url: i.url,
-          sort_order: i.sortOrder,
-          is_active: i.isActive,
-        })),
-      ),
-
-    v.tags.length &&
-      supabase.from("home_service_tags").insert(
-        v.tags.map((i) => ({
-          label: i.label,
-          sort_order: i.sortOrder,
-          is_active: i.isActive,
-        })),
-      ),
-
-    v.megaServices.length &&
-      supabase.from("home_mega_services").insert(
-        v.megaServices.map((i) => ({
-          title: i.title,
-          description: i.description,
-          icon: i.icon,
-          url: i.url,
-          sort_order: i.sortOrder,
-          is_active: i.isActive,
-        })),
-      ),
-
-    v.buttons.length &&
-      supabase.from("home_global_buttons").insert(
-        v.buttons.map((i) => ({
-          placement: i.placement,
-          text: i.text,
-          url: i.url,
-          link_type: i.linkType,
-          icon: i.icon,
-          variant: i.variant,
-          sort_order: i.sortOrder,
-          is_active: i.isActive,
-          new_tab: i.newTab,
-        })),
-      ),
-  ];
-
-  for (const operation of operations) {
-    if (operation) {
-      const { error: relationError } =
-        await operation;
-
-      if (relationError) {
-        return {
-          success: false,
-          message: relationError.message,
-        };
-      }
-    }
+  for (const section of values.sections) {
+    const { error } = await supabase.from("home_sections_config").upsert(
+      {
+        section_key: section.key,
+        title: section.title,
+        sort_order: section.sortOrder,
+        is_active: section.isActive,
+      },
+      { onConflict: "section_key" },
+    );
+    if (error) return { success: false, message: error.message };
   }
 
-  // Columnas del mega menú
-  for (const column of v.megaColumns) {
-    const { data, error: columnError } =
-      await supabase
-        .from("home_mega_columns")
-        .insert({
-          title: column.title,
-          icon: column.icon,
-          category_id: column.categoryId || null,
-          view_all_label: column.viewAllLabel,
-          view_all_url: column.viewAllUrl,
-          sort_order: column.sortOrder,
-          is_active: column.isActive,
-        })
-        .select("id")
-        .single();
+  const replacedHeroPaths = [
+    previousSettings?.hero_desktop_path &&
+    nextHeroDesktopPath &&
+    previousSettings.hero_desktop_path !== nextHeroDesktopPath
+      ? previousSettings.hero_desktop_path
+      : null,
+    previousSettings?.hero_mobile_path &&
+    nextHeroMobilePath &&
+    previousSettings.hero_mobile_path !== nextHeroMobilePath
+      ? previousSettings.hero_mobile_path
+      : null,
+  ].filter((path): path is string => Boolean(path));
 
-    if (columnError) {
+  if (replacedHeroPaths.length > 0) {
+    const { error } = await supabase.storage
+      .from("home-content-images")
+      .remove([...new Set(replacedHeroPaths)]);
+    if (error) {
       return {
         success: false,
-        message: columnError.message,
-      };
-    }
-
-    if (column.productIds.length) {
-      const { error: productsError } =
-        await supabase
-          .from("home_mega_products")
-          .insert(
-            column.productIds.map(
-              (productId, sortOrder) => ({
-                column_id: data.id,
-                product_id: productId,
-                sort_order: sortOrder,
-              }),
-            ),
-          );
-
-      if (productsError) {
-        return {
-          success: false,
-          message: productsError.message,
-        };
-      }
-    }
-  }
-
-  // Configuración y orden de secciones
-  for (const section of v.sections) {
-    const { error: sectionError } =
-      await supabase
-        .from("home_sections_config")
-        .upsert({
-          section_key: section.key,
-          title: section.title,
-          sort_order: section.sortOrder,
-          is_active: section.isActive,
-        });
-
-    if (sectionError) {
-      return {
-        success: false,
-        message: sectionError.message,
-      };
-    }
-  }
-
-  // Eliminar imágenes anteriores del Hero cuando fueron reemplazadas
-  const activePaths = new Set(
-    [v.heroDesktopPath, v.heroMobilePath].filter(Boolean),
-  );
-
-  const replacedPaths = [
-    previousSettings?.hero_desktop_path,
-    previousSettings?.hero_mobile_path,
-  ].filter(
-    (path): path is string =>
-      Boolean(path) && !activePaths.has(path),
-  );
-
-  if (replacedPaths.length) {
-    const { error: storageError } =
-      await supabase.storage
-        .from("home-content-images")
-        .remove([...new Set(replacedPaths)]);
-
-    if (storageError) {
-      return {
-        success: false,
-        message:
-          `El contenido se guardó, pero no se pudieron eliminar las imágenes anteriores: ${storageError.message}`,
+        message: `El contenido se guardó, pero no se pudieron eliminar las imágenes anteriores: ${error.message}`,
       };
     }
   }
 
   revalidatePath("/");
+  revalidatePath("/admin");
   revalidatePath("/admin/pagina-inicio");
+  revalidatePath("/shop");
+  revalidatePath("/sitemap.xml");
 
+  return { success: true, message: "Contenido actualizado correctamente." };
+}
+
+async function requireAdmin() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Tu sesión venció." } as const;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role,is_active")
+    .eq("id", user.id)
+    .single();
+  if (profile?.role !== "admin" || !profile.is_active)
+    return { error: "No tenés permisos." } as const;
+  return { supabase } as const;
+}
+
+function slideRow(slide: HeroSlide) {
   return {
-    success: true,
-    message: "Contenido actualizado correctamente.",
+    name: slide.name,
+    is_active: slide.isActive,
+    sort_order: slide.sortOrder,
+    desktop_url: slide.desktopUrl || null,
+    desktop_path: slide.desktopPath || null,
+    mobile_url: slide.mobileUrl || null,
+    mobile_path: slide.mobilePath || null,
+    alt_text: slide.altText,
+    content_enabled: slide.contentEnabled,
+    content_desktop: slide.contentDesktop,
+    content_mobile: slide.contentMobile,
+    show_label: slide.showLabel,
+    label: slide.label || null,
+    show_title: slide.showTitle,
+    title: slide.title || null,
+    show_subtitle: slide.showSubtitle,
+    subtitle: slide.subtitle || null,
+    show_description: slide.showDescription,
+    description: slide.description || null,
+    show_price: slide.showPrice,
+    price_text: slide.priceText || null,
+    show_installation_badge: slide.showInstallationBadge,
+    installation_badge_text: slide.installationBadgeText || null,
+    show_primary_button: slide.showPrimaryButton,
+    primary_button_text: slide.primaryButtonText || null,
+    primary_button_url: slide.primaryButtonUrl || null,
+    primary_button_new_tab: slide.primaryButtonNewTab,
+    show_secondary_button: slide.showSecondaryButton,
+    secondary_button_text: slide.secondaryButtonText || null,
+    secondary_button_url: slide.secondaryButtonUrl || null,
+    secondary_button_new_tab: slide.secondaryButtonNewTab,
+    show_benefits: slide.showBenefits,
+    benefits: slide.benefits,
+    alignment: slide.alignment,
+    overlay_enabled: slide.overlayEnabled,
+    overlay_intensity: slide.overlayIntensity,
+    updated_at: new Date().toISOString(),
   };
+}
+
+function refreshHero() {
+  revalidatePath("/");
+  revalidatePath("/admin/pagina-inicio");
+}
+
+export async function createHeroSlideAction(input: HeroSlide) {
+  const parsed = heroSlideSchema.safeParse(input);
+  if (!parsed.success)
+    return {
+      success: false,
+      message: parsed.error.issues[0]?.message ?? "Revisá la diapositiva.",
+    };
+  const auth = await requireAdmin();
+  if ("error" in auth) return { success: false, message: auth.error };
+  const { error } = await auth.supabase
+    .from("home_hero_slides")
+    .insert({ id: parsed.data.id, ...slideRow(parsed.data) });
+  if (error) return { success: false, message: error.message };
+  refreshHero();
+  return { success: true, message: "Diapositiva creada." };
+}
+
+export async function updateHeroSlideAction(input: HeroSlide) {
+  const parsed = heroSlideSchema.safeParse(input);
+  if (!parsed.success)
+    return {
+      success: false,
+      message: parsed.error.issues[0]?.message ?? "Revisá la diapositiva.",
+    };
+  const auth = await requireAdmin();
+  if ("error" in auth) return { success: false, message: auth.error };
+  const { data: previous, error: readError } = await auth.supabase
+    .from("home_hero_slides")
+    .select("desktop_path,mobile_path")
+    .eq("id", parsed.data.id)
+    .single();
+  if (readError) return { success: false, message: readError.message };
+  const { error } = await auth.supabase
+    .from("home_hero_slides")
+    .update(slideRow(parsed.data))
+    .eq("id", parsed.data.id);
+  if (error) return { success: false, message: error.message };
+
+  const candidates = [previous.desktop_path, previous.mobile_path].filter(
+    (path) =>
+      path && path !== parsed.data.desktopPath && path !== parsed.data.mobilePath,
+  ) as string[];
+  for (const path of candidates) {
+    const { count } = await auth.supabase
+      .from("home_hero_slides")
+      .select("id", { count: "exact", head: true })
+      .or(`desktop_path.eq.${path},mobile_path.eq.${path}`);
+    if (!count)
+      await auth.supabase.storage.from("home-content-images").remove([path]);
+  }
+  refreshHero();
+  return { success: true, message: "Diapositiva actualizada." };
+}
+
+export async function deleteHeroSlideAction(id: string) {
+  const auth = await requireAdmin();
+  if ("error" in auth) return { success: false, message: auth.error };
+  const { data: slide, error: readError } = await auth.supabase
+    .from("home_hero_slides")
+    .select("desktop_path,mobile_path")
+    .eq("id", id)
+    .single();
+  if (readError) return { success: false, message: readError.message };
+  const { error } = await auth.supabase
+    .from("home_hero_slides")
+    .delete()
+    .eq("id", id);
+  if (error) return { success: false, message: error.message };
+  for (const path of [slide.desktop_path, slide.mobile_path].filter(Boolean) as string[]) {
+    const { count } = await auth.supabase
+      .from("home_hero_slides")
+      .select("id", { count: "exact", head: true })
+      .or(`desktop_path.eq.${path},mobile_path.eq.${path}`);
+    if (!count)
+      await auth.supabase.storage.from("home-content-images").remove([path]);
+  }
+  refreshHero();
+  return { success: true, message: "Diapositiva eliminada." };
+}
+
+export async function reorderHeroSlidesAction(
+  items: Array<{ id: string; sortOrder: number }>,
+) {
+  const auth = await requireAdmin();
+  if ("error" in auth) return { success: false, message: auth.error };
+  for (const item of items) {
+    const { error } = await auth.supabase
+      .from("home_hero_slides")
+      .update({ sort_order: item.sortOrder, updated_at: new Date().toISOString() })
+      .eq("id", item.id);
+    if (error) return { success: false, message: error.message };
+  }
+  refreshHero();
+  return { success: true, message: "Orden actualizado." };
+}
+
+export async function saveHeroCarouselSettingsAction(
+  input: HeroCarouselSettings,
+) {
+  const parsed = heroCarouselSettingsSchema.safeParse(input);
+  if (!parsed.success)
+    return {
+      success: false,
+      message: parsed.error.issues[0]?.message ?? "Revisá la configuración.",
+    };
+  const auth = await requireAdmin();
+  if ("error" in auth) return { success: false, message: auth.error };
+  const value = parsed.data;
+  const { error } = await auth.supabase.from("home_page_settings").upsert({
+    id: true,
+    hero_carousel_enabled: value.carouselEnabled,
+    hero_carousel_autoplay: value.carouselAutoplay,
+    hero_carousel_interval: value.carouselInterval,
+    hero_carousel_manual_navigation: value.carouselManualNavigation,
+    hero_carousel_show_arrows: value.carouselShowArrows,
+    hero_carousel_show_dots: value.carouselShowDots,
+    hero_carousel_pause_on_hover: value.carouselPauseOnHover,
+    hero_carousel_loop: value.carouselLoop,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) return { success: false, message: error.message };
+  refreshHero();
+  return { success: true, message: "Configuración del carrusel guardada." };
 }
