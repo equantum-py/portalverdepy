@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+import {
+  heroCarouselSettingsSchema,
+  heroSlideSchema,
+} from './hero-schema';
+
 const navigationItemSchema = z.object({
   name: z
     .string()
@@ -143,7 +148,6 @@ export const homeContentSchema = z.object({
     .int()
     .min(0)
     .max(90),
-
   heroShadowIntensity: z
     .number()
     .int()
@@ -161,6 +165,9 @@ export const homeContentSchema = z.object({
   heroShowPrimaryButton: z.boolean(),
   heroShowSecondaryButton: z.boolean(),
   heroShowBenefits: z.boolean(),
+
+  carousel: heroCarouselSettingsSchema,
+  heroSlides: z.array(heroSlideSchema),
 
   servicesEnabled: z.boolean(),
   servicesTitle: z
