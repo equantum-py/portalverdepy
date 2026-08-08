@@ -176,26 +176,9 @@ export function ProductImageUploader({
     }
   }
 
-  async function removeImage(index: number) {
-    const image = value[index];
-
+  function removeImage(index: number) {
     setMessage('');
     setHasError(false);
-
-    if (image.storagePath) {
-      const supabase = createClient();
-
-      const { error } = await supabase.storage
-        .from('product-images')
-        .remove([image.storagePath]);
-
-      if (error) {
-        showError(
-          `No se pudo eliminar la imagen: ${error.message}`
-        );
-        return;
-      }
-    }
 
     const remainingImages = value.filter(
       (_, currentIndex) => currentIndex !== index
@@ -216,7 +199,9 @@ export function ProductImageUploader({
     );
 
     onChange(normalizedImages);
-    setMessage('Imagen eliminada correctamente.');
+    setMessage(
+      'Imagen quitada del producto. El archivo se eliminará al guardar los cambios.'
+    );
   }
 
   function setPrimary(index: number) {
@@ -310,7 +295,7 @@ export function ProductImageUploader({
         <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {value.map((image, index) => (
             <article
-              key={image.storagePath}
+              key={image.storagePath || image.imageUrl}
               className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
             >
               <div className="relative aspect-square bg-slate-100">
@@ -368,7 +353,7 @@ export function ProductImageUploader({
                   <button
                     type="button"
                     onClick={() => removeImage(index)}
-                    aria-label="Eliminar imagen"
+                    aria-label="Quitar imagen"
                     className="inline-flex h-9 items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4" />
