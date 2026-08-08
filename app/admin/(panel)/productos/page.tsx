@@ -12,6 +12,7 @@ import Link from 'next/link';
 
 import { ProductDeleteButton } from '@/components/admin/products/product-delete-button';
 import { ProductDuplicateButton } from '@/components/admin/products/product-duplicate-button';
+import { ProductStockToggle } from '@/components/admin/products/product-stock-toggle';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function AdminProductsPage() {
@@ -54,11 +55,9 @@ export default async function AdminProductsPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-green-700">
             Catálogo
           </p>
-
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
             Productos
           </h1>
-
           <p className="mt-2 text-sm text-slate-500">
             Administrá precios, disponibilidad, imágenes y publicación.
           </p>
@@ -77,17 +76,13 @@ export default async function AdminProductsPage() {
         <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative w-full max-w-md">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-
             <input
               type="search"
               placeholder="Buscar productos..."
               className="h-11 w-full rounded-xl border border-slate-200 pl-10 pr-4 text-sm outline-none focus:border-green-600 focus:ring-4 focus:ring-green-100"
             />
           </div>
-
-          <p className="text-sm text-slate-500">
-            {productList.length} productos
-          </p>
+          <p className="text-sm text-slate-500">{productList.length} productos</p>
         </div>
 
         {productList.length ? (
@@ -99,7 +94,7 @@ export default async function AdminProductsPage() {
                   <th className="px-5 py-3">Categoría</th>
                   <th className="px-5 py-3">Precio</th>
                   <th className="px-5 py-3">Estado</th>
-                  <th className="px-5 py-3">Stock</th>
+                  <th className="px-5 py-3">Disponibilidad</th>
                   <th className="px-5 py-3 text-right">Acciones</th>
                 </tr>
               </thead>
@@ -110,16 +105,12 @@ export default async function AdminProductsPage() {
                     | { name: string }
                     | { name: string }[]
                     | null;
-
                   const category = Array.isArray(categoryRelation)
                     ? categoryRelation[0]?.name
                     : categoryRelation?.name;
 
                   return (
-                    <tr
-                      key={product.id}
-                      className="transition hover:bg-slate-50"
-                    >
+                    <tr key={product.id} className="transition hover:bg-slate-50">
                       <td className="px-5 py-4">
                         <div className="flex min-w-[260px] items-center gap-3">
                           <div className="relative h-14 w-14 overflow-hidden rounded-xl bg-slate-100">
@@ -142,18 +133,15 @@ export default async function AdminProductsPage() {
                             <p className="truncate text-sm font-semibold text-slate-900">
                               {product.name}
                             </p>
-
                             <p className="mt-1 truncate text-xs text-slate-500">
                               /product/{product.slug}
                             </p>
-
                             <div className="mt-2 flex flex-wrap gap-1.5">
                               {product.is_offer ? (
                                 <span className="rounded-full bg-red-50 px-2 py-1 text-[10px] font-semibold text-red-600">
                                   Oferta
                                 </span>
                               ) : null}
-
                               {product.includes_installation ? (
                                 <span className="rounded-full bg-green-50 px-2 py-1 text-[10px] font-semibold text-green-700">
                                   Instalación
@@ -175,7 +163,6 @@ export default async function AdminProductsPage() {
                         <p className="text-sm font-semibold text-slate-900">
                           Gs. {Number(product.price).toLocaleString('es-PY')}
                         </p>
-
                         {product.previous_price ? (
                           <p className="mt-1 text-xs text-slate-400 line-through">
                             Gs. {Number(product.previous_price).toLocaleString('es-PY')}
@@ -196,21 +183,16 @@ export default async function AdminProductsPage() {
                           ) : (
                             <CircleOff className="h-3.5 w-3.5" />
                           )}
-
                           {product.is_active ? 'Activo' : 'Inactivo'}
                         </span>
                       </td>
 
                       <td className="px-5 py-4">
-                        <span
-                          className={
-                            product.in_stock
-                              ? 'text-sm font-medium text-green-700'
-                              : 'text-sm font-medium text-red-600'
-                          }
-                        >
-                          {product.in_stock ? 'Disponible' : 'Agotado'}
-                        </span>
+                        <ProductStockToggle
+                          productId={product.id}
+                          productName={product.name}
+                          inStock={product.in_stock}
+                        />
                       </td>
 
                       <td className="px-5 py-4">
@@ -222,12 +204,10 @@ export default async function AdminProductsPage() {
                           >
                             <Pencil className="h-4 w-4" />
                           </Link>
-
                           <ProductDuplicateButton
                             productId={product.id}
                             productName={product.name}
                           />
-
                           <ProductDeleteButton
                             productId={product.id}
                             productName={product.name}
@@ -245,15 +225,12 @@ export default async function AdminProductsPage() {
             <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-50 text-green-700">
               <Boxes className="h-6 w-6" />
             </span>
-
             <h2 className="mt-5 text-lg font-semibold text-slate-950">
               Todavía no hay productos
             </h2>
-
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-              Primero migraremos los productos actuales del sitio a Supabase.
+              Creá el primer producto para comenzar a administrar el catálogo.
             </p>
-
             <Link
               href="/admin/productos/nuevo"
               className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-green-700 px-5 text-sm font-semibold text-white"
