@@ -154,7 +154,7 @@ export function LogoUploader({
       <div className="grid gap-4 md:grid-cols-2">
         <LogoCard
           title="Logo Desktop"
-          help="Para computadoras y pantallas grandes. PNG, JPG, WEBP o SVG. Máximo 5 MB."
+          help="Tamaño recomendado: 600 × 200 px. Fondo transparente. PNG, WEBP o SVG. Máximo 5 MB."
           url={desktopUrl}
           loading={busy === 'desktop'}
           inputRef={desktopInput}
@@ -164,7 +164,7 @@ export function LogoUploader({
 
         <LogoCard
           title="Logo Mobile"
-          help="Versión optimizada para celulares. Puede ser el mismo logo o una versión compacta."
+          help="Tamaño recomendado: 400 × 160 px. Fondo transparente. Puede ser una versión compacta. Máximo 5 MB."
           url={mobileUrl}
           loading={busy === 'mobile'}
           inputRef={mobileInput}
