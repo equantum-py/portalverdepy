@@ -1,26 +1,11 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  Eye,
-  Loader2,
-  Plus,
-  Save,
-  Trash2,
-} from 'lucide-react';
-import {
-  useState,
-  type ComponentProps,
-  type ReactNode,
-} from 'react';
-import {
-  useFieldArray,
-  useForm,
-} from 'react-hook-form';
+import { Eye, Loader2, Plus, Save, Trash2 } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import { useFieldArray, useForm } from 'react-hook-form';
 
 import { saveHomeContentAction } from '@/app/admin/(panel)/pagina-inicio/actions';
-import { HeroCarouselEditor } from './hero-carousel-editor';
-import { HomeHero } from '@/sections/home-hero';
 import {
   homeContentSchema,
   type HomeContentValues,
@@ -29,43 +14,15 @@ import {
 const input =
   'mt-1 h-10 w-full rounded-lg border border-slate-200 px-3 text-sm';
 
-type CategoryOption = {
-  id: string;
-  name: string;
-};
-
-type ProductOption = {
-  id: string;
-  name: string;
-};
-
-type HeroCarouselEditorProps =
-  ComponentProps<typeof HeroCarouselEditor>;
-
-type HomeContentInitialValues =
-  HomeContentValues & {
-    heroSlides:
-      HeroCarouselEditorProps['initialSlides'];
-    carousel:
-      HeroCarouselEditorProps['initialSettings'];
-  };
-
 type HomeContentFormProps = {
-  initialValues: HomeContentInitialValues;
-  categories: CategoryOption[];
-  products: ProductOption[];
+  initialValues: HomeContentValues;
 };
 
 export function HomeContentForm({
   initialValues,
-  categories,
-  products,
 }: HomeContentFormProps) {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-  const [preview, setPreview] = useState<
-    'desktop' | 'mobile'
-  >('desktop');
 
   const {
     register,
@@ -77,29 +34,9 @@ export function HomeContentForm({
     defaultValues: initialValues,
   });
 
-  const nav = useFieldArray({
-    control,
-    name: 'navigation',
-  });
-
   const tags = useFieldArray({
     control,
     name: 'tags',
-  });
-
-  const columns = useFieldArray({
-    control,
-    name: 'megaColumns',
-  });
-
-  const services = useFieldArray({
-    control,
-    name: 'megaServices',
-  });
-
-  const buttons = useFieldArray({
-    control,
-    name: 'buttons',
   });
 
   const sections = useFieldArray({
@@ -114,9 +51,7 @@ export function HomeContentForm({
     setMessage('');
 
     try {
-      const result =
-        await saveHomeContentAction(data);
-
+      const result = await saveHomeContentAction(data);
       setMessage(result.message);
     } catch (error) {
       setMessage(
@@ -128,6 +63,10 @@ export function HomeContentForm({
       setSaving(false);
     }
   }
+
+  const editableSections = sections.fields
+    .map((field, index) => ({ field, index }))
+    .filter(({ index }) => values.sections[index]?.key !== 'hero');
 
   return (
     <form
@@ -145,8 +84,7 @@ export function HomeContentForm({
           </h1>
 
           <p className="mt-2 max-w-2xl text-sm text-slate-500">
-            Administrá el contenido principal del Home,
-            navegación, servicios, botones y secciones.
+            Administrá la barra promocional, los servicios y el orden de las secciones del Home.
           </p>
         </div>
 
@@ -160,24 +98,20 @@ export function HomeContentForm({
           ) : (
             <Save className="h-4 w-4" />
           )}
-
-          {saving
-            ? 'Guardando...'
-            : 'Guardar cambios'}
+          {saving ? 'Guardando...' : 'Guardar cambios'}
         </button>
       </header>
 
-      {message && (
+      {message ? (
         <div
           role="status"
           className="mb-5 rounded-xl bg-green-50 p-4 text-sm text-green-800"
         >
           {message}
         </div>
-      )}
+      ) : null}
 
       <div className="space-y-6">
-        {/* BARRA PROMOCIONAL */}
         <Box title="Barra promocional">
           <label className="flex items-center gap-2 text-sm">
             <input
@@ -189,31 +123,19 @@ export function HomeContentForm({
 
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Texto">
-              <input
-                className={input}
-                {...register('promoText')}
-              />
+              <input className={input} {...register('promoText')} />
             </Field>
 
             <Field label="Icono">
-              <input
-                className={input}
-                {...register('promoIcon')}
-              />
+              <input className={input} {...register('promoIcon')} />
             </Field>
 
             <Field label="Enlace">
-              <input
-                className={input}
-                {...register('promoUrl')}
-              />
+              <input className={input} {...register('promoUrl')} />
             </Field>
 
             <Field label="Texto del botón">
-              <input
-                className={input}
-                {...register('promoButtonText')}
-              />
+              <input className={input} {...register('promoButtonText')} />
             </Field>
 
             <Field label="Velocidad">
@@ -246,262 +168,6 @@ export function HomeContentForm({
           </div>
         </Box>
 
-        {/* LOGO Y WHATSAPP */}
-        <Box title="Encabezado, logo y WhatsApp">
-          <div className="flex flex-wrap gap-5">
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                {...register('logoEnabled')}
-              />
-              Mostrar logo
-            </label>
-
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                {...register('whatsappEnabled')}
-              />
-              WhatsApp activo
-            </label>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Logo Desktop">
-              <input
-                className={input}
-                {...register('logoDesktopUrl')}
-              />
-            </Field>
-
-            <Field label="Ruta Storage Desktop">
-              <input
-                className={input}
-                {...register('logoDesktopPath')}
-              />
-            </Field>
-
-            <Field label="Logo Mobile">
-              <input
-                className={input}
-                {...register('logoMobileUrl')}
-              />
-            </Field>
-
-            <Field label="Ruta Storage Mobile">
-              <input
-                className={input}
-                {...register('logoMobilePath')}
-              />
-            </Field>
-
-            <Field label="Texto alternativo del logo">
-              <input
-                className={input}
-                {...register('logoAlt')}
-              />
-            </Field>
-          </div>
-
-          <div className="grid gap-4 border-t pt-4 md:grid-cols-2">
-            <Field label="Texto de WhatsApp">
-              <input
-                className={input}
-                {...register('whatsappText')}
-              />
-            </Field>
-
-            <Field label="Enlace de WhatsApp">
-              <input
-                className={input}
-                {...register('whatsappUrl')}
-              />
-            </Field>
-          </div>
-
-          <ArrayEditor
-            title="Navegación"
-            fields={nav.fields}
-            add={() =>
-              nav.append({
-                name: 'Nuevo enlace',
-                url: '/',
-                linkType: 'internal',
-                targetId: '',
-                newTab: false,
-                sortOrder: nav.fields.length,
-                isActive: true,
-              })
-            }
-          >
-            {(field, index) => {
-              const linkType =
-                values.navigation?.[index]?.linkType ??
-                'internal';
-
-              return (
-                <div
-                  key={field.id}
-                  className="rounded-xl border border-slate-200 p-4"
-                >
-                  <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                    <Field label="Nombre">
-                      <input
-                        className={input}
-                        {...register(
-                          `navigation.${index}.name`,
-                        )}
-                      />
-                    </Field>
-
-                    <Field label="Tipo de enlace">
-                      <select
-                        className={input}
-                        {...register(
-                          `navigation.${index}.linkType`,
-                        )}
-                      >
-                        <option value="internal">
-                          Página interna
-                        </option>
-
-                        <option value="category">
-                          Categoría
-                        </option>
-
-                        <option value="product">
-                          Producto
-                        </option>
-
-                        <option value="whatsapp">
-                          WhatsApp
-                        </option>
-
-                        <option value="external">
-                          Enlace externo
-                        </option>
-                      </select>
-                    </Field>
-
-                    {(linkType === 'internal' ||
-                      linkType === 'whatsapp' ||
-                      linkType === 'external') && (
-                      <Field label="Enlace">
-                        <input
-                          className={input}
-                          {...register(
-                            `navigation.${index}.url`,
-                          )}
-                        />
-                      </Field>
-                    )}
-
-                    {linkType === 'category' && (
-                      <Field label="Categoría">
-                        <select
-                          className={input}
-                          {...register(
-                            `navigation.${index}.targetId`,
-                          )}
-                        >
-                          <option value="">
-                            Seleccionar categoría
-                          </option>
-
-                          {categories.map(
-                            (category) => (
-                              <option
-                                key={category.id}
-                                value={category.id}
-                              >
-                                {category.name}
-                              </option>
-                            ),
-                          )}
-                        </select>
-                      </Field>
-                    )}
-
-                    {linkType === 'product' && (
-                      <Field label="Producto">
-                        <select
-                          className={input}
-                          {...register(
-                            `navigation.${index}.targetId`,
-                          )}
-                        >
-                          <option value="">
-                            Seleccionar producto
-                          </option>
-
-                          {products.map((product) => (
-                            <option
-                              key={product.id}
-                              value={product.id}
-                            >
-                              {product.name}
-                            </option>
-                          ))}
-                        </select>
-                      </Field>
-                    )}
-
-                    <Field label="Orden">
-                      <input
-                        type="number"
-                        className={input}
-                        {...register(
-                          `navigation.${index}.sortOrder`,
-                          {
-                            valueAsNumber: true,
-                          },
-                        )}
-                      />
-                    </Field>
-                  </div>
-
-                  <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex flex-wrap gap-5">
-                      <label className="flex items-center gap-2 text-sm">
-                        <input
-                          type="checkbox"
-                          {...register(
-                            `navigation.${index}.isActive`,
-                          )}
-                        />
-                        Activo
-                      </label>
-
-                      <label className="flex items-center gap-2 text-sm">
-                        <input
-                          type="checkbox"
-                          {...register(
-                            `navigation.${index}.newTab`,
-                          )}
-                        />
-                        Nueva pestaña
-                      </label>
-                    </div>
-
-                    <Delete
-                      onClick={() =>
-                        nav.remove(index)
-                      }
-                    />
-                  </div>
-                </div>
-              );
-            }}
-          </ArrayEditor>
-        </Box>
-
-        {/* CARRUSEL PRINCIPAL */}
-        <HeroCarouselEditor
-          initialSlides={initialValues.heroSlides}
-          initialSettings={initialValues.carousel}
-        />
-
-        {/* SERVICIOS */}
         <Box title="Sección de servicios">
           <label className="flex items-center gap-2 text-sm">
             <input
@@ -512,10 +178,7 @@ export function HomeContentForm({
           </label>
 
           <Field label="Título">
-            <input
-              className={input}
-              {...register('servicesTitle')}
-            />
+            <input className={input} {...register('servicesTitle')} />
           </Field>
 
           <Field label="Descripción">
@@ -545,573 +208,94 @@ export function HomeContentForm({
                 <input
                   className={input}
                   placeholder="Etiqueta"
-                  {...register(
-                    `tags.${index}.label`,
-                  )}
+                  {...register(`tags.${index}.label`)}
                 />
 
                 <input
                   className={input}
                   placeholder="Icono"
-                  {...register(
-                    `tags.${index}.icon`,
-                  )}
+                  {...register(`tags.${index}.icon`)}
                 />
 
                 <input
                   type="number"
                   className={input}
-                  {...register(
-                    `tags.${index}.sortOrder`,
-                    {
-                      valueAsNumber: true,
-                    },
-                  )}
+                  {...register(`tags.${index}.sortOrder`, {
+                    valueAsNumber: true,
+                  })}
                 />
 
                 <label className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
-                    {...register(
-                      `tags.${index}.isActive`,
-                    )}
+                    {...register(`tags.${index}.isActive`)}
                   />
                   Activa
                 </label>
 
-                <Delete
-                  onClick={() =>
-                    tags.remove(index)
-                  }
-                />
+                <Delete onClick={() => tags.remove(index)} />
               </div>
             )}
           </ArrayEditor>
         </Box>
 
-        {/* MEGA MENU */}
-        <Box title="Mega menú">
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              {...register('megaMenuEnabled')}
-            />
-            Mega menú activo
-          </label>
-
-          <ArrayEditor
-            title="Columnas"
-            fields={columns.fields}
-            add={() =>
-              columns.append({
-                title: 'Columna',
-                icon: 'Leaf',
-                categoryId: '',
-                viewAllLabel:
-                  'Ver toda la categoría',
-                viewAllUrl: '/shop',
-                sortOrder:
-                  columns.fields.length,
-                isActive: true,
-                productIds: [],
-              })
-            }
-          >
-            {(field, index) => (
-              <div
-                key={field.id}
-                className="rounded-xl border border-slate-200 p-4"
-              >
-                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                  <Field label="Título">
-                    <input
-                      className={input}
-                      {...register(
-                        `megaColumns.${index}.title`,
-                      )}
-                    />
-                  </Field>
-
-                  <Field label="Icono">
-                    <input
-                      className={input}
-                      {...register(
-                        `megaColumns.${index}.icon`,
-                      )}
-                    />
-                  </Field>
-
-                  <Field label="Categoría">
-                    <select
-                      className={input}
-                      {...register(
-                        `megaColumns.${index}.categoryId`,
-                      )}
-                    >
-                      <option value="">
-                        Sin categoría
-                      </option>
-
-                      {categories.map(
-                        (category) => (
-                          <option
-                            key={category.id}
-                            value={category.id}
-                          >
-                            {category.name}
-                          </option>
-                        ),
-                      )}
-                    </select>
-                  </Field>
-
-                  <Field label="Texto Ver todos">
-                    <input
-                      className={input}
-                      {...register(
-                        `megaColumns.${index}.viewAllLabel`,
-                      )}
-                    />
-                  </Field>
-
-                  <Field label="Enlace Ver todos">
-                    <input
-                      className={input}
-                      {...register(
-                        `megaColumns.${index}.viewAllUrl`,
-                      )}
-                    />
-                  </Field>
-
-                  <Field label="Orden">
-                    <input
-                      type="number"
-                      className={input}
-                      {...register(
-                        `megaColumns.${index}.sortOrder`,
-                        {
-                          valueAsNumber: true,
-                        },
-                      )}
-                    />
-                  </Field>
-                </div>
-
-                <Field label="Productos">
-                  <select
-                    multiple
-                    className="mt-1 min-h-32 w-full rounded-lg border border-slate-200 p-2 text-sm"
-                    {...register(
-                      `megaColumns.${index}.productIds`,
-                    )}
-                  >
-                    {products.map((product) => (
-                      <option
-                        key={product.id}
-                        value={product.id}
-                      >
-                        {product.name}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-
-                <div className="mt-4 flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      {...register(
-                        `megaColumns.${index}.isActive`,
-                      )}
-                    />
-                    Activa
-                  </label>
-
-                  <Delete
-                    onClick={() =>
-                      columns.remove(index)
-                    }
-                  />
-                </div>
-              </div>
-            )}
-          </ArrayEditor>
-
-          <div className="grid gap-4 border-t pt-5 md:grid-cols-2">
-            <Field label="Título de servicios">
-              <input
-                className={input}
-                {...register('megaServicesTitle')}
-              />
-            </Field>
-
-            <Field label="Descripción">
-              <input
-                className={input}
-                {...register(
-                  'megaServicesDescription',
-                )}
-              />
-            </Field>
-          </div>
-
-          <ArrayEditor
-            title="Servicios del mega menú"
-            fields={services.fields}
-            add={() =>
-              services.append({
-                title: 'Servicio',
-                description: '',
-                icon: 'Leaf',
-                url: '/trabajos',
-                sortOrder:
-                  services.fields.length,
-                isActive: true,
-              })
-            }
-          >
-            {(field, index) => (
-              <div
-                key={field.id}
-                className="rounded-xl border border-slate-200 p-3"
-              >
-                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                  <Field label="Título">
-                    <input
-                      className={input}
-                      {...register(
-                        `megaServices.${index}.title`,
-                      )}
-                    />
-                  </Field>
-
-                  <Field label="Descripción">
-                    <input
-                      className={input}
-                      {...register(
-                        `megaServices.${index}.description`,
-                      )}
-                    />
-                  </Field>
-
-                  <Field label="Icono">
-                    <input
-                      className={input}
-                      {...register(
-                        `megaServices.${index}.icon`,
-                      )}
-                    />
-                  </Field>
-
-                  <Field label="Enlace">
-                    <input
-                      className={input}
-                      {...register(
-                        `megaServices.${index}.url`,
-                      )}
-                    />
-                  </Field>
-
-                  <Field label="Orden">
-                    <input
-                      type="number"
-                      className={input}
-                      {...register(
-                        `megaServices.${index}.sortOrder`,
-                        {
-                          valueAsNumber: true,
-                        },
-                      )}
-                    />
-                  </Field>
-                </div>
-
-                <div className="mt-3 flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      {...register(
-                        `megaServices.${index}.isActive`,
-                      )}
-                    />
-                    Activo
-                  </label>
-
-                  <Delete
-                    onClick={() =>
-                      services.remove(index)
-                    }
-                  />
-                </div>
-              </div>
-            )}
-          </ArrayEditor>
-        </Box>
-
-        {/* BOTONES */}
-        <Box title="Botones globales">
-          <ArrayEditor
-            title="Botones"
-            fields={buttons.fields}
-            add={() =>
-              buttons.append({
-                placement: 'custom',
-                text: 'Nuevo botón',
-                url: '/',
-                linkType: 'internal',
-                icon: '',
-                variant: 'primary',
-                sortOrder:
-                  buttons.fields.length,
-                isActive: true,
-                newTab: false,
-              })
-            }
-          >
-            {(field, index) => (
-              <div
-                key={field.id}
-                className="rounded-xl border border-slate-200 p-4"
-              >
-                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-                  <Field label="Texto">
-                    <input
-                      className={input}
-                      {...register(
-                        `buttons.${index}.text`,
-                      )}
-                    />
-                  </Field>
-
-                  <Field label="Enlace">
-                    <input
-                      className={input}
-                      {...register(
-                        `buttons.${index}.url`,
-                      )}
-                    />
-                  </Field>
-
-                  <Field label="Tipo">
-                    <select
-                      className={input}
-                      {...register(
-                        `buttons.${index}.linkType`,
-                      )}
-                    >
-                      <option value="internal">
-                        Interno
-                      </option>
-                      <option value="external">
-                        Externo
-                      </option>
-                      <option value="whatsapp">
-                        WhatsApp
-                      </option>
-                      <option value="anchor">
-                        Ancla
-                      </option>
-                    </select>
-                  </Field>
-
-                  <Field label="Icono">
-                    <input
-                      className={input}
-                      {...register(
-                        `buttons.${index}.icon`,
-                      )}
-                    />
-                  </Field>
-
-                  <Field label="Estilo">
-                    <input
-                      className={input}
-                      {...register(
-                        `buttons.${index}.variant`,
-                      )}
-                    />
-                  </Field>
-
-                  <Field label="Ubicación">
-                    <input
-                      className={input}
-                      {...register(
-                        `buttons.${index}.placement`,
-                      )}
-                    />
-                  </Field>
-
-                  <Field label="Orden">
-                    <input
-                      type="number"
-                      className={input}
-                      {...register(
-                        `buttons.${index}.sortOrder`,
-                        {
-                          valueAsNumber: true,
-                        },
-                      )}
-                    />
-                  </Field>
-                </div>
-
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex gap-5">
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        {...register(
-                          `buttons.${index}.isActive`,
-                        )}
-                      />
-                      Activo
-                    </label>
-
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        {...register(
-                          `buttons.${index}.newTab`,
-                        )}
-                      />
-                      Nueva pestaña
-                    </label>
-                  </div>
-
-                  <Delete
-                    onClick={() =>
-                      buttons.remove(index)
-                    }
-                  />
-                </div>
-              </div>
-            )}
-          </ArrayEditor>
-        </Box>
-
-        {/* SECCIONES */}
         <Box title="Administración de secciones">
           <p className="text-sm text-slate-500">
-            Activá, desactivá y cambiá el orden de
-            aparición de las secciones del Home.
+            Activá, desactivá y cambiá el orden de las secciones del Home. La portada se administra desde Banners.
           </p>
 
           <div className="space-y-2">
-            {sections.fields.map(
-              (field, index) => (
-                <div
-                  key={field.id}
-                  className="grid items-center gap-3 rounded-xl border border-slate-200 p-3 md:grid-cols-[1fr_120px_120px]"
-                >
-                  <input
-                    className={input}
-                    {...register(
-                      `sections.${index}.title`,
-                    )}
-                  />
+            {editableSections.map(({ field, index }) => (
+              <div
+                key={field.id}
+                className="grid items-center gap-3 rounded-xl border border-slate-200 p-3 md:grid-cols-[1fr_120px_120px]"
+              >
+                <input
+                  className={input}
+                  {...register(`sections.${index}.title`)}
+                />
 
-                  <input
-                    type="number"
-                    className={input}
-                    {...register(
-                      `sections.${index}.sortOrder`,
-                      {
-                        valueAsNumber: true,
-                      },
-                    )}
-                  />
+                <input
+                  type="number"
+                  className={input}
+                  {...register(`sections.${index}.sortOrder`, {
+                    valueAsNumber: true,
+                  })}
+                />
 
-                  {values.sections[index]?.key === 'hero' ? (
-                    <span className="text-sm text-slate-500">
-                      Configurada en Portada principal
-                    </span>
-                  ) : (
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        {...register(
-                          `sections.${index}.isActive`,
-                        )}
-                      />
-                      Activa
-                    </label>
-                  )}
-                </div>
-              ),
-            )}
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    {...register(`sections.${index}.isActive`)}
+                  />
+                  Activa
+                </label>
+              </div>
+            ))}
           </div>
         </Box>
 
-        {/* PREVIEW */}
-        <Box title="Vista previa">
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() =>
-                setPreview('desktop')
-              }
-              className={`rounded-lg border px-3 py-2 text-sm ${
-                preview === 'desktop'
-                  ? 'border-green-700 bg-green-50 text-green-800'
-                  : ''
-              }`}
-            >
-              Desktop
-            </button>
-
-            <button
-              type="button"
-              onClick={() =>
-                setPreview('mobile')
-              }
-              className={`rounded-lg border px-3 py-2 text-sm ${
-                preview === 'mobile'
-                  ? 'border-green-700 bg-green-50 text-green-800'
-                  : ''
-              }`}
-            >
-              Mobile
-            </button>
-          </div>
-
-          <div
-            className={`mx-auto overflow-hidden rounded-xl border bg-white ${
-              preview === 'mobile'
-                ? 'max-w-sm'
-                : 'w-full'
-            }`}
-          >
-            {values.promoEnabled && (
+        <Box title="Vista previa del contenido">
+          <div className="overflow-hidden rounded-xl border bg-white">
+            {values.promoEnabled ? (
               <div className="bg-green-50 p-2 text-center text-xs text-green-900">
-                {values.promoIcon}{' '}
-                {values.promoText}
+                {values.promoIcon} {values.promoText}
               </div>
-            )}
+            ) : null}
 
-            {values.heroEnabled && (
-              <HomeHero
-                content={values}
-                previewViewport={preview}
-              />
-            )}
-
-            {values.servicesEnabled && (
+            {values.servicesEnabled ? (
               <div className="p-5">
                 <Eye className="h-5 w-5 text-green-700" />
-
-                <h3 className="mt-5 font-bold">
+                <h3 className="mt-5 font-semibold">
                   {values.servicesTitle}
                 </h3>
-
                 <p className="mt-1 text-sm text-slate-500">
                   {values.servicesDescription}
                 </p>
 
                 <div className="mt-3 flex flex-wrap gap-2">
                   {values.tags
-                    .filter(
-                      (tag) => tag.isActive,
-                    )
+                    .filter((tag) => tag.isActive)
                     .map((tag, index) => (
                       <span
                         key={`${tag.label}-${index}`}
@@ -1122,7 +306,7 @@ export function HomeContentForm({
                     ))}
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </Box>
       </div>
@@ -1139,13 +323,8 @@ function Box({
 }) {
   return (
     <section className="rounded-2xl border bg-white p-5 shadow-sm">
-      <h2 className="text-lg font-semibold">
-        {title}
-      </h2>
-
-      <div className="mt-4 space-y-4">
-        {children}
-      </div>
+      <h2 className="text-lg font-semibold">{title}</h2>
+      <div className="mt-4 space-y-4">{children}</div>
     </section>
   );
 }
@@ -1159,10 +338,7 @@ function Field({
 }) {
   return (
     <label className="block text-sm text-slate-700">
-      <span className="font-medium">
-        {label}
-      </span>
-
+      <span className="font-medium">{label}</span>
       {children}
     </label>
   );
@@ -1177,18 +353,12 @@ function ArrayEditor({
   title: string;
   fields: { id: string }[];
   add: () => void;
-  children: (
-    field: { id: string },
-    index: number,
-  ) => ReactNode;
+  children: (field: { id: string }, index: number) => ReactNode;
 }) {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h3 className="font-semibold">
-          {title}
-        </h3>
-
+        <h3 className="font-semibold">{title}</h3>
         <button
           type="button"
           onClick={add}
@@ -1199,14 +369,10 @@ function ArrayEditor({
         </button>
       </div>
 
-      <div className="space-y-3">
-        {fields.map(children)}
-      </div>
+      <div className="space-y-3">{fields.map(children)}</div>
     </div>
   );
 }
-
-
 
 function Delete({
   onClick,
