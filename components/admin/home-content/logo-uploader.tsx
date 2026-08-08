@@ -17,7 +17,7 @@ type LogoUploaderProps = {
 
 type UploadKind = 'desktop' | 'mobile';
 
-const BUCKET = 'site-assets';
+const BUCKET = 'home-content-images';
 
 export function LogoUploader({
   initialEnabled,
@@ -63,6 +63,7 @@ export function LogoUploader({
         .from(BUCKET)
         .upload(path, file, {
           cacheControl: '3600',
+          contentType: file.type,
           upsert: false,
         });
 
@@ -80,8 +81,8 @@ export function LogoUploader({
 
       setMessage(
         kind === 'desktop'
-          ? 'Logo de escritorio adjuntado. Guardá los cambios para aplicarlo.'
-          : 'Logo móvil adjuntado. Guardá los cambios para aplicarlo.',
+          ? 'Logo de escritorio adjuntado. Guardá el logo para aplicarlo.'
+          : 'Logo móvil adjuntado. Guardá el logo para aplicarlo.',
       );
     } catch (error) {
       setMessage(
@@ -153,7 +154,7 @@ export function LogoUploader({
       <div className="grid gap-4 md:grid-cols-2">
         <LogoCard
           title="Logo Desktop"
-          help="Recomendado para computadoras y pantallas grandes. PNG, JPG, WEBP o SVG."
+          help="Para computadoras y pantallas grandes. PNG, JPG, WEBP o SVG. Máximo 5 MB."
           url={desktopUrl}
           loading={busy === 'desktop'}
           inputRef={desktopInput}
