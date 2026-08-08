@@ -83,7 +83,12 @@ export default async function HomePage() {
         })}
       </main>
 
-      {content.whatsappEnabled ? <WhatsAppFloating /> : null}
+      {content.whatsappEnabled ? (
+        <WhatsAppFloating
+          url={content.whatsappUrl}
+          text={content.whatsappText}
+        />
+      ) : null}
     </>
   );
 }
