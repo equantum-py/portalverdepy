@@ -15,7 +15,9 @@ export type CategoryActionResult = {
   fieldErrors?: Record<string, string[] | undefined>;
 };
 
-async function requireAdministrator() {
+type RequiredRole = 'editor' | 'admin';
+
+async function requireCategoryAccess(requiredRole: RequiredRole = 'editor') {
   const supabase = await createClient();
 
   const {
@@ -33,14 +35,28 @@ async function requireAdministrator() {
     .single();
 
   if (profileError) {
-    throw new Error('No se pudo verificar tu perfil de administrador.');
+    throw new Error('No se pudo verificar tu perfil.');
   }
 
-  if (!profile?.is_active || profile.role !== 'admin') {
-    throw new Error('No tenés permisos para administrar categorías.');
+  const canEdit =
+    profile?.is_active &&
+    ['admin', 'editor'].includes(profile.role);
+
+  const canDelete =
+    profile?.is_active && profile.role === 'admin';
+
+  if (
+    (requiredRole === 'admin' && !canDelete) ||
+    (requiredRole === 'editor' && !canEdit)
+  ) {
+    throw new Error(
+      requiredRole === 'admin'
+        ? 'Solo un administrador puede eliminar categorías.'
+        : 'No tenés permisos para administrar categorías.',
+    );
   }
 
-  return supabase;
+  return { supabase, user };
 }
 
 function payload(values: CategoryFormValues) {
@@ -67,6 +83,7 @@ function payload(values: CategoryFormValues) {
       .filter(Boolean),
     image_alt: values.imageAlt || values.name,
     canonical_url: values.canonicalUrl || null,
+    updated_at: new Date().toISOString(),
   };
 }
 
@@ -100,7 +117,7 @@ export async function createCategoryAction(
       };
     }
 
-    const supabase = await requireAdministrator();
+    const { supabase, user } = await requireCategoryAccess();
 
     const { data, error } = await supabase
       .from('categories')
@@ -125,6 +142,14 @@ export async function createCategoryAction(
             : error.message,
       };
     }
+
+    await supabase.from('activity_logs').insert({
+      user_id: user.id,
+      action: 'category.created',
+      entity_type: 'category',
+      entity_id: data.id,
+      metadata: { name: parsed.data.name, slug: parsed.data.slug },
+    });
 
     refresh();
 
@@ -159,25 +184,22 @@ export async function updateCategoryAction(
       };
     }
 
-    const supabase = await requireAdministrator();
+    const { supabase, user } = await requireCategoryAccess();
 
     const { data: current, error: currentError } = await supabase
       .from('categories')
-      .select(
-        `
-          image_storage_path,
-          desktop_banner_storage_path,
-          mobile_banner_storage_path
-        `,
-      )
+      .select(`
+        name,
+        slug,
+        image_storage_path,
+        desktop_banner_storage_path,
+        mobile_banner_storage_path
+      `)
       .eq('id', id)
       .single();
 
     if (currentError) {
-      return {
-        success: false,
-        message: currentError.message,
-      };
+      return { success: false, message: currentError.message };
     }
 
     const { error } = await supabase
@@ -196,7 +218,6 @@ export async function updateCategoryAction(
     }
 
     const retainedPaths = new Set(imagePaths(parsed.data));
-
     const removedPaths = [
       current.image_storage_path,
       current.desktop_banner_storage_path,
@@ -211,6 +232,19 @@ export async function updateCategoryAction(
         .from('category-images')
         .remove(removedPaths);
     }
+
+    await supabase.from('activity_logs').insert({
+      user_id: user.id,
+      action: 'category.updated',
+      entity_type: 'category',
+      entity_id: id,
+      metadata: {
+        previous_name: current.name,
+        name: parsed.data.name,
+        previous_slug: current.slug,
+        slug: parsed.data.slug,
+      },
+    });
 
     refresh();
 
@@ -236,23 +270,29 @@ export async function setCategoryFlagAction(
   value: boolean,
 ): Promise<CategoryActionResult> {
   try {
-    const supabase = await requireAdministrator();
+    const { supabase, user } = await requireCategoryAccess();
 
     const { error } = await supabase
       .from('categories')
-      .update({ [field]: value })
+      .update({
+        [field]: value,
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', id);
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
+
+    await supabase.from('activity_logs').insert({
+      user_id: user.id,
+      action: 'category.flag_updated',
+      entity_type: 'category',
+      entity_id: id,
+      metadata: { field, value },
+    });
 
     refresh();
 
-    return {
-      success: true,
-      message: 'Estado actualizado.',
-    };
+    return { success: true, message: 'Estado actualizado.' };
   } catch (error) {
     return {
       success: false,
@@ -268,19 +308,14 @@ export async function deleteCategoryAction(
   id: string,
 ): Promise<CategoryActionResult> {
   try {
-    const supabase = await requireAdministrator();
+    const { supabase, user } = await requireCategoryAccess('admin');
 
     const { count, error: countError } = await supabase
       .from('products')
-      .select('id', {
-        count: 'exact',
-        head: true,
-      })
+      .select('id', { count: 'exact', head: true })
       .eq('category_id', id);
 
-    if (countError) {
-      throw countError;
-    }
+    if (countError) throw countError;
 
     if (count) {
       return {
@@ -293,28 +328,24 @@ export async function deleteCategoryAction(
 
     const { data: category, error: categoryError } = await supabase
       .from('categories')
-      .select(
-        `
-          image_storage_path,
-          desktop_banner_storage_path,
-          mobile_banner_storage_path
-        `,
-      )
+      .select(`
+        name,
+        slug,
+        image_storage_path,
+        desktop_banner_storage_path,
+        mobile_banner_storage_path
+      `)
       .eq('id', id)
       .single();
 
-    if (categoryError) {
-      throw categoryError;
-    }
+    if (categoryError) throw categoryError;
 
     const { error: deleteError } = await supabase
       .from('categories')
       .delete()
       .eq('id', id);
 
-    if (deleteError) {
-      throw deleteError;
-    }
+    if (deleteError) throw deleteError;
 
     const paths = [
       category.image_storage_path,
@@ -328,12 +359,17 @@ export async function deleteCategoryAction(
         .remove(paths);
     }
 
+    await supabase.from('activity_logs').insert({
+      user_id: user.id,
+      action: 'category.deleted',
+      entity_type: 'category',
+      entity_id: id,
+      metadata: { name: category.name, slug: category.slug },
+    });
+
     refresh();
 
-    return {
-      success: true,
-      message: 'Categoría eliminada.',
-    };
+    return { success: true, message: 'Categoría eliminada.' };
   } catch (error) {
     return {
       success: false,
