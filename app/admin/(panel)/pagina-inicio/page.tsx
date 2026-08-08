@@ -9,5 +9,14 @@ export default async function HomeContentPage() {
     supabase.from('categories').select('id,name').eq('is_active', true).order('name'),
     supabase.from('products').select('id,name').eq('is_active', true).order('name')
   ]);
-  return <HomeContentForm initialValues={content} categories={categories.data ?? []} products={products.data ?? []} />;
+
+  return (
+    <div className="[&_form>div.space-y-6>section:nth-child(3)]:hidden">
+      <HomeContentForm
+        initialValues={content}
+        categories={categories.data ?? []}
+        products={products.data ?? []}
+      />
+    </div>
+  );
 }
