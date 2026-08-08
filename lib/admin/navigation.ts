@@ -3,6 +3,7 @@ import {
   BriefcaseBusiness,
   FolderTree,
   Home,
+  Images,
   LayoutDashboard,
   Settings,
   Users
@@ -28,6 +29,11 @@ export const adminNavigation = [
     title: 'Trabajos',
     href: '/admin/trabajos',
     icon: BriefcaseBusiness
+  },
+  {
+    title: 'Banners',
+    href: '/admin/banners',
+    icon: Images
   },
   {
     title: 'Página de inicio',
