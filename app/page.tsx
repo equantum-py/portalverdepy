@@ -6,6 +6,9 @@ import { HomeHero } from "@/sections/home-hero";
 import { ProductSection } from "@/sections/product-section";
 import { ServicesSection } from "@/sections/services-section";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function HomePage() {
   const [products, content] = await Promise.all([
     getPublicProducts(),
@@ -29,6 +32,10 @@ export default async function HomePage() {
       <main className="container-shell space-y-5 py-4 sm:space-y-6 sm:py-6 lg:py-10">
         {activeSections.map((section) => {
           if (section.key === "hero") {
+            if (!content.heroEnabled) {
+              return null;
+            }
+
             return (
               <div key={section.key}>
                 <div className="space-y-4 lg:hidden">
@@ -55,14 +62,16 @@ export default async function HomePage() {
           }
 
           if (section.key === "services") {
+            if (!content.servicesEnabled) {
+              return null;
+            }
+
             return (
               <ServicesSection key={section.key} />
             );
           }
 
-          if (
-            section.key === "products-landscaping"
-          ) {
+          if (section.key === "products-landscaping") {
             return (
               <ProductSection
                 key={section.key}
@@ -76,7 +85,9 @@ export default async function HomePage() {
         })}
       </main>
 
-      <WhatsAppFloating />
+      {content.whatsappEnabled ? (
+        <WhatsAppFloating />
+      ) : null}
     </>
   );
 }
