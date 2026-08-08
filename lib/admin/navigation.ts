@@ -6,7 +6,8 @@ import {
   Images,
   LayoutDashboard,
   Settings,
-  Users
+  Users,
+  Image
 } from 'lucide-react';
 
 export const adminNavigation = [
@@ -34,6 +35,11 @@ export const adminNavigation = [
     title: 'Banners',
     href: '/admin/banners',
     icon: Images
+  },
+  {
+    title: 'Logo',
+    href: '/admin/logo',
+    icon: Image
   },
   {
     title: 'Página de inicio',
