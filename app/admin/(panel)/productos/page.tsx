@@ -2,10 +2,12 @@ import {
   Boxes,
   CheckCircle2,
   CircleOff,
+  Filter,
   Pencil,
   Plus,
   Search,
-  Tag
+  Tag,
+  X
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -15,7 +17,24 @@ import { ProductDuplicateButton } from '@/components/admin/products/product-dupl
 import { ProductStockToggle } from '@/components/admin/products/product-stock-toggle';
 import { createClient } from '@/lib/supabase/server';
 
-export default async function AdminProductsPage() {
+type AdminProductsPageProps = {
+  searchParams: Promise<{
+    q?: string;
+    status?: string;
+    stock?: string;
+    category?: string;
+  }>;
+};
+
+export default async function AdminProductsPage({
+  searchParams
+}: AdminProductsPageProps) {
+  const filters = await searchParams;
+  const query = filters.q?.trim().toLowerCase() ?? '';
+  const status = filters.status ?? 'all';
+  const stock = filters.stock ?? 'all';
+  const categoryFilter = filters.category ?? 'all';
+
   const supabase = await createClient();
 
   const { data: products, error } = await supabase
@@ -46,7 +65,50 @@ export default async function AdminProductsPage() {
     );
   }
 
-  const productList = products ?? [];
+  const allProducts = products ?? [];
+
+  const categoryNames = Array.from(
+    new Set(
+      allProducts
+        .map((product) => getCategoryName(product.categories))
+        .filter((name): name is string => Boolean(name))
+    )
+  ).sort((first, second) => first.localeCompare(second, 'es'));
+
+  const productList = allProducts.filter((product) => {
+    const category = getCategoryName(product.categories) ?? '';
+    const matchesQuery =
+      !query ||
+      product.name.toLowerCase().includes(query) ||
+      product.slug.toLowerCase().includes(query) ||
+      category.toLowerCase().includes(query);
+
+    const matchesStatus =
+      status === 'all' ||
+      (status === 'active' && product.is_active) ||
+      (status === 'inactive' && !product.is_active);
+
+    const matchesStock =
+      stock === 'all' ||
+      (stock === 'available' && product.in_stock) ||
+      (stock === 'out' && !product.in_stock);
+
+    const matchesCategory =
+      categoryFilter === 'all' || category === categoryFilter;
+
+    return (
+      matchesQuery &&
+      matchesStatus &&
+      matchesStock &&
+      matchesCategory
+    );
+  });
+
+  const hasFilters =
+    Boolean(query) ||
+    status !== 'all' ||
+    stock !== 'all' ||
+    categoryFilter !== 'all';
 
   return (
     <div className="mx-auto w-full max-w-[1500px]">
@@ -73,17 +135,83 @@ export default async function AdminProductsPage() {
       </section>
 
       <section className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative w-full max-w-md">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input
-              type="search"
-              placeholder="Buscar productos..."
-              className="h-11 w-full rounded-xl border border-slate-200 pl-10 pr-4 text-sm outline-none focus:border-green-600 focus:ring-4 focus:ring-green-100"
-            />
+        <form
+          method="get"
+          className="border-b border-slate-100 p-4"
+        >
+          <div className="grid gap-3 xl:grid-cols-[minmax(260px,1fr)_190px_190px_220px_auto]">
+            <label className="relative block">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                type="search"
+                name="q"
+                defaultValue={filters.q ?? ''}
+                placeholder="Buscar por nombre, slug o categoría..."
+                className="h-11 w-full rounded-xl border border-slate-200 pl-10 pr-4 text-sm outline-none focus:border-green-600 focus:ring-4 focus:ring-green-100"
+              />
+            </label>
+
+            <select
+              name="status"
+              defaultValue={status}
+              aria-label="Filtrar por estado"
+              className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-green-600 focus:ring-4 focus:ring-green-100"
+            >
+              <option value="all">Todos los estados</option>
+              <option value="active">Activos</option>
+              <option value="inactive">Inactivos</option>
+            </select>
+
+            <select
+              name="stock"
+              defaultValue={stock}
+              aria-label="Filtrar por disponibilidad"
+              className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-green-600 focus:ring-4 focus:ring-green-100"
+            >
+              <option value="all">Todo el stock</option>
+              <option value="available">Disponibles</option>
+              <option value="out">Agotados</option>
+            </select>
+
+            <select
+              name="category"
+              defaultValue={categoryFilter}
+              aria-label="Filtrar por categoría"
+              className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-green-600 focus:ring-4 focus:ring-green-100"
+            >
+              <option value="all">Todas las categorías</option>
+              {categoryNames.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="submit"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              <Filter className="h-4 w-4" />
+              Filtrar
+            </button>
           </div>
-          <p className="text-sm text-slate-500">{productList.length} productos</p>
-        </div>
+
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-slate-500">
+              {productList.length} de {allProducts.length} productos
+            </p>
+
+            {hasFilters ? (
+              <Link
+                href="/admin/productos"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-red-600"
+              >
+                <X className="h-4 w-4" />
+                Limpiar filtros
+              </Link>
+            ) : null}
+          </div>
+        </form>
 
         {productList.length ? (
           <div className="overflow-x-auto">
@@ -101,13 +229,7 @@ export default async function AdminProductsPage() {
 
               <tbody className="divide-y divide-slate-100">
                 {productList.map((product) => {
-                  const categoryRelation = product.categories as
-                    | { name: string }
-                    | { name: string }[]
-                    | null;
-                  const category = Array.isArray(categoryRelation)
-                    ? categoryRelation[0]?.name
-                    : categoryRelation?.name;
+                  const category = getCategoryName(product.categories);
 
                   return (
                     <tr key={product.id} className="transition hover:bg-slate-50">
@@ -226,21 +348,48 @@ export default async function AdminProductsPage() {
               <Boxes className="h-6 w-6" />
             </span>
             <h2 className="mt-5 text-lg font-semibold text-slate-950">
-              Todavía no hay productos
+              {hasFilters
+                ? 'No encontramos productos'
+                : 'Todavía no hay productos'}
             </h2>
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-              Creá el primer producto para comenzar a administrar el catálogo.
+              {hasFilters
+                ? 'Probá con otros términos o limpiá los filtros aplicados.'
+                : 'Creá el primer producto para comenzar a administrar el catálogo.'}
             </p>
-            <Link
-              href="/admin/productos/nuevo"
-              className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-green-700 px-5 text-sm font-semibold text-white"
-            >
-              <Plus className="h-4 w-4" />
-              Crear primer producto
-            </Link>
+            {hasFilters ? (
+              <Link
+                href="/admin/productos"
+                className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700"
+              >
+                <X className="h-4 w-4" />
+                Limpiar filtros
+              </Link>
+            ) : (
+              <Link
+                href="/admin/productos/nuevo"
+                className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-green-700 px-5 text-sm font-semibold text-white"
+              >
+                <Plus className="h-4 w-4" />
+                Crear primer producto
+              </Link>
+            )}
           </div>
         )}
       </section>
     </div>
   );
+}
+
+function getCategoryName(
+  relation:
+    | { name: string }
+    | { name: string }[]
+    | null
+): string | null {
+  if (Array.isArray(relation)) {
+    return relation[0]?.name ?? null;
+  }
+
+  return relation?.name ?? null;
 }
