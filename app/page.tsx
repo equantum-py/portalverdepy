@@ -16,11 +16,11 @@ export default async function HomePage() {
   ]);
 
   const cesped = products.filter(
-    (product) => product.category === "Césped",
+    (product) => product.categorySlug === "cesped",
   );
 
   const paisajismo = products.filter(
-    (product) => product.category === "Paisajismo",
+    (product) => product.categorySlug === "paisajismo",
   );
 
   const activeSections = [...content.sections]
@@ -66,9 +66,7 @@ export default async function HomePage() {
               return null;
             }
 
-            return (
-              <ServicesSection key={section.key} />
-            );
+            return <ServicesSection key={section.key} />;
           }
 
           if (section.key === "products-landscaping") {
@@ -85,9 +83,7 @@ export default async function HomePage() {
         })}
       </main>
 
-      {content.whatsappEnabled ? (
-        <WhatsAppFloating />
-      ) : null}
+      {content.whatsappEnabled ? <WhatsAppFloating /> : null}
     </>
   );
 }
