@@ -1,4 +1,5 @@
 import { WhatsAppIcon } from '@/components/icons';
+import { createWhatsAppUrl } from '@/lib/site-config';
 
 type WhatsAppFloatingProps = {
   url?: string;
@@ -6,7 +7,7 @@ type WhatsAppFloatingProps = {
 };
 
 export function WhatsAppFloating({
-  url = 'https://wa.me/595981077600',
+  url = createWhatsAppUrl('Hola, equipo de Portal Verde. Estoy visitando su página web y quisiera recibir asesoramiento. ¿Podrían ayudarme? Gracias.'),
   text = 'Escribinos por WhatsApp',
 }: WhatsAppFloatingProps) {
   return (
