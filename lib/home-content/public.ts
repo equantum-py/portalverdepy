@@ -155,6 +155,33 @@ export async function getHomeContent(): Promise<HomeContentValues> {
     heroShowPrimaryButton: bool(s.hero_show_primary_button, true),
     heroShowSecondaryButton: bool(s.hero_show_secondary_button, true),
     heroShowBenefits: bool(s.hero_show_benefits, true),
+
+    servicesEnabled: bool(
+      s.services_enabled,
+      defaultHomeContent.servicesEnabled,
+    ),
+    servicesTitle: text(
+      s.services_title,
+      defaultHomeContent.servicesTitle,
+    ),
+    servicesDescription: text(
+      s.services_description,
+      defaultHomeContent.servicesDescription,
+    ),
+
+    megaMenuEnabled: bool(
+      s.mega_menu_enabled,
+      defaultHomeContent.megaMenuEnabled,
+    ),
+    megaServicesTitle: text(
+      s.mega_services_title,
+      defaultHomeContent.megaServicesTitle,
+    ),
+    megaServicesDescription: text(
+      s.mega_services_description,
+      defaultHomeContent.megaServicesDescription,
+    ),
+
     carousel: {
       carouselEnabled: bool(s.hero_carousel_enabled, true),
       carouselAutoplay: bool(s.hero_carousel_autoplay, true),
