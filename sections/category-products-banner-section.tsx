@@ -31,23 +31,26 @@ export function CategoryProductsBannerSection({
   mobileSwipe,
   mobileShowProgress,
 }: Props) {
-  const scrollerRef = useRef<HTMLDivElement>(null);
+  const mobileScrollerRef = useRef<HTMLDivElement>(null);
+  const desktopScrollerRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
 
   if (!products.length) return null;
 
   const categoryUrl = `/shop?category=${encodeURIComponent(categorySlug)}`;
+  const bannerUrl = bannerMobileUrl || bannerDesktopUrl;
 
-  function scroll(direction: -1 | 1) {
-    const element = scrollerRef.current;
+  function scrollDesktop(direction: -1 | 1) {
+    const element = desktopScrollerRef.current;
     if (!element) return;
-
-    const amount = Math.max(element.clientWidth * 0.9, 220);
-    element.scrollBy({ left: amount * direction, behavior: 'smooth' });
+    element.scrollBy({
+      left: Math.max(element.clientWidth * 0.9, 300) * direction,
+      behavior: 'smooth',
+    });
   }
 
-  function updateProgress() {
-    const element = scrollerRef.current;
+  function updateMobileProgress() {
+    const element = mobileScrollerRef.current;
     if (!element) return;
 
     const maxScroll = element.scrollWidth - element.clientWidth;
@@ -56,12 +59,15 @@ export function CategoryProductsBannerSection({
       return;
     }
 
-    setProgress(Math.min(100, Math.max(0, (element.scrollLeft / maxScroll) * 100)));
+    setProgress(
+      Math.min(100, Math.max(0, (element.scrollLeft / maxScroll) * 100)),
+    );
   }
 
-  const mobileBasis = mobileColumns === 1
-    ? 'basis-[92%] min-w-[92%]'
-    : 'basis-[calc(50%-5px)] min-w-[calc(50%-5px)]';
+  const mobileItemWidth =
+    mobileColumns === 1
+      ? 'basis-[86%] min-w-[86%]'
+      : 'basis-[calc(50%-5px)] min-w-[calc(50%-5px)]';
 
   return (
     <section className="border-b border-border/70 py-4 last:border-none sm:py-6 lg:py-7">
@@ -86,43 +92,82 @@ export function CategoryProductsBannerSection({
         ) : null}
       </div>
 
-      <div className="grid grid-cols-[112px_minmax(0,1fr)] items-stretch gap-2.5 sm:grid-cols-[180px_minmax(0,1fr)] sm:gap-4 lg:grid-cols-[274px_minmax(0,1fr)]">
-        {(bannerDesktopUrl || bannerMobileUrl) ? (
-          <Link
-            href={categoryUrl}
-            className="group relative block h-full min-h-0 overflow-hidden rounded-2xl border border-border bg-brand-50 shadow-sm"
-          >
-            <div className="relative h-full min-h-[180px] w-full sm:min-h-[290px] lg:min-h-[441px]">
-              <picture>
-                {bannerMobileUrl ? (
-                  <source media="(max-width: 1023px)" srcSet={bannerMobileUrl} />
-                ) : null}
+      {/* MOBILE / TABLET: banner is the first card inside the same horizontal carousel */}
+      <div className="lg:hidden">
+        <div
+          ref={mobileScrollerRef}
+          onScroll={updateMobileProgress}
+          className={`flex snap-x snap-mandatory gap-2.5 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+            mobileSwipe ? 'touch-pan-x' : ''
+          }`}
+        >
+          {bannerUrl ? (
+            <Link
+              href={categoryUrl}
+              className={`${mobileItemWidth} snap-start overflow-hidden rounded-2xl border border-border bg-white shadow-sm`}
+            >
+              <div className="relative aspect-[274/441] w-full">
                 <Image
-                  src={bannerDesktopUrl || bannerMobileUrl}
+                  src={bannerUrl}
                   alt={`Banner ${title}`}
                   fill
-                  sizes="(max-width: 639px) 112px, (max-width: 1023px) 180px, 274px"
-                  className="object-cover transition duration-500 group-hover:scale-[1.02]"
+                  sizes={mobileColumns === 1 ? '86vw' : '50vw'}
+                  className="object-cover"
                 />
-              </picture>
+              </div>
+            </Link>
+          ) : null}
+
+          {products.map((product) => (
+            <div
+              key={product.id}
+              className={`${mobileItemWidth} snap-start`}
+            >
+              <ProductCard product={product} />
+            </div>
+          ))}
+        </div>
+
+        {mobileShowProgress ? (
+          <div className="mt-1 h-1 overflow-hidden rounded-full bg-slate-200">
+            <div
+              className="h-full rounded-full bg-brand-700 transition-[width] duration-150"
+              style={{ width: `${Math.max(12, progress)}%` }}
+            />
+          </div>
+        ) : null}
+      </div>
+
+      {/* DESKTOP: fixed 274x441 banner + horizontal product carousel */}
+      <div className="hidden lg:grid lg:grid-cols-[274px_minmax(0,1fr)] lg:gap-4">
+        {bannerDesktopUrl || bannerMobileUrl ? (
+          <Link
+            href={categoryUrl}
+            className="group overflow-hidden rounded-2xl border border-border bg-white shadow-sm"
+          >
+            <div className="relative aspect-[274/441] w-full">
+              <Image
+                src={bannerDesktopUrl || bannerMobileUrl}
+                alt={`Banner ${title}`}
+                fill
+                sizes="274px"
+                className="object-cover transition duration-500 group-hover:scale-[1.02]"
+              />
             </div>
           </Link>
         ) : (
-          <div className="rounded-2xl border border-dashed border-border bg-brand-50" />
+          <div className="aspect-[274/441] rounded-2xl border border-dashed border-border bg-brand-50" />
         )}
 
         <div className="relative min-w-0">
           <div
-            ref={scrollerRef}
-            onScroll={updateProgress}
-            className={`flex h-full snap-x snap-mandatory gap-2.5 overflow-x-auto pb-2 sm:gap-4 lg:pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
-              mobileSwipe ? 'touch-pan-x' : 'touch-auto'
-            }`}
+            ref={desktopScrollerRef}
+            className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {products.map((product) => (
               <div
                 key={product.id}
-                className={`${mobileBasis} snap-start sm:basis-[calc(50%-8px)] sm:min-w-[calc(50%-8px)] lg:basis-[calc(33.333%-11px)] lg:min-w-[calc(33.333%-11px)]`}
+                className="min-w-[calc(33.333%-11px)] basis-[calc(33.333%-11px)] snap-start"
               >
                 <ProductCard product={product} />
               </div>
@@ -131,30 +176,21 @@ export function CategoryProductsBannerSection({
 
           <button
             type="button"
-            onClick={() => scroll(-1)}
+            onClick={() => scrollDesktop(-1)}
             aria-label="Productos anteriores"
-            className="absolute left-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-white/95 p-2 text-brand-800 shadow-md transition hover:bg-white sm:inline-flex"
+            className="absolute left-2 top-1/2 z-10 inline-flex -translate-y-1/2 rounded-full border border-border bg-white/95 p-2 text-brand-800 shadow-md transition hover:bg-white"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
 
           <button
             type="button"
-            onClick={() => scroll(1)}
+            onClick={() => scrollDesktop(1)}
             aria-label="Productos siguientes"
-            className="absolute right-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-white/95 p-2 text-brand-800 shadow-md transition hover:bg-white sm:inline-flex"
+            className="absolute right-2 top-1/2 z-10 inline-flex -translate-y-1/2 rounded-full border border-border bg-white/95 p-2 text-brand-800 shadow-md transition hover:bg-white"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
-
-          {mobileShowProgress ? (
-            <div className="mt-1 h-1 overflow-hidden rounded-full bg-slate-200 lg:hidden">
-              <div
-                className="h-full rounded-full bg-brand-700 transition-[width] duration-150"
-                style={{ width: `${Math.max(12, progress)}%` }}
-              />
-            </div>
-          ) : null}
         </div>
       </div>
     </section>
