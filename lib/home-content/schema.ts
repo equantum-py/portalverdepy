@@ -6,21 +6,9 @@ import {
 } from './hero-schema';
 
 const navigationItemSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, 'El nombre es obligatorio.'),
-  url: z
-    .string()
-    .trim()
-    .min(1, 'La URL es obligatoria.'),
-  linkType: z.enum([
-    'internal',
-    'category',
-    'product',
-    'whatsapp',
-    'external',
-  ]),
+  name: z.string().trim().min(1, 'El nombre es obligatorio.'),
+  url: z.string().trim().min(1, 'La URL es obligatoria.'),
+  linkType: z.enum(['internal', 'category', 'product', 'whatsapp', 'external']),
   targetId: z.string(),
   newTab: z.boolean(),
   sortOrder: z.number().int().min(0),
@@ -28,20 +16,14 @@ const navigationItemSchema = z.object({
 });
 
 const serviceTagSchema = z.object({
-  label: z
-    .string()
-    .trim()
-    .min(1, 'El texto es obligatorio.'),
+  label: z.string().trim().min(1, 'El texto es obligatorio.'),
   icon: z.string(),
   sortOrder: z.number().int().min(0),
   isActive: z.boolean(),
 });
 
 const megaColumnSchema = z.object({
-  title: z
-    .string()
-    .trim()
-    .min(1, 'El título es obligatorio.'),
+  title: z.string().trim().min(1, 'El título es obligatorio.'),
   icon: z.string(),
   categoryId: z.string(),
   viewAllLabel: z.string(),
@@ -52,36 +34,19 @@ const megaColumnSchema = z.object({
 });
 
 const megaServiceSchema = z.object({
-  title: z
-    .string()
-    .trim()
-    .min(1, 'El título es obligatorio.'),
+  title: z.string().trim().min(1, 'El título es obligatorio.'),
   description: z.string().trim(),
   icon: z.string(),
-  url: z
-    .string()
-    .trim()
-    .min(1, 'La URL es obligatoria.'),
+  url: z.string().trim().min(1, 'La URL es obligatoria.'),
   sortOrder: z.number().int().min(0),
   isActive: z.boolean(),
 });
 
 const globalButtonSchema = z.object({
   placement: z.string(),
-  text: z
-    .string()
-    .trim()
-    .min(1, 'El texto del botón es obligatorio.'),
-  url: z
-    .string()
-    .trim()
-    .min(1, 'La URL es obligatoria.'),
-  linkType: z.enum([
-    'internal',
-    'external',
-    'whatsapp',
-    'anchor',
-  ]),
+  text: z.string().trim().min(1, 'El texto del botón es obligatorio.'),
+  url: z.string().trim().min(1, 'La URL es obligatoria.'),
+  linkType: z.enum(['internal', 'external', 'whatsapp', 'anchor']),
   icon: z.string(),
   variant: z.string(),
   sortOrder: z.number().int().min(0),
@@ -94,14 +59,19 @@ const homeSectionSchema = z.object({
   title: z.string(),
   sortOrder: z.number().int().min(0),
   isActive: z.boolean(),
+  sectionType: z.enum(['standard', 'banner-products']).default('standard'),
+  categorySlug: z.string().default(''),
+  bannerDesktopUrl: z.string().default(''),
+  bannerDesktopPath: z.string().default(''),
+  bannerMobileUrl: z.string().default(''),
+  bannerMobilePath: z.string().default(''),
+  productLimit: z.number().int().min(1).max(8).default(4),
+  showViewAll: z.boolean().default(true),
 });
 
 export const homeContentSchema = z.object({
   promoEnabled: z.boolean(),
-  promoText: z
-    .string()
-    .trim()
-    .min(1, 'El texto promocional es obligatorio.'),
+  promoText: z.string().trim().min(1, 'El texto promocional es obligatorio.'),
   promoIcon: z.string().max(20),
   promoUrl: z.string(),
   promoButtonText: z.string(),
@@ -110,26 +80,18 @@ export const homeContentSchema = z.object({
   promoNewTab: z.boolean(),
 
   logoEnabled: z.boolean(),
-  logoDesktopUrl: z
-    .string()
-    .min(1, 'El logo de escritorio es obligatorio.'),
+  logoDesktopUrl: z.string().min(1, 'El logo de escritorio es obligatorio.'),
   logoDesktopPath: z.string(),
-  logoMobileUrl: z
-    .string()
-    .min(1, 'El logo móvil es obligatorio.'),
+  logoMobileUrl: z.string().min(1, 'El logo móvil es obligatorio.'),
   logoMobilePath: z.string(),
-  logoAlt: z
-    .string()
-    .min(1, 'El texto alternativo es obligatorio.'),
+  logoAlt: z.string().min(1, 'El texto alternativo es obligatorio.'),
 
   whatsappEnabled: z.boolean(),
   whatsappText: z.string(),
   whatsappUrl: z.string(),
 
   heroEnabled: z.boolean(),
-  heroTitle: z
-    .string()
-    .min(1, 'El título de la portada es obligatorio.'),
+  heroTitle: z.string().min(1, 'El título de la portada es obligatorio.'),
   heroSubtitle: z.string(),
   heroDescription: z.string(),
   heroDesktopUrl: z.string(),
@@ -137,22 +99,10 @@ export const homeContentSchema = z.object({
   heroMobileUrl: z.string(),
   heroMobilePath: z.string(),
   heroAlt: z.string(),
-  heroAlignment: z.enum([
-    'left',
-    'center',
-    'right',
-  ]),
+  heroAlignment: z.enum(['left', 'center', 'right']),
   heroOverlay: z.boolean(),
-  heroOverlayIntensity: z
-    .number()
-    .int()
-    .min(0)
-    .max(90),
-  heroShadowIntensity: z
-    .number()
-    .int()
-    .min(0)
-    .max(100),
+  heroOverlayIntensity: z.number().int().min(0).max(90),
+  heroShadowIntensity: z.number().int().min(0).max(100),
   heroContentEnabled: z.boolean(),
   heroContentDesktop: z.boolean(),
   heroContentMobile: z.boolean(),
@@ -170,9 +120,7 @@ export const homeContentSchema = z.object({
   heroSlides: z.array(heroSlideSchema),
 
   servicesEnabled: z.boolean(),
-  servicesTitle: z
-    .string()
-    .min(1, 'El título de servicios es obligatorio.'),
+  servicesTitle: z.string().min(1, 'El título de servicios es obligatorio.'),
   servicesDescription: z.string(),
 
   megaMenuEnabled: z.boolean(),
@@ -187,6 +135,4 @@ export const homeContentSchema = z.object({
   sections: z.array(homeSectionSchema),
 });
 
-export type HomeContentValues = z.infer<
-  typeof homeContentSchema
->;
+export type HomeContentValues = z.infer<typeof homeContentSchema>;
