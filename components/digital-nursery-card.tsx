@@ -20,8 +20,14 @@ export function DigitalNurseryCard({ item }: { item: DigitalNurseryPublicItem })
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
-      <div className="relative aspect-[4/3] overflow-hidden bg-brand-50">
-        <Image src={item.imageUrl || '/images/product-placeholder.webp'} alt={item.name} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" className="object-cover" />
+      <div className="relative aspect-[4/3] overflow-hidden bg-[#f4eee3]">
+        <Image
+          src={item.imageUrl || '/images/product-placeholder.webp'}
+          alt={item.name}
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className="object-contain p-1"
+        />
       </div>
       <div className="flex flex-1 flex-col p-3 sm:p-4">
         <p className="text-[10px] font-medium uppercase tracking-wide text-text-soft sm:text-xs">Plantas</p>
