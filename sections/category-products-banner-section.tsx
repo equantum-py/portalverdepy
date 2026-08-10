@@ -43,6 +43,7 @@ export function CategoryProductsBannerSection({
   function scrollDesktop(direction: -1 | 1) {
     const element = desktopScrollerRef.current;
     if (!element) return;
+
     element.scrollBy({
       left: Math.max(element.clientWidth * 0.9, 300) * direction,
       behavior: 'smooth',
@@ -92,7 +93,7 @@ export function CategoryProductsBannerSection({
         ) : null}
       </div>
 
-      {/* MOBILE / TABLET: banner is the first card inside the same horizontal carousel */}
+      {/* Mobile/tablet: banner is the first item of the same carousel */}
       <div className="lg:hidden">
         <div
           ref={mobileScrollerRef}
@@ -138,38 +139,38 @@ export function CategoryProductsBannerSection({
         ) : null}
       </div>
 
-      {/* DESKTOP: fixed 274x441 banner + horizontal product carousel */}
-      <div className="hidden lg:grid lg:grid-cols-[274px_minmax(0,1fr)] lg:gap-4">
+      {/* Desktop: banner stretches to the exact height of the product cards */}
+      <div className="hidden lg:grid lg:grid-cols-[274px_minmax(0,1fr)] lg:items-stretch lg:gap-4">
         {bannerDesktopUrl || bannerMobileUrl ? (
           <Link
             href={categoryUrl}
-            className="group overflow-hidden rounded-2xl border border-border bg-white shadow-sm"
+            className="group relative h-full min-h-[441px] overflow-hidden rounded-2xl border border-border bg-white shadow-sm"
           >
-            <div className="relative aspect-[274/441] w-full">
-              <Image
-                src={bannerDesktopUrl || bannerMobileUrl}
-                alt={`Banner ${title}`}
-                fill
-                sizes="274px"
-                className="object-cover transition duration-500 group-hover:scale-[1.02]"
-              />
-            </div>
+            <Image
+              src={bannerDesktopUrl || bannerMobileUrl}
+              alt={`Banner ${title}`}
+              fill
+              sizes="274px"
+              className="object-cover transition duration-500 group-hover:scale-[1.02]"
+            />
           </Link>
         ) : (
-          <div className="aspect-[274/441] rounded-2xl border border-dashed border-border bg-brand-50" />
+          <div className="h-full min-h-[441px] rounded-2xl border border-dashed border-border bg-brand-50" />
         )}
 
         <div className="relative min-w-0">
           <div
             ref={desktopScrollerRef}
-            className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex h-full snap-x snap-mandatory items-stretch gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {products.map((product) => (
               <div
                 key={product.id}
-                className="min-w-[calc(33.333%-11px)] basis-[calc(33.333%-11px)] snap-start"
+                className="flex min-w-[calc(33.333%-11px)] basis-[calc(33.333%-11px)] snap-start"
               >
-                <ProductCard product={product} />
+                <div className="w-full">
+                  <ProductCard product={product} />
+                </div>
               </div>
             ))}
           </div>
