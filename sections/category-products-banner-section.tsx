@@ -59,8 +59,14 @@ export function CategoryProductsBannerSection({ title, categorySlug, bannerDeskt
       </div>
 
       <div className="lg:hidden">
+        {bannerUrl ? (
+          <Link href={categoryUrl} className="mb-3 block w-full overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
+            <div className="relative aspect-[16/7] w-full sm:aspect-[16/6]">
+              <Image src={bannerUrl} alt={`Banner ${title}`} fill sizes="100vw" className="object-cover" />
+            </div>
+          </Link>
+        ) : null}
         <div ref={mobileScrollerRef} onScroll={updateMobileProgress} className={`flex snap-x snap-mandatory gap-2.5 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${mobileSwipe ? 'touch-pan-x' : ''}`}>
-          {bannerUrl ? <Link href={categoryUrl} className={`${mobileItemWidth} snap-start overflow-hidden rounded-2xl border border-border bg-white shadow-sm`}><div className="relative aspect-[274/441] w-full"><Image src={bannerUrl} alt={`Banner ${title}`} fill sizes={mobileColumns === 1 ? '86vw' : '50vw'} className="object-cover" /></div></Link> : null}
           {products.map((product) => <div key={product.id} className={`${mobileItemWidth} snap-start`}>{renderCard(product)}</div>)}
         </div>
         {mobileShowProgress ? <div className="mt-1 h-1 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-brand-700 transition-[width] duration-150" style={{ width: `${Math.max(12, progress)}%` }} /></div> : null}
