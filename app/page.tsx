@@ -29,7 +29,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <main className="container-shell space-y-5 py-4 sm:space-y-6 sm:py-6 lg:py-10">
+      <main className="container-shell space-y-5 py-4 sm:space-y-6 sm:py-5 lg:py-6">
         {activeSections.map((section) => {
           if (section.key === "hero") {
             if (!content.heroEnabled) {
@@ -43,7 +43,7 @@ export default async function HomePage() {
                   <HomeHero content={content} />
                 </div>
 
-                <div className="hidden gap-5 lg:grid lg:grid-cols-[280px_minmax(0,1fr)]">
+                <div className="hidden items-start gap-5 lg:grid lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]">
                   <CategorySidebar />
                   <HomeHero content={content} />
                 </div>
