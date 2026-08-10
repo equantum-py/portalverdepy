@@ -7,7 +7,8 @@ import {
   LayoutDashboard,
   Settings,
   Users,
-  Image
+  Image,
+  Sprout
 } from 'lucide-react';
 
 export const adminNavigation = [
@@ -20,6 +21,11 @@ export const adminNavigation = [
     title: 'Productos',
     href: '/admin/productos',
     icon: Boxes
+  },
+  {
+    title: 'Vivero Digital',
+    href: '/admin/vivero-digital',
+    icon: Sprout
   },
   {
     title: 'Categorías',
