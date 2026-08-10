@@ -1,6 +1,7 @@
 import Image from 'next/image';
 
 import { WhatsAppIcon } from '@/components/icons';
+import { createWhatsAppUrl } from '@/lib/site-config';
 
 export type DigitalNurseryPublicItem = {
   id: string;
@@ -12,9 +13,10 @@ export type DigitalNurseryPublicItem = {
 };
 
 export function DigitalNurseryCard({ item }: { item: DigitalNurseryPublicItem }) {
-  const whatsappNumber = '595981077600';
-  const message = item.whatsappMessage || `Hola, quiero consultar por ${item.name}${item.variant ? ` (${item.variant})` : ''}. ¿Me podrían dar más información y disponibilidad?`;
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+  const message =
+    item.whatsappMessage ||
+    `Hola, equipo de Portal Verde. Estoy interesado/a en la planta “${item.name}${item.variant ? ` - ${item.variant}` : ''}”. ¿Podrían confirmarme la disponibilidad y brindarme más información? Gracias.`;
+  const whatsappUrl = createWhatsAppUrl(message);
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
