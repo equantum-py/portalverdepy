@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Manrope } from "next/font/google";
+import Script from 'next/script';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 import { siteConfig } from '@/lib/site-config';
@@ -17,6 +18,8 @@ const manrope = Manrope({
   variable: "--font-manrope",
   display: "swap",
 });
+
+const googleAnalyticsId = 'G-X4SL2XNW02';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -91,8 +94,20 @@ export default async function RootLayout({
       <body
         className={`${manrope.variable} bg-[#f8faf8] font-sans text-[#172019] antialiased`}
       >
-<main><RouteShell categories={categories} products={products} homeContent={homeContent}>{children}</RouteShell></main>
-<SpeedInsights />
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${googleAnalyticsId}');
+          `}
+        </Script>
+        <main><RouteShell categories={categories} products={products} homeContent={homeContent}>{children}</RouteShell></main>
+        <SpeedInsights />
       </body>
     </html>
   );
