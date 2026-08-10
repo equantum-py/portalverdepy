@@ -67,6 +67,9 @@ const homeSectionSchema = z.object({
   bannerMobilePath: z.string(),
   productLimit: z.number().int().min(1).max(8),
   showViewAll: z.boolean(),
+  mobileColumns: z.union([z.literal(1), z.literal(2)]),
+  mobileSwipe: z.boolean(),
+  mobileShowProgress: z.boolean(),
 });
 
 export const homeContentSchema = z.object({
