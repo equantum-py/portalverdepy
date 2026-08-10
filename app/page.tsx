@@ -5,90 +5,38 @@ import { getPublicProducts } from "@/lib/products/catalog-products";
 import { HomeHero } from "@/sections/home-hero";
 import { ProductSection } from "@/sections/product-section";
 import { ServicesSection } from "@/sections/services-section";
+import { CategoryProductsBannerSection } from "@/sections/category-products-banner-section";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function HomePage() {
-  const [products, content] = await Promise.all([
-    getPublicProducts(),
-    getHomeContent(),
-  ]);
-
-  const cesped = products.filter(
-    (product) => product.categorySlug === "cesped",
-  );
-
-  const paisajismo = products.filter(
-    (product) => product.categorySlug === "paisajismo",
-  );
-
-  const activeSections = [...content.sections]
-    .filter((section) => section.isActive)
-    .sort((a, b) => a.sortOrder - b.sortOrder);
+  const [products, content] = await Promise.all([getPublicProducts(), getHomeContent()]);
+  const cesped = products.filter((product) => product.categorySlug === "cesped");
+  const paisajismo = products.filter((product) => product.categorySlug === "paisajismo");
+  const activeSections = [...content.sections].filter((section) => section.isActive).sort((a, b) => a.sortOrder - b.sortOrder);
 
   return (
     <>
       <main className="container-shell space-y-5 py-4 sm:space-y-6 sm:py-5 lg:py-6">
         {activeSections.map((section) => {
           if (section.key === "hero") {
-            if (!content.heroEnabled) {
-              return null;
-            }
-
-            return (
-              <div key={section.key}>
-                <div className="space-y-4 lg:hidden">
-                  <CategorySidebar />
-                  <HomeHero content={content} />
-                </div>
-
-                <div className="hidden items-start gap-5 lg:grid lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]">
-                  <CategorySidebar />
-                  <HomeHero content={content} />
-                </div>
-              </div>
-            );
+            if (!content.heroEnabled) return null;
+            return <div key={section.key}><div className="space-y-4 lg:hidden"><CategorySidebar /><HomeHero content={content} /></div><div className="hidden items-start gap-5 lg:grid lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]"><CategorySidebar /><HomeHero content={content} /></div></div>;
           }
 
-          if (section.key === "products-grass") {
-            return (
-              <ProductSection
-                key={section.key}
-                title={section.title}
-                products={cesped}
-              />
-            );
+          if (section.sectionType === "banner-products" && section.categorySlug) {
+            const categoryProducts = products.filter((product) => product.categorySlug === section.categorySlug).slice(0, section.productLimit);
+            return <CategoryProductsBannerSection key={section.key} title={section.title} categorySlug={section.categorySlug} bannerDesktopUrl={section.bannerDesktopUrl} bannerMobileUrl={section.bannerMobileUrl} products={categoryProducts} showViewAll={section.showViewAll} />;
           }
 
-          if (section.key === "services") {
-            if (!content.servicesEnabled) {
-              return null;
-            }
-
-            return <ServicesSection key={section.key} />;
-          }
-
-          if (section.key === "products-landscaping") {
-            return (
-              <ProductSection
-                key={section.key}
-                title={section.title}
-                products={paisajismo}
-              />
-            );
-          }
-
+          if (section.key === "products-grass") return <ProductSection key={section.key} title={section.title} products={cesped} />;
+          if (section.key === "services") { if (!content.servicesEnabled) return null; return <ServicesSection key={section.key} />; }
+          if (section.key === "products-landscaping") return <ProductSection key={section.key} title={section.title} products={paisajismo} />;
           return null;
         })}
       </main>
-
-      {content.whatsappEnabled ? (
-        <WhatsAppFloating
-          url={content.whatsappUrl}
-          text={content.whatsappText}
-        />
-      ) : null}
+      {content.whatsappEnabled ? <WhatsAppFloating url={content.whatsappUrl} text={content.whatsappText} /> : null}
     </>
   );
 }
