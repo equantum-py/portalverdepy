@@ -11,15 +11,11 @@ import {
 import { formatPricePYG } from '@/lib/format-price';
 import type { Product } from '@/lib/types';
 import { WhatsAppIcon } from '@/components/icons';
+import { createWhatsAppUrl } from '@/lib/site-config';
 
 export function ProductCard({ product }: { product: Product }) {
-  const whatsappNumber = '595981077600';
-
-  const whatsappMessage = `Hola, quiero consultar por ${product.name}. ¿Me podrían dar más información, precio final y disponibilidad?`;
-
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-    whatsappMessage
-  )}`;
+  const whatsappMessage = `Hola, equipo de Portal Verde. Estoy interesado/a en el producto “${product.name}”. ¿Podrían confirmarme la disponibilidad y brindarme más información? Gracias.`;
+  const whatsappUrl = createWhatsAppUrl(whatsappMessage);
 
   const discount =
     product.previousPrice && product.previousPrice > product.price
