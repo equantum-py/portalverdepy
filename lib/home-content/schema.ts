@@ -59,14 +59,14 @@ const homeSectionSchema = z.object({
   title: z.string(),
   sortOrder: z.number().int().min(0),
   isActive: z.boolean(),
-  sectionType: z.enum(['standard', 'banner-products']).default('standard'),
-  categorySlug: z.string().default(''),
-  bannerDesktopUrl: z.string().default(''),
-  bannerDesktopPath: z.string().default(''),
-  bannerMobileUrl: z.string().default(''),
-  bannerMobilePath: z.string().default(''),
-  productLimit: z.number().int().min(1).max(8).default(4),
-  showViewAll: z.boolean().default(true),
+  sectionType: z.enum(['standard', 'banner-products']),
+  categorySlug: z.string(),
+  bannerDesktopUrl: z.string(),
+  bannerDesktopPath: z.string(),
+  bannerMobileUrl: z.string(),
+  bannerMobilePath: z.string(),
+  productLimit: z.number().int().min(1).max(8),
+  showViewAll: z.boolean(),
 });
 
 export const homeContentSchema = z.object({
