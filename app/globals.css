@@ -15,7 +15,7 @@ a {
 }
 
 .container-shell {
-  @apply mx-auto w-full max-w-[1280px] px-4 sm:px-6 lg:px-8;
+  @apply mx-auto w-full max-w-[1600px] px-3 sm:px-4 lg:px-5 xl:px-6;
 }
 
 .section-space {
@@ -136,7 +136,6 @@ textarea:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
-
 
 html,
 body {
