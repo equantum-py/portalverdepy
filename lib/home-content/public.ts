@@ -15,6 +15,9 @@ const standardSection = (key: string, title: string, sortOrder: number, isActive
   bannerMobilePath: '',
   productLimit: 4,
   showViewAll: true,
+  mobileColumns: 2 as const,
+  mobileSwipe: false,
+  mobileShowProgress: false,
 });
 
 export const defaultHomeContent: HomeContentValues = {
@@ -124,6 +127,22 @@ export async function getHomeContent(): Promise<HomeContentValues> {
     megaColumns: (megaColumns.data ?? []).map((item) => ({ title: item.title, icon: item.icon ?? '', categoryId: item.category_id ?? '', viewAllLabel: item.view_all_label ?? '', viewAllUrl: item.view_all_url ?? '', sortOrder: item.sort_order, isActive: item.is_active, productIds: [] })),
     megaServices: (megaServices.data ?? []).map((item) => ({ title: item.title, description: item.description ?? '', icon: item.icon ?? '', url: item.url, sortOrder: item.sort_order, isActive: item.is_active })),
     buttons: (buttons.data ?? []).map((item) => ({ placement: item.placement, text: item.text, url: item.url, linkType: item.link_type, icon: item.icon ?? '', variant: item.variant ?? '', sortOrder: item.sort_order, isActive: item.is_active, newTab: item.new_tab })),
-    sections: (sections.data ?? []).length > 0 ? (sections.data ?? []).map((item) => ({ key: item.section_key, title: item.title, sortOrder: item.sort_order, isActive: item.is_active, sectionType: item.section_type === 'banner-products' ? 'banner-products' : 'standard', categorySlug: item.category_slug ?? '', bannerDesktopUrl: item.banner_desktop_url ?? '', bannerDesktopPath: item.banner_desktop_path ?? '', bannerMobileUrl: item.banner_mobile_url ?? '', bannerMobilePath: item.banner_mobile_path ?? '', productLimit: item.product_limit ?? 4, showViewAll: item.show_view_all ?? true })) : defaultHomeContent.sections,
+    sections: (sections.data ?? []).length > 0 ? (sections.data ?? []).map((item) => ({
+      key: item.section_key,
+      title: item.title,
+      sortOrder: item.sort_order,
+      isActive: item.is_active,
+      sectionType: item.section_type === 'banner-products' ? 'banner-products' : 'standard',
+      categorySlug: item.category_slug ?? '',
+      bannerDesktopUrl: item.banner_desktop_url ?? '',
+      bannerDesktopPath: item.banner_desktop_path ?? '',
+      bannerMobileUrl: item.banner_mobile_url ?? '',
+      bannerMobilePath: item.banner_mobile_path ?? '',
+      productLimit: item.product_limit ?? 4,
+      showViewAll: item.show_view_all ?? true,
+      mobileColumns: item.mobile_columns === 1 ? 1 : 2,
+      mobileSwipe: item.mobile_swipe ?? false,
+      mobileShowProgress: item.mobile_show_progress ?? false,
+    })) : defaultHomeContent.sections,
   };
 }
