@@ -7,9 +7,9 @@ export const siteConfig = {
   url: 'https://www.portalverdepy.com',
 
   contact: {
-    phoneDisplay: '+595 981 077 600',
-    phoneRaw: '+595981077600',
-    whatsapp: '595981077600',
+    phoneDisplay: '+595 984 053 683',
+    phoneRaw: '+595984053683',
+    whatsapp: '595984053683',
     email: 'hola@portalverde.com.py',
     coverage: 'Asunción y Gran Asunción',
     schedule: 'Lunes a sábado'
