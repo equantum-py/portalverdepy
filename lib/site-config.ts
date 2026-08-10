@@ -3,7 +3,8 @@ export const siteConfig = {
   description:
     'Venta e instalación de césped, productos de jardinería, paisajismo y mantenimiento en Asunción y Gran Asunción.',
 
-  url: 'https://portalverde.com.py',
+  // Dominio canónico de producción. El dominio raíz redirige a www en Vercel.
+  url: 'https://www.portalverdepy.com',
 
   contact: {
     phoneDisplay: '+595 981 077 600',
