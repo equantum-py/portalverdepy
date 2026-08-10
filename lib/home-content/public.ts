@@ -2,28 +2,39 @@ import { createClient } from '@/lib/supabase/server';
 
 import type { HomeContentValues } from './schema';
 
+const standardSection = (key: string, title: string, sortOrder: number, isActive = true) => ({
+  key,
+  title,
+  sortOrder,
+  isActive,
+  sectionType: 'standard' as const,
+  categorySlug: '',
+  bannerDesktopUrl: '',
+  bannerDesktopPath: '',
+  bannerMobileUrl: '',
+  bannerMobilePath: '',
+  productLimit: 4,
+  showViewAll: true,
+});
+
 export const defaultHomeContent: HomeContentValues = {
   promoEnabled: true,
-  promoText:
-    'Césped Esmeralda desde Gs. 31.000 m² con instalación incluida',
+  promoText: 'Césped Esmeralda desde Gs. 31.000 m² con instalación incluida',
   promoIcon: '🌱',
   promoUrl: 'https://wa.me/595981077600',
   promoButtonText: 'WhatsApp',
   promoScroll: true,
   promoSpeed: 24,
   promoNewTab: true,
-
   logoEnabled: true,
   logoDesktopUrl: '/images/logo-desktop.png',
   logoDesktopPath: '',
   logoMobileUrl: '/images/logo-mobile.png',
   logoMobilePath: '',
   logoAlt: 'Portal Verde',
-
   whatsappEnabled: true,
   whatsappText: 'Consultar por WhatsApp',
   whatsappUrl: 'https://wa.me/595981077600',
-
   heroEnabled: true,
   heroTitle: 'Transformamos tu espacio en un jardín que se disfruta',
   heroSubtitle: 'Instalación profesional garantizada',
@@ -60,234 +71,59 @@ export const defaultHomeContent: HomeContentValues = {
     carouselLoop: true,
   },
   heroSlides: [],
-
   servicesEnabled: true,
   servicesTitle: 'Nuestros servicios',
   servicesDescription: '',
-
   megaMenuEnabled: true,
   megaServicesTitle: 'Servicios',
   megaServicesDescription: '',
-
   navigation: [],
   tags: [],
   megaColumns: [],
   megaServices: [],
   buttons: [],
   sections: [
-    { key: 'hero', title: 'Portada principal', sortOrder: 0, isActive: true },
-    { key: 'products-grass', title: 'Césped', sortOrder: 1, isActive: true },
-    { key: 'services', title: 'Servicios', sortOrder: 2, isActive: true },
-    { key: 'products-landscaping', title: 'Paisajismo', sortOrder: 3, isActive: true },
+    standardSection('hero', 'Portada principal', 0),
+    standardSection('products-grass', 'Césped', 1),
+    standardSection('services', 'Servicios', 2),
+    standardSection('products-landscaping', 'Paisajismo', 3),
   ],
 };
 
 type SettingsRow = Record<string, unknown>;
-
-const bool = (value: unknown, fallback: boolean) =>
-  typeof value === 'boolean' ? value : fallback;
-const text = (value: unknown, fallback = '') =>
-  typeof value === 'string' ? value : fallback;
-const num = (value: unknown, fallback: number) =>
-  typeof value === 'number' ? value : fallback;
+const bool = (value: unknown, fallback: boolean) => typeof value === 'boolean' ? value : fallback;
+const text = (value: unknown, fallback = '') => typeof value === 'string' ? value : fallback;
+const num = (value: unknown, fallback: number) => typeof value === 'number' ? value : fallback;
 
 export async function getHomeContent(): Promise<HomeContentValues> {
   const supabase = await createClient();
-
-  const [settings, navigation, tags, megaColumns, megaServices, buttons, sections, heroSlides] =
-    await Promise.all([
-      supabase.from('home_page_settings').select('*').eq('id', true).maybeSingle(),
-      supabase.from('home_navigation_items').select('*').order('sort_order'),
-      supabase.from('home_service_tags').select('*').order('sort_order'),
-      supabase.from('home_mega_columns').select('*').order('sort_order'),
-      supabase.from('home_mega_services').select('*').order('sort_order'),
-      supabase.from('home_global_buttons').select('*').order('sort_order'),
-      supabase.from('home_sections_config').select('*').order('sort_order'),
-      supabase.from('home_hero_slides').select('*').order('sort_order'),
-    ]);
-
+  const [settings, navigation, tags, megaColumns, megaServices, buttons, sections, heroSlides] = await Promise.all([
+    supabase.from('home_page_settings').select('*').eq('id', true).maybeSingle(),
+    supabase.from('home_navigation_items').select('*').order('sort_order'),
+    supabase.from('home_service_tags').select('*').order('sort_order'),
+    supabase.from('home_mega_columns').select('*').order('sort_order'),
+    supabase.from('home_mega_services').select('*').order('sort_order'),
+    supabase.from('home_global_buttons').select('*').order('sort_order'),
+    supabase.from('home_sections_config').select('*').order('sort_order'),
+    supabase.from('home_hero_slides').select('*').order('sort_order'),
+  ]);
   const s = (settings.data ?? {}) as SettingsRow;
 
-  const result: HomeContentValues = {
+  return {
     ...defaultHomeContent,
     promoEnabled: bool(s.promo_enabled, defaultHomeContent.promoEnabled),
-    promoText: text(s.promo_text, defaultHomeContent.promoText),
-    promoIcon: text(s.promo_icon, defaultHomeContent.promoIcon),
-    promoUrl: text(s.promo_url, defaultHomeContent.promoUrl),
-    promoButtonText: text(s.promo_button_text, defaultHomeContent.promoButtonText),
-    promoScroll: bool(s.promo_scroll, defaultHomeContent.promoScroll),
-    promoSpeed: num(s.promo_speed, defaultHomeContent.promoSpeed),
-    promoNewTab: bool(s.promo_new_tab, defaultHomeContent.promoNewTab),
-    logoEnabled: bool(s.logo_enabled, defaultHomeContent.logoEnabled),
-    logoDesktopUrl: text(s.logo_desktop_url, defaultHomeContent.logoDesktopUrl),
-    logoDesktopPath: text(s.logo_desktop_path),
-    logoMobileUrl: text(s.logo_mobile_url, defaultHomeContent.logoMobileUrl),
-    logoMobilePath: text(s.logo_mobile_path),
-    logoAlt: text(s.logo_alt, defaultHomeContent.logoAlt),
-    whatsappEnabled: bool(s.whatsapp_enabled, defaultHomeContent.whatsappEnabled),
-    whatsappText: text(s.whatsapp_text, defaultHomeContent.whatsappText),
-    whatsappUrl: text(s.whatsapp_url, defaultHomeContent.whatsappUrl),
-    heroEnabled: bool(s.hero_enabled, defaultHomeContent.heroEnabled),
-    heroTitle: text(s.hero_title, defaultHomeContent.heroTitle),
-    heroSubtitle: text(s.hero_subtitle, defaultHomeContent.heroSubtitle),
-    heroDescription: text(s.hero_description),
-    heroDesktopUrl: text(s.hero_desktop_url, defaultHomeContent.heroDesktopUrl),
-    heroDesktopPath: text(s.hero_desktop_path),
-    heroMobileUrl: text(s.hero_mobile_url, defaultHomeContent.heroMobileUrl),
-    heroMobilePath: text(s.hero_mobile_path),
-    heroAlt: text(s.hero_alt, defaultHomeContent.heroAlt),
-    heroAlignment:
-      s.hero_alignment === 'center' || s.hero_alignment === 'right'
-        ? s.hero_alignment
-        : 'left',
-    heroOverlay: bool(s.hero_overlay, defaultHomeContent.heroOverlay),
-    heroOverlayIntensity: num(s.hero_overlay_intensity, defaultHomeContent.heroOverlayIntensity),
-    heroShadowIntensity: num(s.hero_shadow_intensity, defaultHomeContent.heroShadowIntensity),
-    heroContentEnabled: bool(s.hero_content_enabled, true),
-    heroContentDesktop: bool(s.hero_content_desktop, true),
-    heroContentMobile: bool(s.hero_content_mobile, true),
-    heroShowLabel: bool(s.hero_show_label, true),
-    heroShowTitle: bool(s.hero_show_title, true),
-    heroShowSubtitle: bool(s.hero_show_subtitle, true),
-    heroShowDescription: bool(s.hero_show_description, true),
-    heroShowPrice: bool(s.hero_show_price, true),
-    heroShowInstallationBadge: bool(s.hero_show_installation_badge, true),
-    heroShowPrimaryButton: bool(s.hero_show_primary_button, true),
-    heroShowSecondaryButton: bool(s.hero_show_secondary_button, true),
-    heroShowBenefits: bool(s.hero_show_benefits, true),
-
-    servicesEnabled: bool(
-      s.services_enabled,
-      defaultHomeContent.servicesEnabled,
-    ),
-    servicesTitle: text(
-      s.services_title,
-      defaultHomeContent.servicesTitle,
-    ),
-    servicesDescription: text(
-      s.services_description,
-      defaultHomeContent.servicesDescription,
-    ),
-
-    megaMenuEnabled: bool(
-      s.mega_menu_enabled,
-      defaultHomeContent.megaMenuEnabled,
-    ),
-    megaServicesTitle: text(
-      s.mega_services_title,
-      defaultHomeContent.megaServicesTitle,
-    ),
-    megaServicesDescription: text(
-      s.mega_services_description,
-      defaultHomeContent.megaServicesDescription,
-    ),
-
-    carousel: {
-      carouselEnabled: bool(s.hero_carousel_enabled, true),
-      carouselAutoplay: bool(s.hero_carousel_autoplay, true),
-      carouselInterval: num(s.hero_carousel_interval, 5000),
-      carouselManualNavigation: bool(s.hero_carousel_manual_navigation, true),
-      carouselShowArrows: bool(s.hero_carousel_show_arrows, true),
-      carouselShowDots: bool(s.hero_carousel_show_dots, true),
-      carouselPauseOnHover: bool(s.hero_carousel_pause_on_hover, true),
-      carouselLoop: bool(s.hero_carousel_loop, true),
-    },
-    heroSlides: (heroSlides.data ?? []).map((slide) => ({
-      id: slide.id,
-      name: slide.name,
-      isActive: slide.is_active,
-      sortOrder: slide.sort_order,
-      desktopUrl: slide.desktop_url ?? '',
-      desktopPath: slide.desktop_path ?? '',
-      mobileUrl: slide.mobile_url ?? '',
-      mobilePath: slide.mobile_path ?? '',
-      altText: slide.alt_text,
-      contentEnabled: slide.content_enabled,
-      contentDesktop: slide.content_desktop,
-      contentMobile: slide.content_mobile,
-      showLabel: slide.show_label,
-      label: slide.label ?? '',
-      showTitle: slide.show_title,
-      title: slide.title ?? '',
-      showSubtitle: slide.show_subtitle,
-      subtitle: slide.subtitle ?? '',
-      showDescription: slide.show_description,
-      description: slide.description ?? '',
-      showPrice: slide.show_price,
-      priceText: slide.price_text ?? '',
-      showInstallationBadge: slide.show_installation_badge,
-      installationBadgeText: slide.installation_badge_text ?? '',
-      showPrimaryButton: slide.show_primary_button,
-      primaryButtonText: slide.primary_button_text ?? '',
-      primaryButtonUrl: slide.primary_button_url ?? '',
-      primaryButtonNewTab: slide.primary_button_new_tab,
-      showSecondaryButton: slide.show_secondary_button,
-      secondaryButtonText: slide.secondary_button_text ?? '',
-      secondaryButtonUrl: slide.secondary_button_url ?? '',
-      secondaryButtonNewTab: slide.secondary_button_new_tab,
-      showBenefits: slide.show_benefits,
-      benefits: Array.isArray(slide.benefits) ? slide.benefits : [],
-      alignment:
-        slide.alignment === 'center' || slide.alignment === 'right'
-          ? slide.alignment
-          : 'left',
-      overlayEnabled: slide.overlay_enabled,
-      overlayIntensity: slide.overlay_intensity,
-    })),
-    navigation: (navigation.data ?? []).map((item) => ({
-      name: item.name,
-      url: item.url,
-      linkType: item.link_type,
-      targetId: item.target_id ?? '',
-      newTab: item.new_tab,
-      sortOrder: item.sort_order,
-      isActive: item.is_active,
-    })),
-    tags: (tags.data ?? []).map((item) => ({
-      label: item.label,
-      icon: item.icon ?? '',
-      sortOrder: item.sort_order,
-      isActive: item.is_active,
-    })),
-    megaColumns: (megaColumns.data ?? []).map((item) => ({
-      title: item.title,
-      icon: item.icon ?? '',
-      categoryId: item.category_id ?? '',
-      viewAllLabel: item.view_all_label ?? '',
-      viewAllUrl: item.view_all_url ?? '',
-      sortOrder: item.sort_order,
-      isActive: item.is_active,
-      productIds: [],
-    })),
-    megaServices: (megaServices.data ?? []).map((item) => ({
-      title: item.title,
-      description: item.description ?? '',
-      icon: item.icon ?? '',
-      url: item.url,
-      sortOrder: item.sort_order,
-      isActive: item.is_active,
-    })),
-    buttons: (buttons.data ?? []).map((item) => ({
-      placement: item.placement,
-      text: item.text,
-      url: item.url,
-      linkType: item.link_type,
-      icon: item.icon ?? '',
-      variant: item.variant ?? '',
-      sortOrder: item.sort_order,
-      isActive: item.is_active,
-      newTab: item.new_tab,
-    })),
-    sections:
-      (sections.data ?? []).length > 0
-        ? (sections.data ?? []).map((item) => ({
-            key: item.section_key,
-            title: item.title,
-            sortOrder: item.sort_order,
-            isActive: item.is_active,
-          }))
-        : defaultHomeContent.sections,
+    promoText: text(s.promo_text, defaultHomeContent.promoText), promoIcon: text(s.promo_icon, defaultHomeContent.promoIcon), promoUrl: text(s.promo_url, defaultHomeContent.promoUrl), promoButtonText: text(s.promo_button_text, defaultHomeContent.promoButtonText), promoScroll: bool(s.promo_scroll, defaultHomeContent.promoScroll), promoSpeed: num(s.promo_speed, defaultHomeContent.promoSpeed), promoNewTab: bool(s.promo_new_tab, defaultHomeContent.promoNewTab),
+    logoEnabled: bool(s.logo_enabled, true), logoDesktopUrl: text(s.logo_desktop_url, defaultHomeContent.logoDesktopUrl), logoDesktopPath: text(s.logo_desktop_path), logoMobileUrl: text(s.logo_mobile_url, defaultHomeContent.logoMobileUrl), logoMobilePath: text(s.logo_mobile_path), logoAlt: text(s.logo_alt, 'Portal Verde'),
+    whatsappEnabled: bool(s.whatsapp_enabled, true), whatsappText: text(s.whatsapp_text, defaultHomeContent.whatsappText), whatsappUrl: text(s.whatsapp_url, defaultHomeContent.whatsappUrl),
+    heroEnabled: bool(s.hero_enabled, true), heroTitle: text(s.hero_title, defaultHomeContent.heroTitle), heroSubtitle: text(s.hero_subtitle, defaultHomeContent.heroSubtitle), heroDescription: text(s.hero_description), heroDesktopUrl: text(s.hero_desktop_url, defaultHomeContent.heroDesktopUrl), heroDesktopPath: text(s.hero_desktop_path), heroMobileUrl: text(s.hero_mobile_url, defaultHomeContent.heroMobileUrl), heroMobilePath: text(s.hero_mobile_path), heroAlt: text(s.hero_alt, 'Portal Verde'), heroAlignment: s.hero_alignment === 'center' || s.hero_alignment === 'right' ? s.hero_alignment : 'left', heroOverlay: bool(s.hero_overlay, true), heroOverlayIntensity: num(s.hero_overlay_intensity, 75), heroShadowIntensity: num(s.hero_shadow_intensity, 75), heroContentEnabled: bool(s.hero_content_enabled, true), heroContentDesktop: bool(s.hero_content_desktop, true), heroContentMobile: bool(s.hero_content_mobile, true), heroShowLabel: bool(s.hero_show_label, true), heroShowTitle: bool(s.hero_show_title, true), heroShowSubtitle: bool(s.hero_show_subtitle, true), heroShowDescription: bool(s.hero_show_description, true), heroShowPrice: bool(s.hero_show_price, true), heroShowInstallationBadge: bool(s.hero_show_installation_badge, true), heroShowPrimaryButton: bool(s.hero_show_primary_button, true), heroShowSecondaryButton: bool(s.hero_show_secondary_button, true), heroShowBenefits: bool(s.hero_show_benefits, true),
+    servicesEnabled: bool(s.services_enabled, true), servicesTitle: text(s.services_title, 'Nuestros servicios'), servicesDescription: text(s.services_description), megaMenuEnabled: bool(s.mega_menu_enabled, true), megaServicesTitle: text(s.mega_services_title, 'Servicios'), megaServicesDescription: text(s.mega_services_description),
+    carousel: { carouselEnabled: bool(s.hero_carousel_enabled, true), carouselAutoplay: bool(s.hero_carousel_autoplay, true), carouselInterval: num(s.hero_carousel_interval, 5000), carouselManualNavigation: bool(s.hero_carousel_manual_navigation, true), carouselShowArrows: bool(s.hero_carousel_show_arrows, true), carouselShowDots: bool(s.hero_carousel_show_dots, true), carouselPauseOnHover: bool(s.hero_carousel_pause_on_hover, true), carouselLoop: bool(s.hero_carousel_loop, true) },
+    heroSlides: (heroSlides.data ?? []).map((slide) => ({ id: slide.id, name: slide.name, isActive: slide.is_active, sortOrder: slide.sort_order, desktopUrl: slide.desktop_url ?? '', desktopPath: slide.desktop_path ?? '', mobileUrl: slide.mobile_url ?? '', mobilePath: slide.mobile_path ?? '', altText: slide.alt_text, contentEnabled: slide.content_enabled, contentDesktop: slide.content_desktop, contentMobile: slide.content_mobile, showLabel: slide.show_label, label: slide.label ?? '', showTitle: slide.show_title, title: slide.title ?? '', showSubtitle: slide.show_subtitle, subtitle: slide.subtitle ?? '', showDescription: slide.show_description, description: slide.description ?? '', showPrice: slide.show_price, priceText: slide.price_text ?? '', showInstallationBadge: slide.show_installation_badge, installationBadgeText: slide.installation_badge_text ?? '', showPrimaryButton: slide.show_primary_button, primaryButtonText: slide.primary_button_text ?? '', primaryButtonUrl: slide.primary_button_url ?? '', primaryButtonNewTab: slide.primary_button_new_tab, showSecondaryButton: slide.show_secondary_button, secondaryButtonText: slide.secondary_button_text ?? '', secondaryButtonUrl: slide.secondary_button_url ?? '', secondaryButtonNewTab: slide.secondary_button_new_tab, showBenefits: slide.show_benefits, benefits: Array.isArray(slide.benefits) ? slide.benefits : [], alignment: slide.alignment === 'center' || slide.alignment === 'right' ? slide.alignment : 'left', overlayEnabled: slide.overlay_enabled, overlayIntensity: slide.overlay_intensity })),
+    navigation: (navigation.data ?? []).map((item) => ({ name: item.name, url: item.url, linkType: item.link_type, targetId: item.target_id ?? '', newTab: item.new_tab, sortOrder: item.sort_order, isActive: item.is_active })),
+    tags: (tags.data ?? []).map((item) => ({ label: item.label, icon: item.icon ?? '', sortOrder: item.sort_order, isActive: item.is_active })),
+    megaColumns: (megaColumns.data ?? []).map((item) => ({ title: item.title, icon: item.icon ?? '', categoryId: item.category_id ?? '', viewAllLabel: item.view_all_label ?? '', viewAllUrl: item.view_all_url ?? '', sortOrder: item.sort_order, isActive: item.is_active, productIds: [] })),
+    megaServices: (megaServices.data ?? []).map((item) => ({ title: item.title, description: item.description ?? '', icon: item.icon ?? '', url: item.url, sortOrder: item.sort_order, isActive: item.is_active })),
+    buttons: (buttons.data ?? []).map((item) => ({ placement: item.placement, text: item.text, url: item.url, linkType: item.link_type, icon: item.icon ?? '', variant: item.variant ?? '', sortOrder: item.sort_order, isActive: item.is_active, newTab: item.new_tab })),
+    sections: (sections.data ?? []).length > 0 ? (sections.data ?? []).map((item) => ({ key: item.section_key, title: item.title, sortOrder: item.sort_order, isActive: item.is_active, sectionType: item.section_type === 'banner-products' ? 'banner-products' : 'standard', categorySlug: item.category_slug ?? '', bannerDesktopUrl: item.banner_desktop_url ?? '', bannerDesktopPath: item.banner_desktop_path ?? '', bannerMobileUrl: item.banner_mobile_url ?? '', bannerMobilePath: item.banner_mobile_path ?? '', productLimit: item.product_limit ?? 4, showViewAll: item.show_view_all ?? true })) : defaultHomeContent.sections,
   };
-
-  return result;
 }
