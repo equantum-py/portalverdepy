@@ -5,6 +5,7 @@ export const PRODUCT_UNITS = [
   'm²',
   'metro lineal',
   'docena',
+  'kg',
   'servicio',
   'visita'
 ] as const;
