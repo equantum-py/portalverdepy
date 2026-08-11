@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { DigitalNurseryCard } from '@/components/digital-nursery-card';
 import { ProductCard } from '@/components/product-card';
@@ -34,11 +34,26 @@ export function CategoryProductsBannerSection({
   mobileShowProgress,
   nurseryMode = false,
 }: Props) {
-  const scrollerRef = useRef<HTMLDivElement>(null);
+  const mobileScrollerRef = useRef<HTMLDivElement>(null);
+  const desktopScrollerRef = useRef<HTMLDivElement>(null);
+  const firstMobileCardRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
+  const [mobileCardHeight, setMobileCardHeight] = useState<number | null>(null);
 
   const categoryUrl = `/shop?category=${encodeURIComponent(categorySlug)}`;
   const bannerUrl = bannerMobileUrl || bannerDesktopUrl;
+
+  useEffect(() => {
+    const element = firstMobileCardRef.current;
+    if (!element) return;
+
+    const update = () => setMobileCardHeight(Math.ceil(element.getBoundingClientRect().height));
+    update();
+
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [products.length, mobileColumns]);
 
   if (!bannerUrl && products.length === 0) return null;
 
@@ -58,20 +73,20 @@ export function CategoryProductsBannerSection({
       <ProductCard product={product} />
     );
 
-  function scroll(direction: -1 | 1) {
-    const element = scrollerRef.current;
+  function scrollDesktop(direction: -1 | 1) {
+    const element = desktopScrollerRef.current;
     if (!element) return;
     element.scrollBy({ left: Math.max(element.clientWidth * 0.85, 220) * direction, behavior: 'smooth' });
   }
 
   function updateProgress() {
-    const element = scrollerRef.current;
+    const element = mobileScrollerRef.current;
     if (!element) return;
     const maxScroll = element.scrollWidth - element.clientWidth;
     setProgress(maxScroll <= 0 ? 100 : Math.min(100, Math.max(0, (element.scrollLeft / maxScroll) * 100)));
   }
 
-  const mobileCardWidth = mobileColumns === 1
+  const mobileItemWidth = mobileColumns === 1
     ? 'min-w-[78vw] basis-[78vw]'
     : 'min-w-[46vw] basis-[46vw]';
 
@@ -89,36 +104,66 @@ export function CategoryProductsBannerSection({
         ) : null}
       </div>
 
-      <div className="flex items-start gap-2.5 sm:gap-3 lg:grid lg:grid-cols-[274px_minmax(0,1fr)] lg:items-stretch lg:gap-4">
-        {bannerUrl ? (
-          <Link
-            href={categoryUrl}
-            className="group relative block h-auto w-[38vw] max-w-[160px] shrink-0 self-start overflow-hidden rounded-2xl border border-border bg-white shadow-sm sm:w-[180px] sm:max-w-none lg:h-full lg:min-h-[441px] lg:w-auto"
-            style={{ aspectRatio: '274 / 441' }}
-          >
+      <div className="lg:hidden">
+        <div
+          ref={mobileScrollerRef}
+          onScroll={updateProgress}
+          className={`flex snap-x snap-mandatory items-start gap-2.5 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${mobileSwipe ? 'touch-pan-x' : ''}`}
+        >
+          {bannerUrl ? (
+            <Link
+              href={categoryUrl}
+              className={`${mobileItemWidth} relative shrink-0 snap-start overflow-hidden rounded-2xl border border-border bg-[#f7f5ef] shadow-sm`}
+              style={mobileCardHeight ? { height: `${mobileCardHeight}px` } : undefined}
+            >
+              <Image
+                src={bannerUrl}
+                alt={`Banner ${title}`}
+                fill
+                sizes={mobileColumns === 1 ? '78vw' : '46vw'}
+                className="object-contain object-center"
+                priority={false}
+              />
+            </Link>
+          ) : null}
+
+          {products.map((product, index) => (
+            <div
+              key={product.id}
+              ref={index === 0 ? firstMobileCardRef : undefined}
+              className={`${mobileItemWidth} flex shrink-0 snap-start`}
+            >
+              <div className="w-full">{renderCard(product)}</div>
+            </div>
+          ))}
+        </div>
+
+        {mobileShowProgress ? (
+          <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-200">
+            <div className="h-full rounded-full bg-brand-700 transition-[width] duration-150" style={{ width: `${Math.max(12, progress)}%` }} />
+          </div>
+        ) : null}
+      </div>
+
+      <div className="hidden lg:grid lg:grid-cols-[274px_minmax(0,1fr)] lg:items-stretch lg:gap-4">
+        {bannerDesktopUrl || bannerMobileUrl ? (
+          <Link href={categoryUrl} className="group relative h-full min-h-[441px] overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
             <Image
-              src={bannerUrl}
+              src={bannerDesktopUrl || bannerMobileUrl}
               alt={`Banner ${title}`}
               fill
-              sizes="(max-width: 639px) 38vw, (max-width: 1023px) 180px, 274px"
-              className="object-contain object-top transition duration-500 group-hover:scale-[1.01] lg:object-cover lg:object-center"
+              sizes="274px"
+              className="object-cover object-center transition duration-500 group-hover:scale-[1.02]"
             />
           </Link>
         ) : (
-          <div className="w-[38vw] max-w-[160px] shrink-0 rounded-2xl border border-dashed border-border bg-brand-50 sm:w-[180px] sm:max-w-none lg:min-h-[441px] lg:w-auto" style={{ aspectRatio: '274 / 441' }} />
+          <div className="h-full min-h-[441px] rounded-2xl border border-dashed border-border bg-brand-50" />
         )}
 
-        <div className="relative min-w-0 flex-1 overflow-hidden">
-          <div
-            ref={scrollerRef}
-            onScroll={updateProgress}
-            className={`flex snap-x snap-mandatory items-start gap-2.5 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-3 lg:h-full lg:items-stretch lg:gap-4 ${mobileSwipe ? 'touch-pan-x' : ''}`}
-          >
+        <div className="relative min-w-0 overflow-hidden">
+          <div ref={desktopScrollerRef} className="flex h-full snap-x snap-mandatory items-stretch gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {products.map((product) => (
-              <div
-                key={product.id}
-                className={`${mobileCardWidth} flex shrink-0 snap-start sm:min-w-[260px] sm:basis-[260px] lg:min-w-[calc(33.333%-11px)] lg:basis-[calc(33.333%-11px)]`}
-              >
+              <div key={product.id} className="flex min-w-[calc(33.333%-11px)] basis-[calc(33.333%-11px)] shrink-0 snap-start">
                 <div className="w-full">{renderCard(product)}</div>
               </div>
             ))}
@@ -126,22 +171,16 @@ export function CategoryProductsBannerSection({
 
           {products.length > 1 ? (
             <>
-              <button type="button" onClick={() => scroll(-1)} aria-label="Productos anteriores" className="absolute left-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-white/95 p-2 text-brand-800 shadow-md transition hover:bg-white sm:inline-flex">
+              <button type="button" onClick={() => scrollDesktop(-1)} aria-label="Productos anteriores" className="absolute left-2 top-1/2 z-10 inline-flex -translate-y-1/2 rounded-full border border-border bg-white/95 p-2 text-brand-800 shadow-md transition hover:bg-white">
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              <button type="button" onClick={() => scroll(1)} aria-label="Productos siguientes" className="absolute right-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-white/95 p-2 text-brand-800 shadow-md transition hover:bg-white sm:inline-flex">
+              <button type="button" onClick={() => scrollDesktop(1)} aria-label="Productos siguientes" className="absolute right-2 top-1/2 z-10 inline-flex -translate-y-1/2 rounded-full border border-border bg-white/95 p-2 text-brand-800 shadow-md transition hover:bg-white">
                 <ChevronRight className="h-5 w-5" />
               </button>
             </>
           ) : null}
         </div>
       </div>
-
-      {mobileShowProgress ? (
-        <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-200 lg:hidden">
-          <div className="h-full rounded-full bg-brand-700 transition-[width] duration-150" style={{ width: `${Math.max(12, progress)}%` }} />
-        </div>
-      ) : null}
     </section>
   );
 }
