@@ -20,8 +20,7 @@ async function getActiveNurseryPlants(): Promise<Product[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("digital_nursery_items")
-    .select("id,name,variant,description,image_url,sort_order")
-    .eq("category", "Planta")
+    .select("id,name,variant,description,image_url,sort_order,is_active,is_published")
     .eq("is_active", true)
     .eq("is_published", true)
     .order("sort_order", { ascending: true });
