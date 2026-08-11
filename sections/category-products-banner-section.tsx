@@ -49,7 +49,7 @@ export function CategoryProductsBannerSection({ title, categorySlug, bannerDeskt
     setProgress(Math.min(100, Math.max(0, (element.scrollLeft / maxScroll) * 100)));
   }
 
-  const mobileItemWidth = mobileColumns === 1 ? 'basis-[86%] min-w-[86%]' : 'basis-[calc(50%-5px)] min-w-[calc(50%-5px)]';
+  const mobileProductWidth = mobileColumns === 1 ? 'min-w-[76vw] basis-[76vw]' : 'min-w-[44vw] basis-[44vw]';
 
   return (
     <section className="border-b border-border/70 py-4 last:border-none sm:py-6 lg:py-7">
@@ -59,15 +59,15 @@ export function CategoryProductsBannerSection({ title, categorySlug, bannerDeskt
       </div>
 
       <div className="lg:hidden">
-        {bannerUrl ? (
-          <Link href={categoryUrl} className="mb-3 block w-full overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
-            <div className="relative aspect-[16/7] w-full sm:aspect-[16/6]">
-              <Image src={bannerUrl} alt={`Banner ${title}`} fill sizes="100vw" className="object-cover" />
-            </div>
-          </Link>
-        ) : null}
-        <div ref={mobileScrollerRef} onScroll={updateMobileProgress} className={`flex snap-x snap-mandatory gap-2.5 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${mobileSwipe ? 'touch-pan-x' : ''}`}>
-          {products.map((product) => <div key={product.id} className={`${mobileItemWidth} snap-start`}>{renderCard(product)}</div>)}
+        <div ref={mobileScrollerRef} onScroll={updateMobileProgress} className={`flex snap-x snap-mandatory items-stretch gap-2.5 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${mobileSwipe ? 'touch-pan-x' : ''}`}>
+          {bannerUrl ? (
+            <Link href={categoryUrl} className={`relative shrink-0 snap-start overflow-hidden rounded-2xl border border-border bg-white shadow-sm ${mobileColumns === 1 ? 'min-w-[42vw] basis-[42vw]' : 'min-w-[38vw] basis-[38vw]'}`}>
+              <div className="relative h-full min-h-[390px] w-full">
+                <Image src={bannerUrl} alt={`Banner ${title}`} fill sizes="42vw" className="object-cover" priority={false} />
+              </div>
+            </Link>
+          ) : null}
+          {products.map((product) => <div key={product.id} className={`${mobileProductWidth} shrink-0 snap-start`}>{renderCard(product)}</div>)}
         </div>
         {mobileShowProgress ? <div className="mt-1 h-1 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-brand-700 transition-[width] duration-150" style={{ width: `${Math.max(12, progress)}%` }} /></div> : null}
       </div>
