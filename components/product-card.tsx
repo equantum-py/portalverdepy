@@ -16,6 +16,7 @@ import { createWhatsAppUrl } from '@/lib/site-config';
 export function ProductCard({ product }: { product: Product }) {
   const whatsappMessage = `Hola, equipo de Portal Verde. Estoy interesado/a en el producto “${product.name}”. ¿Podrían confirmarme la disponibilidad y brindarme más información? Gracias.`;
   const whatsappUrl = createWhatsAppUrl(whatsappMessage);
+  const saleUnit = product.unit ?? 'unidad';
 
   const discount =
     product.previousPrice && product.previousPrice > product.price
@@ -79,10 +80,14 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
 
         <div className="mt-3">
-          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
             <p className="text-base font-bold tracking-tight text-brand-700 sm:text-xl">
               {formatPricePYG(product.price)}
             </p>
+
+            <span className="text-[11px] font-semibold text-brand-700 sm:text-sm">
+              / {saleUnit}
+            </span>
 
             {product.previousPrice ? (
               <p className="text-[10px] text-text-soft line-through sm:text-xs">
