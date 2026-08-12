@@ -13,6 +13,10 @@ import {
 } from 'lucide-react';
 
 import { ProductCard } from '@/components/product-card';
+import {
+  installationNote,
+  shouldShowInstallationNote
+} from '@/lib/product-installation-note';
 import { ProductGallery } from '@/components/products/product-gallery';
 import { formatPricePYG } from '@/lib/format-price';
 import { getPublicProducts } from '@/lib/products/catalog-products';
@@ -285,6 +289,13 @@ export default async function ProductPage({
                 </div>
               ) : null}
 
+              {shouldShowInstallationNote(product) ? (
+                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+                  <strong className="font-semibold">Aclaración sobre el terreno:</strong>{' '}
+                  {installationNote}
+                </div>
+              ) : null}
+
               <div className="mt-5 grid gap-3 text-sm text-text-soft">
                 <p className="flex items-start gap-2">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-700" />
@@ -407,177 +418,3 @@ export default async function ProductPage({
             {/* Recomendaciones */}
             {product.recommendations?.length ? (
               <section className="mt-3 sm:mt-6">
-                <details className="group rounded-2xl border border-border bg-white shadow-sm sm:hidden">
-                  <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-4">
-                    <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-700">
-                        Uso recomendado
-                      </p>
-                      <h2 className="mt-1 text-base font-semibold text-text-strong">
-                        Ideal para
-                      </h2>
-                    </div>
-
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-brand-700 transition group-open:rotate-45">
-                      +
-                    </span>
-                  </summary>
-
-                  <ul className="grid gap-2 border-t border-border px-4 py-4">
-                    {product.recommendations.map((recommendation: string) => (
-                      <li
-                        key={recommendation}
-                        className="flex items-start gap-2 text-xs leading-5 text-text-soft"
-                      >
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-700" />
-                        {recommendation}
-                      </li>
-                    ))}
-                  </ul>
-                </details>
-
-                <div className="hidden rounded-3xl border border-border bg-white p-6 shadow-sm sm:block">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-700">
-                    Uso recomendado
-                  </p>
-
-                  <h2 className="mt-1 text-xl font-semibold text-text-strong">
-                    Ideal para
-                  </h2>
-
-                  <ul className="mt-4 grid gap-3">
-                    {product.recommendations.map((recommendation: string) => (
-                      <li
-                        key={recommendation}
-                        className="flex items-start gap-3 text-sm leading-6 text-text-soft"
-                      >
-                        <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-100">
-                          <Check className="h-3 w-3 text-brand-700" />
-                        </span>
-
-                        {recommendation}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </section>
-            ) : null}
-          </div>
-        </section>
-
-        {/* Proceso */}
-        <section className="mt-6 rounded-2xl bg-brand-950 px-4 py-6 text-white sm:mt-14 sm:rounded-3xl sm:px-8 sm:py-8 lg:px-10">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-200">
-              Simple y acompañado
-            </p>
-
-            <h2 className="mt-2 text-2xl font-semibold sm:text-3xl">
-              ¿Cómo realizamos tu pedido?
-            </h2>
-          </div>
-
-          <div className="mt-5 grid auto-cols-[82%] grid-flow-col gap-3 overflow-x-auto pb-2 sm:mt-7 sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-4">
-            {[
-              {
-                number: '01',
-                title: 'Consultás',
-                text: 'Nos contás qué necesitás y cuántos metros aproximados.'
-              },
-              {
-                number: '02',
-                title: 'Asesoramos',
-                text: 'Te recomendamos el producto adecuado para tu espacio.'
-              },
-              {
-                number: '03',
-                title: 'Coordinamos',
-                text: 'Confirmamos precio, disponibilidad y fecha de trabajo.'
-              },
-              {
-                number: '04',
-                title: 'Instalamos',
-                text: 'Nuestro equipo realiza la instalación profesional.'
-              }
-            ].map((step) => (
-              <article
-                key={step.number}
-                className="rounded-2xl border border-white/10 bg-white/5 p-4"
-              >
-                <span className="text-sm font-bold text-brand-300">
-                  {step.number}
-                </span>
-
-                <h3 className="mt-3 font-semibold">{step.title}</h3>
-
-                <p className="mt-2 text-sm leading-6 text-white/70">
-                  {step.text}
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        {/* Relacionados */}
-        {relatedProducts.length ? (
-          <section className="mt-10 sm:mt-14">
-            <div className="mb-5 flex items-end justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-700">
-                  Completá tu proyecto
-                </p>
-
-                <h2 className="mt-1 text-2xl font-semibold tracking-tight text-text-strong sm:text-3xl">
-                  También te puede interesar
-                </h2>
-              </div>
-
-              <Link
-                href="/shop"
-                className="shrink-0 text-sm font-semibold text-brand-700"
-              >
-                Ver más
-              </Link>
-            </div>
-
-            <div className="flex snap-x gap-3 overflow-x-auto pb-3 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-4">
-              {relatedProducts.map((relatedProduct: Product) => (
-                <div
-                  key={relatedProduct.id}
-                  className="w-[72%] shrink-0 snap-start sm:w-auto"
-                >
-                  <ProductCard product={relatedProduct} />
-                </div>
-              ))}
-            </div>
-          </section>
-        ) : null}
-      </main>
-
-      {/* CTA fijo mobile */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white/95 p-3 shadow-[0_-10px_30px_rgba(15,35,20,0.12)] backdrop-blur-lg sm:hidden">
-        <div className="container-shell flex items-center gap-3 px-0">
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] uppercase tracking-wide text-text-soft">
-              Desde
-            </p>
-
-            <p className="truncate text-lg font-bold text-brand-700">
-              {formatPricePYG(product.price)}
-            </p>
-          </div>
-
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 text-sm font-semibold text-white"
-          >
-            <WhatsAppIcon className="h-5 w-5" />
-            Presupuesto
-          </a>
-        </div>
-      </div>
-    </>
-  );
-}
