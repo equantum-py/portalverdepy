@@ -311,9 +311,9 @@ export function ProductImageUploader({
                   src={image.imageUrl}
                   alt={image.altText || productName || 'Producto'}
                   fill
-                  quality={95}
+                  quality={90}
                   sizes="(max-width: 640px) 100vw, 320px"
-                  className="object-cover"
+                  className="object-contain p-1"
                 />
 
                 {image.isPrimary ? (

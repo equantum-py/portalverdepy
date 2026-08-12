@@ -35,9 +35,10 @@ export function ProductGallery({
           src="/images/product-placeholder.webp"
           alt={productName}
           fill
-          quality={95}
+          quality={90}
           priority
-          className="object-cover"
+          sizes="(max-width: 1024px) 100vw, 620px"
+          className="object-contain p-2"
         />
       </div>
     );
@@ -73,10 +74,10 @@ export function ProductGallery({
             `${productName} - imagen ${selectedIndex + 1}`
           }
           fill
-          quality={95}
+          quality={90}
           priority={selectedIndex === 0}
           sizes="(max-width: 1024px) 100vw, 620px"
-          className="object-cover"
+          className="object-contain p-2"
         />
 
         {validImages.length > 1 ? (
@@ -132,7 +133,7 @@ export function ProductGallery({
                   fill
                   quality={90}
                   sizes="96px"
-                  className="object-cover"
+                  className="object-contain p-1"
                 />
               </button>
             );
