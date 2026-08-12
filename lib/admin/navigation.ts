@@ -4,6 +4,7 @@ import {
   FolderTree,
   Home,
   Images,
+  PanelsTopLeft,
   LayoutDashboard,
   Settings,
   Users,
@@ -41,6 +42,11 @@ export const adminNavigation = [
     title: 'Banners',
     href: '/admin/banners',
     icon: Images
+  },
+  {
+    title: 'Banners de servicios',
+    href: '/admin/banners-servicios',
+    icon: PanelsTopLeft
   },
   {
     title: 'Logo',
