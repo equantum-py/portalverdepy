@@ -1,6 +1,7 @@
 'use client';
 
 import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
+import Image from 'next/image';
 import { type ChangeEvent, useRef, useState } from 'react';
 
 import { validateMinimumImageSize } from '@/lib/images/client-image-validation';
@@ -62,7 +63,6 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
       });
       if (error) throw error;
 
-      if (path) await supabase.storage.from('product-images').remove([path]);
       const { data } = supabase.storage.from('product-images').getPublicUrl(nextPath);
       setPath(nextPath);
       setUrl(data.publicUrl);
@@ -75,12 +75,10 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
     }
   }
 
-  async function remove() {
-    const supabase = createClient();
-    if (path) await supabase.storage.from('product-images').remove([path]);
+  function remove() {
     setPath('');
     setUrl('');
-    setMessage('Foto eliminada. Guardá los cambios.');
+    setMessage('Foto quitada del registro. El archivo original se conserva. Guardá los cambios.');
   }
 
   return (
@@ -91,8 +89,9 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
         {url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={url} alt={itemName} width={1200} height={900} className="aspect-[4/3] w-full object-cover" />
+          <div className="relative aspect-[4/3] w-full">
+            <Image src={url} alt={itemName} fill quality={90} sizes="(max-width: 768px) 100vw, 720px" className="object-contain p-1" />
+          </div>
         ) : (
           <div className="flex aspect-[4/3] items-center justify-center text-sm text-slate-400">Sin foto</div>
         )}
