@@ -146,20 +146,20 @@ export function CategoryProductsBannerSection({
         ) : null}
       </div>
 
-      <div className="hidden lg:grid lg:grid-cols-[274px_minmax(0,1fr)] lg:items-stretch lg:gap-4">
+      <div className="hidden lg:grid lg:grid-cols-[274px_minmax(0,1fr)] lg:items-start lg:gap-4">
         {bannerDesktopUrl || bannerMobileUrl ? (
-          <Link href={categoryUrl} className="group relative h-full min-h-[441px] overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
+          <Link href={categoryUrl} className="group relative aspect-[274/441] w-[274px] overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
             <Image
               src={bannerDesktopUrl || bannerMobileUrl}
               alt={`Banner ${title}`}
               fill
               quality={95}
               sizes="274px"
-              className="object-cover object-center transition duration-500 group-hover:scale-[1.02]"
+              className="object-contain object-top transition duration-500 group-hover:scale-[1.01]"
             />
           </Link>
         ) : (
-          <div className="h-full min-h-[441px] rounded-2xl border border-dashed border-border bg-brand-50" />
+          <div className="aspect-[274/441] w-[274px] rounded-2xl border border-dashed border-border bg-brand-50" />
         )}
 
         <div className="relative min-w-0 overflow-hidden">
