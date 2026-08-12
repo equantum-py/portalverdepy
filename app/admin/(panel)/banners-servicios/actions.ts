@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 
 const bannerSchema = z.object({
   key: z.enum(['service-banner-irrigation', 'service-banner-maintenance']),
-  title: z.string().trim().min(3, 'Escribí un título.'),
+  title: z.string().trim().max(80),
   isActive: z.boolean(),
   link: z.string().trim().min(1, 'Agregá el enlace de WhatsApp.'),
   desktopUrl: z.string(),
