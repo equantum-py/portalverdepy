@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { ImagePlus, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import { type ChangeEvent, useRef, useState } from 'react';
 
+import { validateMinimumImageSize } from '@/lib/images/client-image-validation';
 import { createClient } from '@/lib/supabase/client';
 
 const BUCKET = 'home-content-images';
@@ -24,7 +25,7 @@ export function SectionBannerUploader({ sectionKey, variant, url, onChange }: Pr
   const [error, setError] = useState('');
 
   const label = variant === 'desktop' ? 'Banner Desktop' : 'Banner Mobile';
-  const recommended = '274 × 441 px';
+  const recommended = '548 × 882 px o superior';
   const ratio = 'aspect-[274/441]';
 
   async function upload(event: ChangeEvent<HTMLInputElement>) {
@@ -34,13 +35,15 @@ export function SectionBannerUploader({ sectionKey, variant, url, onChange }: Pr
     setError('');
     if (!ALLOWED_TYPES.includes(file.type)) { setError('Solo se permiten imágenes JPG, PNG o WebP.'); return; }
     if (file.size > MAX_FILE_SIZE) { setError('La imagen supera el máximo permitido de 5 MB.'); return; }
+    const dimensionError = await validateMinimumImageSize(file, 548, 882);
+    if (dimensionError) { setError(dimensionError); return; }
     setUploading(true);
     try {
       const extension = file.name.split('.').pop()?.toLowerCase() || 'webp';
       const safeKey = sectionKey.replace(/[^a-zA-Z0-9-_]/g, '-');
       const storagePath = `home-sections/${safeKey}/${variant}/${crypto.randomUUID()}.${extension}`;
       const supabase = createClient();
-      const { error: uploadError } = await supabase.storage.from(BUCKET).upload(storagePath, file, { cacheControl: '3600', contentType: file.type, upsert: false });
+      const { error: uploadError } = await supabase.storage.from(BUCKET).upload(storagePath, file, { cacheControl: '31536000', contentType: file.type, upsert: false });
       if (uploadError) throw uploadError;
       const { data } = supabase.storage.from(BUCKET).getPublicUrl(storagePath);
       onChange({ url: data.publicUrl, path: storagePath });
@@ -58,7 +61,7 @@ export function SectionBannerUploader({ sectionKey, variant, url, onChange }: Pr
       <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={upload} className="hidden" />
       {url ? (
         <div className={`relative w-full max-w-[274px] overflow-hidden rounded-xl border bg-slate-50 ${ratio}`}>
-          <Image src={url} alt={label} fill sizes="274px" className="object-cover" />
+          <Image src={url} alt={label} fill quality={95} sizes="274px" className="object-cover" />
           <div className="absolute right-2 top-2 flex gap-2">
             <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading} className="rounded-lg bg-white p-2 text-slate-700 shadow" aria-label={`Reemplazar ${label}`}>{uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}</button>
             <button type="button" onClick={() => onChange({ url: '', path: '' })} disabled={uploading} className="rounded-lg bg-white p-2 text-red-600 shadow" aria-label={`Eliminar ${label}`}><Trash2 className="h-4 w-4" /></button>

@@ -15,6 +15,7 @@ import {
   useState
 } from 'react';
 
+import { validateExactImageSize } from '@/lib/images/client-image-validation';
 import type { ProductImageDraft } from '@/lib/products/schema';
 import { createProductSlug } from '@/lib/products/slug';
 import { createClient } from '@/lib/supabase/client';
@@ -95,6 +96,13 @@ export function ProductImageUploader({
         event.target.value = '';
         return;
       }
+
+      const dimensionError = await validateExactImageSize(file, 1200, 1200);
+      if (dimensionError) {
+        showError(dimensionError);
+        event.target.value = '';
+        return;
+      }
     }
 
     setIsUploading(true);
@@ -116,7 +124,7 @@ export function ProductImageUploader({
         const { error: uploadError } = await supabase.storage
           .from('product-images')
           .upload(storagePath, file, {
-            cacheControl: '3600',
+            cacheControl: '31536000',
             contentType: file.type,
             upsert: false
           });
@@ -269,7 +277,7 @@ export function ProductImageUploader({
             </span>
 
             <span className="mt-1 text-xs text-slate-500">
-              JPG, PNG o WebP · máximo 5 MB por archivo
+              JPG, PNG o WebP · 1200 × 1200 px · máximo 5 MB
             </span>
 
             <span className="mt-1 text-xs text-slate-400">
@@ -303,6 +311,7 @@ export function ProductImageUploader({
                   src={image.imageUrl}
                   alt={image.altText || productName || 'Producto'}
                   fill
+                  quality={95}
                   sizes="(max-width: 640px) 100vw, 320px"
                   className="object-cover"
                 />

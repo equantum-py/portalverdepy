@@ -3,6 +3,7 @@
 import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
 import { type ChangeEvent, useRef, useState } from 'react';
 
+import { validateMinimumImageSize } from '@/lib/images/client-image-validation';
 import { createClient } from '@/lib/supabase/client';
 
 type Props = {
@@ -42,6 +43,11 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
       setMessage('La imagen supera 5 MB.');
       return;
     }
+    const dimensionError = await validateMinimumImageSize(file, 1200, 900);
+    if (dimensionError) {
+      setMessage(dimensionError);
+      return;
+    }
 
     setUploading(true);
     setMessage('');
@@ -50,7 +56,7 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
       const extension = file.name.split('.').pop()?.toLowerCase() || 'webp';
       const nextPath = `digital-nursery/${itemId}/${safeName(itemName)}-${crypto.randomUUID()}.${extension}`;
       const { error } = await supabase.storage.from('product-images').upload(nextPath, file, {
-        cacheControl: '3600',
+        cacheControl: '31536000',
         contentType: file.type,
         upsert: false
       });
@@ -86,7 +92,7 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
         {url ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={url} alt={itemName} className="aspect-[4/3] w-full object-cover" />
+          <img src={url} alt={itemName} width={1200} height={900} className="aspect-[4/3] w-full object-cover" />
         ) : (
           <div className="flex aspect-[4/3] items-center justify-center text-sm text-slate-400">Sin foto</div>
         )}

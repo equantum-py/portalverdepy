@@ -35,6 +35,7 @@ export function ProductGallery({
           src="/images/product-placeholder.webp"
           alt={productName}
           fill
+          quality={95}
           priority
           className="object-cover"
         />
@@ -72,6 +73,7 @@ export function ProductGallery({
             `${productName} - imagen ${selectedIndex + 1}`
           }
           fill
+          quality={95}
           priority={selectedIndex === 0}
           sizes="(max-width: 1024px) 100vw, 620px"
           className="object-cover"
@@ -128,6 +130,7 @@ export function ProductGallery({
                     `${productName} - miniatura ${index + 1}`
                   }
                   fill
+                  quality={90}
                   sizes="96px"
                   className="object-cover"
                 />

@@ -8,6 +8,7 @@ import {
   type ChangeEvent,
 } from 'react';
 
+import { validateMinimumImageSize } from '@/lib/images/client-image-validation';
 import type { CategoryImage } from '@/lib/categories/schema';
 import { createCategorySlug } from '@/lib/categories/slug';
 import { createClient } from '@/lib/supabase/client';
@@ -71,6 +72,23 @@ export function CategoryImageUploader({
       return;
     }
 
+    const minimumSize =
+      aspect === 'desktop'
+        ? { width: 1920, height: 600 }
+        : aspect === 'mobile'
+          ? { width: 960, height: 1200 }
+          : { width: 1200, height: 1200 };
+    const dimensionError = await validateMinimumImageSize(
+      file,
+      minimumSize.width,
+      minimumSize.height,
+    );
+    if (dimensionError) {
+      setMessage(dimensionError);
+      if (inputRef.current) inputRef.current.value = '';
+      return;
+    }
+
     setUploading(true);
 
     try {
@@ -88,7 +106,7 @@ export function CategoryImageUploader({
         .from('category-images')
         .upload(path, file, {
           contentType: file.type,
-          cacheControl: '3600',
+          cacheControl: '31536000',
           upsert: false,
         });
 
@@ -155,6 +173,7 @@ export function CategoryImageUploader({
             src={value.imageUrl}
             alt={label}
             fill
+            quality={95}
             className="object-cover"
             sizes={
               aspect === 'desktop'
