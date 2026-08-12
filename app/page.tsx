@@ -53,7 +53,14 @@ export default async function HomePage() {
     getActiveNurseryPlants(),
   ]);
   const cesped = products.filter((product) => product.categorySlug === "cesped");
-  const paisajismo = products.filter((product) => product.categorySlug === "paisajismo");
+  const piedras = products.filter((product) =>
+    normalizeCategory(product.name).includes("piedra")
+  );
+  const paisajismo = products.filter(
+    (product) =>
+      product.categorySlug === "paisajismo" &&
+      !normalizeCategory(product.name).includes("piedra")
+  );
   const activeSections = [...content.sections].filter((section) => section.isActive).sort((a, b) => a.sortOrder - b.sortOrder);
 
   return <>
@@ -85,6 +92,13 @@ export default async function HomePage() {
         if (section.key === "products-grass") return <ProductSection key={section.key} title={section.title} products={cesped} />;
         if (section.key === "services") { if (!content.servicesEnabled) return null; return <ServicesSection key={section.key} />; }
         if (section.key === "products-landscaping") return <ProductSection key={section.key} title={section.title} products={paisajismo} />;
+        const isStonesSection =
+          section.sectionType === "standard" &&
+          (normalizeCategory(section.key).includes("piedra") ||
+            normalizeCategory(section.title).includes("piedra"));
+        if (isStonesSection) {
+          return <ProductSection key={section.key} title={section.title} products={piedras} />;
+        }
         return null;
       })}
     </main>
