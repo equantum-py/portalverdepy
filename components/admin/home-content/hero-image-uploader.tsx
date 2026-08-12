@@ -4,6 +4,7 @@ import { ImagePlus, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 
+import { validateMinimumImageSize } from '@/lib/images/client-image-validation';
 import { createClient } from '@/lib/supabase/client';
 
 const BUCKET = 'home-content-images';
@@ -86,6 +87,20 @@ export function HeroImageUploader({
       return;
     }
 
+    const minimumSize =
+      imageVariant === 'desktop'
+        ? { width: 1920, height: 650 }
+        : { width: 750, height: 507 };
+    const dimensionError = await validateMinimumImageSize(
+      file,
+      minimumSize.width,
+      minimumSize.height,
+    );
+    if (dimensionError) {
+      setError(dimensionError);
+      return;
+    }
+
     const localUrl = URL.createObjectURL(file);
 
     setPreviewUrl((current) => {
@@ -104,7 +119,7 @@ export function HeroImageUploader({
       const { error: uploadError } = await supabase.storage
         .from(BUCKET)
         .upload(storagePath, file, {
-          cacheControl: '3600',
+          cacheControl: '31536000',
           contentType: file.type,
           upsert: false,
         });
@@ -167,6 +182,7 @@ export function HeroImageUploader({
             src={displayedUrl}
             alt={displayLabel}
             fill
+            quality={95}
             unoptimized={Boolean(previewUrl)}
             className="object-contain object-center"
             sizes="(min-width: 768px) 550px, 100vw"
