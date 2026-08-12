@@ -35,4 +35,7 @@ export type Product = {
   previousPrice?: number;
   includesInstallation?: boolean;
   inStock?: boolean;
+  appliedUnitPrice?: number;
+  estimatedTotal?: number;
+  appliedTierLabel?: string;
 };

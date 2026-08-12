@@ -72,9 +72,7 @@ export function CartClient() {
     const productLines = items
       .map(
         (item) =>
-          `• ${item.name}\n  Cantidad: ${item.quantity}\n  Precio estimado: ${formatPricePYG(
-            item.price * item.quantity
-          )}`
+          `• ${item.name}\n  Cantidad: ${item.quantity} ${item.unit ?? 'unidad'}\n  Precio aplicado: ${formatPricePYG(item.appliedUnitPrice ?? item.price)} por ${item.unit ?? 'unidad'}\n  Total estimado: ${formatPricePYG((item.appliedUnitPrice ?? item.price) * item.quantity)}${item.appliedTierLabel ? `\n  Escala: ${item.appliedTierLabel}` : ''}`
       )
       .join('\n\n');
 
@@ -250,7 +248,7 @@ export function CartClient() {
                   </p>
 
                   <p className="mt-1 text-sm font-bold text-text-strong sm:text-base">
-                    {formatPricePYG(item.price * item.quantity)}
+                    {formatPricePYG((item.appliedUnitPrice ?? item.price) * item.quantity)}
                   </p>
                 </div>
               </div>

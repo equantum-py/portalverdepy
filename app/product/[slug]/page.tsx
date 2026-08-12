@@ -23,6 +23,7 @@ import { getPublicProducts } from '@/lib/products/catalog-products';
 import type { Product } from '@/lib/types';
 import { getPublicProductBySlug } from '@/lib/products/public-products';
 import { WhatsAppIcon } from '@/components/icons';
+import { TieredPriceCalculator } from '@/components/products/tiered-price-calculator';
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -163,6 +164,8 @@ export default async function ProductPage({
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     message
   )}`;
+  const activePriceTiers = databaseProduct?.priceTiers ?? [];
+  const hasTieredPricing = activePriceTiers.length > 0;
 
   return (
     <>
@@ -264,8 +267,10 @@ export default async function ProductPage({
               {product.seoDescription || product.description}
             </p>
 
+            {hasTieredPricing ? <TieredPriceCalculator product={product as Product} tiers={activePriceTiers} minimumQuantity={Number(databaseProduct?.min_order_quantity ?? 1)} unit={databaseProduct?.unit ?? 'unidad'} whatsappNumber={whatsappNumber} /> : null}
+
             {/* Precio y conversión */}
-            <div className="mt-4 rounded-2xl border border-brand-100 bg-white p-4 shadow-soft sm:mt-6 sm:rounded-3xl sm:p-6">
+            {!hasTieredPricing ? <div className="mt-4 rounded-2xl border border-brand-100 bg-white p-4 shadow-soft sm:mt-6 sm:rounded-3xl sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-text-soft">
                 Precio desde
               </p>
@@ -336,7 +341,7 @@ export default async function ProductPage({
                 <Clock3 className="h-3.5 w-3.5" />
                 Atención personalizada por WhatsApp
               </p>
-            </div>
+            </div> : null}
 
             {/* Beneficios */}
             {product.benefits?.length ? (
