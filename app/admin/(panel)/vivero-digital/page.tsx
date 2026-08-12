@@ -1,4 +1,5 @@
 import { ImageOff, Pencil, Search, Sprout } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 import { createClient } from '@/lib/supabase/server';
@@ -51,7 +52,7 @@ export default async function DigitalNurseryPage({ searchParams }: PageProps) {
         <div className="grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {items.map((item) => (
             <article key={item.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-              <div className="flex aspect-[4/3] items-center justify-center bg-slate-50">{item.image_url ? <img src={item.image_url} alt={item.name} className="h-full w-full object-cover" /> : <div className="flex flex-col items-center gap-2 text-slate-400"><ImageOff className="h-8 w-8" /><span className="text-xs">Foto pendiente</span></div>}</div>
+              <div className="relative flex aspect-[4/3] items-center justify-center bg-slate-50">{item.image_url ? <Image src={item.image_url} alt={item.name} fill quality={90} sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw" className="object-contain p-1" /> : <div className="flex flex-col items-center gap-2 text-slate-400"><ImageOff className="h-8 w-8" /><span className="text-xs">Foto pendiente</span></div>}</div>
               <div className="p-4">
                 <div className="flex items-start justify-between gap-3"><div><p className="text-xs uppercase tracking-wide text-green-700">{item.category}</p><h2 className="mt-1 font-semibold text-slate-950">{item.name}</h2>{item.variant ? <p className="mt-1 text-xs text-slate-500">Tamaño: {item.variant}</p> : null}</div><Link href={`/admin/vivero-digital/${item.id}`} title="Editar" className="rounded-lg border border-slate-200 p-2 text-slate-500 hover:border-green-200 hover:text-green-700"><Pencil className="h-4 w-4" /></Link></div>
 
