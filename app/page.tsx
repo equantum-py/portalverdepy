@@ -8,6 +8,7 @@ import { HomeHero } from "@/sections/home-hero";
 import { ProductSection } from "@/sections/product-section";
 import { ServicesSection } from "@/sections/services-section";
 import { CategoryProductsBannerSection } from "@/sections/category-products-banner-section";
+import { DigitalNurserySection } from "@/sections/digital-nursery-section";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -66,6 +67,21 @@ export default async function HomePage() {
             : products.filter((product) => normalizeCategory(product.categorySlug ?? "") === normalizeCategory(section.categorySlug))
           ).slice(0, section.productLimit);
           return <CategoryProductsBannerSection key={section.key} title={section.title} categorySlug={section.categorySlug} bannerDesktopUrl={section.bannerDesktopUrl} bannerMobileUrl={section.bannerMobileUrl} products={categoryProducts} showViewAll={section.showViewAll} mobileColumns={section.mobileColumns} mobileSwipe={section.mobileSwipe} mobileShowProgress={section.mobileShowProgress} nurseryMode={isPlantsSection} />;
+        }
+        const isStandardPlantsSection =
+          section.sectionType === "standard" &&
+          (["plants", "plantas", "planta"].includes(normalizeCategory(section.key)) ||
+            ["plantas", "planta"].includes(normalizeCategory(section.title)));
+        if (isStandardPlantsSection) {
+          return (
+            <DigitalNurserySection
+              key={section.key}
+              title={section.title}
+              plants={nurseryPlants}
+              limit={section.productLimit}
+              showViewAll={section.showViewAll}
+            />
+          );
         }
         if (section.key === "products-grass") return <ProductSection key={section.key} title={section.title} products={cesped} />;
         if (section.key === "services") { if (!content.servicesEnabled) return null; return <ServicesSection key={section.key} />; }
