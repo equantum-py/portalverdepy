@@ -22,7 +22,7 @@ export function DigitalNurserySection({
   if (!visiblePlants.length) return null;
 
   return (
-    <section className="border-b border-border/70 py-5 last:border-none sm:py-8 lg:py-10">
+    <section className="mx-auto w-full max-w-[1440px] border-b border-border/70 py-5 last:border-none sm:py-8 lg:py-10">
       <div className="mb-4 flex items-end justify-between gap-4 sm:mb-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-700">
@@ -44,7 +44,7 @@ export function DigitalNurserySection({
         ) : null}
       </div>
 
-      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6">
         {visiblePlants.map((plant) => (
           <DigitalNurseryCard
             key={plant.id}
