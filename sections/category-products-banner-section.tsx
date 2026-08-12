@@ -120,6 +120,7 @@ export function CategoryProductsBannerSection({
                 src={bannerUrl}
                 alt={`Banner ${title}`}
                 fill
+                quality={95}
                 sizes={mobileColumns === 1 ? '78vw' : '46vw'}
                 className="object-contain object-center"
                 priority={false}
@@ -152,6 +153,7 @@ export function CategoryProductsBannerSection({
               src={bannerDesktopUrl || bannerMobileUrl}
               alt={`Banner ${title}`}
               fill
+              quality={95}
               sizes="274px"
               className="object-cover object-center transition duration-500 group-hover:scale-[1.02]"
             />
