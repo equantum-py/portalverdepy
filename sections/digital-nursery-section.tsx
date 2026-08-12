@@ -14,10 +14,10 @@ type Props = {
 export function DigitalNurserySection({
   title,
   plants,
-  limit = 4,
+  limit,
   showViewAll = true,
 }: Props) {
-  const visiblePlants = plants.slice(0, limit);
+  const visiblePlants = typeof limit === 'number' ? plants.slice(0, limit) : plants;
 
   if (!visiblePlants.length) return null;
 
