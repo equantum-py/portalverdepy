@@ -42,8 +42,10 @@ export function CategoryProductsBannerSection({
 
   const categoryUrl = `/shop?category=${encodeURIComponent(categorySlug)}`;
   const bannerUrl = bannerMobileUrl || bannerDesktopUrl;
+  const isGrassBanner = categorySlug.trim().toLowerCase() === 'cesped';
 
   useEffect(() => {
+    if (isGrassBanner) return;
     const element = firstMobileCardRef.current;
     if (!element) return;
 
@@ -53,7 +55,7 @@ export function CategoryProductsBannerSection({
     const observer = new ResizeObserver(update);
     observer.observe(element);
     return () => observer.disconnect();
-  }, [products.length, mobileColumns]);
+  }, [isGrassBanner, products.length, mobileColumns]);
 
   if (!bannerUrl && products.length === 0) return null;
 
@@ -113,16 +115,16 @@ export function CategoryProductsBannerSection({
           {bannerUrl ? (
             <Link
               href={categoryUrl}
-              className={`${mobileItemWidth} relative shrink-0 snap-start overflow-hidden rounded-2xl border border-border bg-[#f7f5ef] shadow-sm`}
-              style={mobileCardHeight ? { height: `${mobileCardHeight}px` } : undefined}
+              className={`${mobileItemWidth} relative shrink-0 snap-start overflow-hidden rounded-2xl shadow-sm ${isGrassBanner ? 'aspect-[340/548]' : 'border border-border bg-[#f7f5ef]'}`}
+              style={!isGrassBanner && mobileCardHeight ? { height: `${mobileCardHeight}px` } : undefined}
             >
               <Image
                 src={bannerUrl}
                 alt={`Banner ${title}`}
                 fill
-                quality={95}
+                quality={isGrassBanner ? 90 : 95}
                 sizes={mobileColumns === 1 ? '78vw' : '46vw'}
-                className="object-contain object-center"
+                className={isGrassBanner ? 'object-cover object-center' : 'object-contain object-center'}
                 priority={false}
               />
             </Link>
@@ -146,16 +148,16 @@ export function CategoryProductsBannerSection({
         ) : null}
       </div>
 
-      <div className="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)] lg:items-stretch lg:gap-4">
+      <div className={`hidden lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)] lg:gap-4 ${isGrassBanner ? 'lg:items-start' : 'lg:items-stretch'}`}>
         {bannerDesktopUrl || bannerMobileUrl ? (
-          <Link href={categoryUrl} className="group relative h-full min-h-[441px] w-full overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
+          <Link href={categoryUrl} className={`group relative w-full overflow-hidden rounded-2xl shadow-sm ${isGrassBanner ? 'aspect-[340/548]' : 'h-full min-h-[441px] border border-border bg-white'}`}>
             <Image
               src={bannerDesktopUrl || bannerMobileUrl}
               alt={`Banner ${title}`}
               fill
-              quality={95}
+              quality={isGrassBanner ? 90 : 95}
               sizes="(min-width: 1536px) 360px, 25vw"
-              className="object-contain object-top transition duration-500 group-hover:scale-[1.01]"
+              className={`${isGrassBanner ? 'object-cover object-center' : 'object-contain object-top'} transition duration-500 group-hover:scale-[1.01]`}
             />
           </Link>
         ) : (
