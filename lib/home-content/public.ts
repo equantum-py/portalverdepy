@@ -20,6 +20,28 @@ const standardSection = (key: string, title: string, sortOrder: number, isActive
   mobileShowProgress: false,
 });
 
+const serviceBannerSection = (
+  key: string,
+  title: string,
+  categorySlug: string
+) => ({
+  ...standardSection(key, title, 3, true),
+  categorySlug
+});
+
+const defaultServiceBanners = [
+  serviceBannerSection(
+    'service-banner-irrigation',
+    'Sistema de riego',
+    'https://wa.me/595984053683?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20el%20servicio%20de%20sistema%20de%20riego.'
+  ),
+  serviceBannerSection(
+    'service-banner-maintenance',
+    'Mantenimiento de jardines',
+    'https://wa.me/595984053683?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20el%20servicio%20de%20mantenimiento%20de%20jardines.'
+  )
+];
+
 export const defaultHomeContent: HomeContentValues = {
   promoEnabled: true,
   promoText: 'Césped Esmeralda desde Gs. 31.000 m² con instalación incluida',
@@ -89,6 +111,7 @@ export const defaultHomeContent: HomeContentValues = {
     standardSection('hero', 'Portada principal', 0),
     standardSection('products-grass', 'Césped', 1),
     standardSection('services', 'Servicios', 2),
+    ...defaultServiceBanners,
     standardSection('products-landscaping', 'Paisajismo', 3),
   ],
 };
@@ -127,12 +150,13 @@ export async function getHomeContent(): Promise<HomeContentValues> {
     megaColumns: (megaColumns.data ?? []).map((item) => ({ title: item.title, icon: item.icon ?? '', categoryId: item.category_id ?? '', viewAllLabel: item.view_all_label ?? '', viewAllUrl: item.view_all_url ?? '', sortOrder: item.sort_order, isActive: item.is_active, productIds: [] })),
     megaServices: (megaServices.data ?? []).map((item) => ({ title: item.title, description: item.description ?? '', icon: item.icon ?? '', url: item.url, sortOrder: item.sort_order, isActive: item.is_active })),
     buttons: (buttons.data ?? []).map((item) => ({ placement: item.placement, text: item.text, url: item.url, linkType: item.link_type, icon: item.icon ?? '', variant: item.variant ?? '', sortOrder: item.sort_order, isActive: item.is_active, newTab: item.new_tab })),
-    sections: (sections.data ?? []).length > 0 ? (sections.data ?? []).map((item) => ({
+    sections: (sections.data ?? []).length > 0 ? (() => {
+      const savedSections = (sections.data ?? []).map((item) => ({
       key: item.section_key,
       title: item.title,
       sortOrder: item.sort_order,
       isActive: item.is_active,
-      sectionType: item.section_type === 'banner-products' ? 'banner-products' : 'standard',
+      sectionType: (item.section_type === 'banner-products' ? 'banner-products' : 'standard') as 'banner-products' | 'standard',
       categorySlug: item.category_slug ?? '',
       bannerDesktopUrl: item.banner_desktop_url ?? '',
       bannerDesktopPath: item.banner_desktop_path ?? '',
@@ -140,9 +164,15 @@ export async function getHomeContent(): Promise<HomeContentValues> {
       bannerMobilePath: item.banner_mobile_path ?? '',
       productLimit: item.product_limit ?? 4,
       showViewAll: item.show_view_all ?? true,
-      mobileColumns: item.mobile_columns === 1 ? 1 : 2,
+      mobileColumns: (item.mobile_columns === 1 ? 1 : 2) as 1 | 2,
       mobileSwipe: item.mobile_swipe ?? false,
       mobileShowProgress: item.mobile_show_progress ?? false,
-    })) : defaultHomeContent.sections,
+      }));
+      const savedKeys = new Set(savedSections.map((section) => section.key));
+      return [
+        ...savedSections,
+        ...defaultServiceBanners.filter((section) => !savedKeys.has(section.key))
+      ];
+    })() : defaultHomeContent.sections,
   };
 }
