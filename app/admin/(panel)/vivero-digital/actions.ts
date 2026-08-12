@@ -36,6 +36,7 @@ export async function updateDigitalNurseryItemAction(formData: FormData) {
   if (error) throw new Error(`No se pudo guardar: ${error.message}`);
 
   revalidatePath('/admin/vivero-digital');
+  revalidatePath('/');
   revalidatePath('/shop');
   redirect('/admin/vivero-digital?updated=1');
 }
@@ -58,5 +59,6 @@ export async function toggleDigitalNurseryItemAction(formData: FormData) {
   if (error) throw new Error(`No se pudo cambiar el estado: ${error.message}`);
 
   revalidatePath('/admin/vivero-digital');
+  revalidatePath('/');
   revalidatePath('/shop');
 }
