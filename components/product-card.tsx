@@ -29,14 +29,14 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-soft">
       <Link href={`/product/${product.slug}`} className="block">
-        <div className="relative aspect-[4/3] overflow-hidden bg-brand-50">
+        <div className="relative aspect-square overflow-hidden bg-white">
           <Image
             src={product.image}
             alt={product.name}
             fill
-            quality={95}
+            quality={90}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover transition duration-500 group-hover:scale-105"
+            className="object-contain p-1 transition duration-500 group-hover:scale-[1.02]"
           />
 
           <div className="absolute left-2 top-2 flex max-w-[70%] flex-wrap gap-1.5">
