@@ -25,7 +25,7 @@ export function DigitalNurseryCard({ item }: { item: DigitalNurseryPublicItem })
           src={item.imageUrl || '/images/product-placeholder.webp'}
           alt={item.name}
           fill
-          quality={95}
+          quality={90}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="object-contain p-1"
         />
