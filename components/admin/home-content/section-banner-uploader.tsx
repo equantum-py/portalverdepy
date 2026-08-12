@@ -61,7 +61,7 @@ export function SectionBannerUploader({ sectionKey, variant, url, onChange }: Pr
       <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={upload} className="hidden" />
       {url ? (
         <div className={`relative w-full max-w-[274px] overflow-hidden rounded-xl border bg-slate-50 ${ratio}`}>
-          <Image src={url} alt={label} fill quality={95} sizes="274px" className="object-cover" />
+          <Image src={url} alt={label} fill quality={95} sizes="274px" className="object-contain" />
           <div className="absolute right-2 top-2 flex gap-2">
             <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading} className="rounded-lg bg-white p-2 text-slate-700 shadow" aria-label={`Reemplazar ${label}`}>{uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}</button>
             <button type="button" onClick={() => onChange({ url: '', path: '' })} disabled={uploading} className="rounded-lg bg-white p-2 text-red-600 shadow" aria-label={`Eliminar ${label}`}><Trash2 className="h-4 w-4" /></button>
