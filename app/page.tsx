@@ -9,6 +9,7 @@ import { ProductSection } from "@/sections/product-section";
 import { ServicesSection } from "@/sections/services-section";
 import { CategoryProductsBannerSection } from "@/sections/category-products-banner-section";
 import { DigitalNurserySection } from "@/sections/digital-nursery-section";
+import { ServiceBannersSection } from "@/sections/service-banners-section";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -62,10 +63,12 @@ export default async function HomePage() {
       !normalizeCategory(product.name).includes("piedra")
   );
   const activeSections = [...content.sections].filter((section) => section.isActive).sort((a, b) => a.sortOrder - b.sortOrder);
+  const serviceBanners = activeSections.filter((section) => section.key.startsWith("service-banner-"));
+  const regularSections = activeSections.filter((section) => !section.key.startsWith("service-banner-"));
 
   return <>
     <main className="container-shell space-y-5 py-4 sm:space-y-6 sm:py-5 lg:py-6">
-      {activeSections.map((section) => {
+      {regularSections.map((section) => {
         if (section.key === "hero") { if (!content.heroEnabled) return null; return <div key={section.key}><div className="space-y-4 lg:hidden"><CategorySidebar /><HomeHero content={content} /></div><div className="hidden items-start gap-5 lg:grid lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]"><CategorySidebar /><HomeHero content={content} /></div></div>; }
         if (section.sectionType === "banner-products" && section.categorySlug) {
           const isPlantsSection = ["plantas", "planta"].includes(normalizeCategory(section.categorySlug));
@@ -91,7 +94,7 @@ export default async function HomePage() {
         }
         if (section.key === "products-grass") return <ProductSection key={section.key} title={section.title} products={cesped} />;
         if (section.key === "services") { if (!content.servicesEnabled) return null; return <ServicesSection key={section.key} />; }
-        if (section.key === "products-landscaping") return <ProductSection key={section.key} title={section.title} products={paisajismo} />;
+        if (section.key === "products-landscaping") return <div key={section.key} className="space-y-5 sm:space-y-6"><ServiceBannersSection banners={serviceBanners} /><ProductSection title={section.title} products={paisajismo} /></div>;
         const isStonesSection =
           section.sectionType === "standard" &&
           (normalizeCategory(section.key).includes("piedra") ||
