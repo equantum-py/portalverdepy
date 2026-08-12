@@ -18,8 +18,8 @@ export function HomeHeroSlide({ slide, previewViewport, priority = false }: Prop
 
   return (
     <div className="absolute inset-0">
-      <Image src={previewViewport === "mobile" ? slide.mobileUrl || slide.desktopUrl : slide.desktopUrl || slide.mobileUrl} alt={slide.altText} fill priority={priority} sizes="(max-width:1023px) 100vw, 1080px" className={`${previewViewport ? "" : "hidden lg:block"} object-contain object-center`} />
-      {!previewViewport && <Image src={slide.mobileUrl || slide.desktopUrl} alt={slide.altText} fill priority={priority} sizes="100vw" className="object-contain object-center lg:hidden" />}
+      <Image src={previewViewport === "mobile" ? slide.mobileUrl || slide.desktopUrl : slide.desktopUrl || slide.mobileUrl} alt={slide.altText} fill quality={95} priority={priority} sizes="(max-width:1023px) 100vw, 1080px" className={`${previewViewport ? "" : "hidden lg:block"} object-contain object-center`} />
+      {!previewViewport && <Image src={slide.mobileUrl || slide.desktopUrl} alt={slide.altText} fill quality={95} priority={priority} sizes="100vw" className="object-contain object-center lg:hidden" />}
       {slide.overlayEnabled && visible && <div className={`absolute inset-0 bg-brand-950 ${responsiveContent}`} style={{ opacity: slide.overlayIntensity / 100 }} />}
       {visible && (
         <div className={`absolute inset-0 flex flex-col justify-end p-3 sm:p-5 lg:justify-center lg:p-8 xl:p-10 ${alignment} ${responsiveContent}`}>
