@@ -154,7 +154,7 @@ export function CategoryProductsBannerSection({
               alt={`Banner ${title}`}
               fill
               quality={95}
-              sizes="274px"
+              sizes="(min-width: 1536px) 360px, 25vw"
               className="object-contain object-top transition duration-500 group-hover:scale-[1.01]"
             />
           </Link>
