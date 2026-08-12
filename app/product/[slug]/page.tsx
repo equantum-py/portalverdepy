@@ -13,6 +13,10 @@ import {
 } from 'lucide-react';
 
 import { ProductCard } from '@/components/product-card';
+import {
+  installationNote,
+  shouldShowInstallationNote
+} from '@/lib/product-installation-note';
 import { ProductGallery } from '@/components/products/product-gallery';
 import { formatPricePYG } from '@/lib/format-price';
 import { getPublicProducts } from '@/lib/products/catalog-products';
@@ -282,6 +286,13 @@ export default async function ProductPage({
                 <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1.5 text-sm font-semibold text-green-800">
                   <CheckCircle2 className="h-4 w-4" />
                   Instalación incluida
+                </div>
+              ) : null}
+
+              {shouldShowInstallationNote(product) ? (
+                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+                  <strong className="font-semibold">Aclaración sobre el terreno:</strong>{' '}
+                  {installationNote}
                 </div>
               ) : null}
 
