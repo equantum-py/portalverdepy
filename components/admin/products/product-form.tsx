@@ -117,6 +117,7 @@ export function ProductForm({
   const seoTitle = watch('seoTitle');
   const seoDescription = watch('seoDescription');
   const relatedProductSlugs = watch('relatedProductSlugs') ?? [];
+  const configuredPriceTiers = watch('priceTiers') ?? [];
 
   useEffect(() => {
     if (!slugEdited) {
@@ -483,6 +484,10 @@ export function ProductForm({
           </div>
 
           <div className="mt-7 border-t border-slate-100 pt-6">
+            <label className="mb-5 flex cursor-pointer items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4">
+              <input type="checkbox" checked={configuredPriceTiers.length > 0} onChange={(event) => event.target.checked ? priceTiers.append({ minQuantity: Number(watch('minOrderQuantity') || 1), maxQuantity: undefined, priceAmount: Number(watch('priceAmount') || 1), isPromo: false, label: '' }) : priceTiers.replace([])} className="mt-1 h-4 w-4 accent-green-700" />
+              <span><strong className="block text-sm text-green-950">Activar precios por escala</strong><span className="mt-1 block text-xs leading-5 text-green-800">La calculadora aparecerá en la página del producto. Al desactivar, se utilizará el precio normal.</span></span>
+            </label>
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">

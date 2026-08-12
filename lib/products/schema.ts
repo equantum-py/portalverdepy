@@ -136,6 +136,10 @@ export const productFormSchema = z
 
     const tiers = [...product.priceTiers].sort((a, b) => a.minQuantity - b.minQuantity);
 
+    if (tiers.length && tiers[0].minQuantity !== product.minOrderQuantity) {
+      context.addIssue({ code: 'custom', path: ['priceTiers'], message: 'La primera escala debe comenzar en la cantidad mínima de compra.' });
+    }
+
     for (let index = 0; index < tiers.length - 1; index += 1) {
       const current = tiers[index];
       const next = tiers[index + 1];
@@ -148,7 +152,14 @@ export const productFormSchema = z
         });
         break;
       }
+
+      if (current.maxQuantity + 1 !== next.minQuantity) {
+        context.addIssue({ code: 'custom', path: ['priceTiers'], message: 'Las escalas deben ser continuas, sin cantidades sin precio.' });
+        break;
+      }
     }
+
+    if (tiers.slice(0, -1).some((tier) => tier.maxQuantity === undefined)) context.addIssue({ code: 'custom', path: ['priceTiers'], message: 'Solo la última escala puede quedar sin límite.' });
   });
 
 export type ProductFormInput = z.input<typeof productFormSchema>;

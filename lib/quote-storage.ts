@@ -43,3 +43,7 @@ export function addQuoteItem(product: Product, quantity = 1) {
 
   return nextItems;
 }
+
+export function addPricedQuoteItem(product: Product, quantity: number, unitPrice: number, tierLabel = '') {
+  addQuoteItem({ ...product, price: unitPrice, appliedUnitPrice: unitPrice, estimatedTotal: quantity * unitPrice, appliedTierLabel: tierLabel }, quantity);
+}

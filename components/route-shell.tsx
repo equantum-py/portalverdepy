@@ -22,7 +22,7 @@ export function RouteShell({
 }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith('/admin');
-  const isStandalone = isAdmin || pathname === '/proximamente';
+  const isStandalone = isAdmin;
 
   if (isStandalone) {
     return <>{children}</>;
