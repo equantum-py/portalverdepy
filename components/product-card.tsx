@@ -12,11 +12,16 @@ import { formatPricePYG } from '@/lib/format-price';
 import type { Product } from '@/lib/types';
 import { WhatsAppIcon } from '@/components/icons';
 import { createWhatsAppUrl } from '@/lib/site-config';
+import {
+  installationNoteShort,
+  shouldShowInstallationNote
+} from '@/lib/product-installation-note';
 
 export function ProductCard({ product }: { product: Product }) {
   const whatsappMessage = `Hola, equipo de Portal Verde. Estoy interesado/a en el producto “${product.name}”. ¿Podrían confirmarme la disponibilidad y brindarme más información? Gracias.`;
   const whatsappUrl = createWhatsAppUrl(whatsappMessage);
   const saleUnit = product.unit ?? 'unidad';
+  const showInstallationNote = shouldShowInstallationNote(product);
 
   const discount =
     product.previousPrice && product.previousPrice > product.price
@@ -108,6 +113,12 @@ export function ProductCard({ product }: { product: Product }) {
               Consultá disponibilidad
             </p>
           </div>
+
+          {showInstallationNote ? (
+            <p className="mt-2 line-clamp-2 text-[10px] leading-4 text-text-soft sm:text-[11px]">
+              * {installationNoteShort}
+            </p>
+          ) : null}
         </div>
 
         <div className="mt-auto pt-3">
