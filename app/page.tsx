@@ -78,7 +78,6 @@ export default async function HomePage() {
               key={section.key}
               title={section.title}
               plants={nurseryPlants}
-              limit={section.productLimit}
               showViewAll={section.showViewAll}
             />
           );
