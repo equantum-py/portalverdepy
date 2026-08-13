@@ -61,7 +61,13 @@ function extractRequestedItem(message: string) {
     .replace(/^[¿¡\s]+|[?!.\s]+$/g, '')
     .trim();
 
-  return cleaned || message.trim();
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  const looksUnsafe =
+    !cleaned ||
+    words.length > 6 ||
+    /\b(?:mensaje|arriba|anterior|antes|eso|ese|esa|esto|esta|tienen|tenés|hay|quiero|quisiera|necesito|busco|pregunté|pregunte)\b/i.test(cleaned);
+
+  return looksUnsafe ? null : cleaned;
 }
 
 function createVerifiedFallback(
@@ -130,9 +136,13 @@ function createVerifiedFallback(
     return {
       answer: requestedPlant
         ? `Sí, ${requestedPlant.name} figura en nuestro vivero. Te confirmo disponibilidad por WhatsApp, ¿querés consultar ahora?`
-        : `Creo que sí podemos conseguir ${requestedItem}. Para confirmarte disponibilidad, te comunico con un asesor por WhatsApp.`,
+        : requestedItem
+          ? `Creo que sí podemos conseguir ${requestedItem}. Para confirmarte disponibilidad, te comunico con un asesor por WhatsApp.`
+          : 'Creo que sí podemos conseguir esa planta. Para confirmarte disponibilidad, te comunico con un asesor por WhatsApp.',
       recommendedProductSlugs: [],
-      whatsappMessage: `Hola, Portal Verde. Quiero confirmar si pueden conseguir o tienen disponible: ${requestedItem}`,
+      whatsappMessage: requestedItem
+        ? `Hola, Portal Verde. Quiero confirmar si pueden conseguir o tienen disponible: ${requestedItem}`
+        : 'Hola, Portal Verde. Quiero consultar la disponibilidad de una planta que mencioné en el chat.',
       needsHuman: true
     };
   }
@@ -223,6 +233,7 @@ REGLAS OBLIGATORIAS:
 - Un mensaje que empieza con "hola" puede contener además una consulta. Respondé la consulta completa, no solamente el saludo.
 - Cuando pregunten qué plantas hay, respondé con los nombres exactos de PLANTAS PUBLICADAS; no preguntes primero por tamaño.
 - Si piden una planta o producto que no figura en el contexto, respondé con confianza: "Creo que sí podemos conseguirlo, pero te confirmo por WhatsApp". No afirmes que está disponible.
+- REGLA ESTRICTA DE EXTRACCIÓN: cuando consulten por algo no publicado, nunca repitas el saludo, la pregunta completa ni palabras como "tienen", "tenés", "busco" o "quiero". Extraé únicamente el nombre del producto o planta. Si no podés identificarlo con seguridad, decí "esa planta" o "ese producto".
 - Respondé muy breve: entre 1 y 3 frases, máximo 55 palabras.
 - Hacé solamente una pregunta por respuesta para que la conversación avance paso a paso.
 - Usá expresiones naturales como "claro que sí", "contame" o "perfecto" cuando correspondan, sin repetirlas demasiado.
@@ -230,6 +241,11 @@ REGLAS OBLIGATORIAS:
 - recommendedProductSlugs solo puede contener slugs exactos del catálogo.
 - whatsappMessage debe resumir la consulta para que el cliente la envíe a Portal Verde, sin afirmar que ya compró o reservó.
 - Si el pedido está fuera del contexto, decí con transparencia que un asesor humano debe confirmarlo.
+
+EJEMPLO OBLIGATORIO:
+Usuario: "Hola, ¿tienen árbol de mango?"
+Respuesta:
+{"answer":"Creo que sí podemos conseguir árbol de mango. Para confirmarte disponibilidad, te comunico con un asesor por WhatsApp.","recommendedProductSlugs":[],"whatsappMessage":"Hola, Portal Verde. Quiero confirmar disponibilidad de árbol de mango.","needsHuman":true}
 
 SERVICIOS:
 Paisajismo; mantenimiento de jardines; mantenimiento de piscinas; instalación de riego automático; visita técnica. Todos se consultan y cotizan por WhatsApp. Cobertura informada: Asunción y Gran Asunción.
