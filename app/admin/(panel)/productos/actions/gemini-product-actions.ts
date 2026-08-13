@@ -75,7 +75,7 @@ breves; título SEO de máximo 60 caracteres incluyendo Paraguay cuando resulte 
 meta descripción de máximo 160 caracteres; palabras clave separadas por comas; texto
 alternativo descriptivo, sin repetir palabras innecesariamente.`;
 
-    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    const model = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
       {
@@ -87,9 +87,8 @@ alternativo descriptivo, sin repetir palabras innecesariamente.`;
         body: JSON.stringify({
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
           generationConfig: {
-            temperature: 0.35,
             responseMimeType: 'application/json',
-            responseJsonSchema: {
+            responseSchema: {
               type: 'object',
               properties: {
                 shortDescription: { type: 'string' },
@@ -108,8 +107,22 @@ alternativo descriptivo, sin repetir palabras innecesariamente.`;
     );
 
     if (!response.ok) {
-      console.error('Gemini API error:', response.status, await response.text());
-      return { success: false, message: 'Gemini no pudo generar el contenido. Intentá nuevamente.' };
+      const errorBody = await response.text();
+      console.error('Gemini API error:', response.status, errorBody);
+
+      if (response.status === 401 || response.status === 403) {
+        return { success: false, message: 'Google rechazó la clave de Gemini. Revisá que sea válida y tenga acceso a Gemini API.' };
+      }
+
+      if (response.status === 429) {
+        return { success: false, message: 'Gemini alcanzó temporalmente el límite de uso. Esperá un momento y volvé a intentar.' };
+      }
+
+      if (response.status === 400) {
+        return { success: false, message: 'Gemini rechazó la solicitud. Actualizá la página e intentá nuevamente.' };
+      }
+
+      return { success: false, message: 'Gemini no está disponible en este momento. Intentá nuevamente.' };
     }
 
     const payload = await response.json() as {
