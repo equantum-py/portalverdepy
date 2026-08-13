@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 
 const requestSchema = z.object({
   name: z.string().trim().min(2).max(160),
-  category: z.string().trim().max(120).default(''),
+  category: z.string().trim().min(1).max(120),
   unit: z.string().trim().max(40).default('unidad'),
   shortDescription: z.string().trim().max(500).default(''),
   description: z.string().trim().max(5000).default('')
@@ -18,7 +18,9 @@ const suggestionSchema = z.object({
   seoTitle: z.string().trim().min(1).max(60),
   seoDescription: z.string().trim().min(1).max(160),
   seoKeywords: z.string().trim().min(1).max(500),
-  mainImageAlt: z.string().trim().min(1).max(180)
+  mainImageAlt: z.string().trim().min(1).max(180),
+  features: z.array(z.string().trim().min(1).max(120)).min(2).max(5),
+  recommendations: z.array(z.string().trim().min(1).max(180)).min(2).max(4)
 });
 
 export type GeminiProductSuggestion = z.infer<typeof suggestionSchema>;
@@ -50,7 +52,7 @@ export async function generateProductCopyAction(input: unknown): Promise<Result>
 
     const parsed = requestSchema.safeParse(input);
     if (!parsed.success) {
-      return { success: false, message: 'Escribí primero el nombre del producto.' };
+      return { success: false, message: 'Escribí el nombre y seleccioná la categoría antes de generar.' };
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -62,18 +64,23 @@ export async function generateProductCopyAction(input: unknown): Promise<Result>
     const prompt = `Actuá como redactor ecommerce y especialista SEO de Portal Verde Paraguay.
 Creá contenido claro, comercial, profesional y comprobable para este producto.
 Usá español paraguayo natural con voseo moderado. No inventes precios, disponibilidad,
-propiedades técnicas, instalación incluida ni beneficios que no estén en los datos.
+propiedades técnicas, instalación incluida, ahorro, rendimiento, eficiencia, durabilidad,
+calidad, garantía ni beneficios que no estén expresamente escritos en los datos.
+Si solo recibís nombre y categoría, redactá en términos neutrales y verificables.
 
 Producto: ${product.name}
-Categoría: ${product.category || 'Sin especificar'}
+Categoría: ${product.category}
 Unidad de venta: ${product.unit}
 Descripción corta actual: ${product.shortDescription || 'Vacía'}
 Descripción completa actual: ${product.description || 'Vacía'}
 
 Reglas: descripción corta de máximo 220 caracteres; descripción completa de 1 a 3 párrafos
 breves; título SEO de máximo 60 caracteres incluyendo Paraguay cuando resulte natural;
-meta descripción de máximo 160 caracteres; palabras clave separadas por comas; texto
-alternativo descriptivo, sin repetir palabras innecesariamente.`;
+meta descripción de máximo 160 caracteres; palabras clave separadas por comas.
+El texto alternativo debe identificar únicamente el producto y su categoría; no describas
+aspecto, instalación, ubicación ni elementos visuales porque todavía no viste la fotografía.
+Generá entre 2 y 5 características comerciales prudentes, sin datos técnicos inventados,
+y entre 2 y 4 recomendaciones útiles formuladas como sugerencias generales.`;
 
     const model = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
     const response = await fetch(
@@ -96,9 +103,11 @@ alternativo descriptivo, sin repetir palabras innecesariamente.`;
                 seoTitle: { type: 'string' },
                 seoDescription: { type: 'string' },
                 seoKeywords: { type: 'string' },
-                mainImageAlt: { type: 'string' }
+                mainImageAlt: { type: 'string' },
+                features: { type: 'array', items: { type: 'string' } },
+                recommendations: { type: 'array', items: { type: 'string' } }
               },
-              required: ['shortDescription', 'description', 'seoTitle', 'seoDescription', 'seoKeywords', 'mainImageAlt']
+              required: ['shortDescription', 'description', 'seoTitle', 'seoDescription', 'seoKeywords', 'mainImageAlt', 'features', 'recommendations']
             }
           }
         }),
