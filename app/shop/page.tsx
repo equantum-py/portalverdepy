@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { CatalogClient } from '@/components/catalog-client';
 import { DigitalNurseryCatalog } from '@/components/digital-nursery-catalog';
+import { ServicesCatalog } from '@/components/services-catalog';
 import { getPublicProducts } from '@/lib/products/catalog-products';
 import { createClient } from '@/lib/supabase/server';
 
@@ -17,6 +18,10 @@ type ShopPageProps = {
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const params = (await searchParams) ?? {};
   const normalizedCategory = (params.category ?? '').trim().toLowerCase();
+
+  if (normalizedCategory === 'mantenimiento de jardines' || normalizedCategory === 'servicios') {
+    return <main className="container-shell py-4 sm:py-7 lg:py-10"><ServicesCatalog /></main>;
+  }
 
   if (normalizedCategory === 'plantas' || normalizedCategory === 'planta') {
     const supabase = await createClient();
