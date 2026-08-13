@@ -90,7 +90,7 @@ export function GreenAdvisor() {
 
           <div className="flex-1 space-y-3 overflow-y-auto overscroll-contain bg-[#f7faf7] p-4">
             <div className="max-w-[90%] rounded-2xl rounded-tl-md border border-emerald-100 bg-white p-3 text-sm leading-relaxed text-slate-700">
-              ¡Hola! Puedo orientarte sobre césped, plantas y servicios. Para presupuestos y disponibilidad final te conecto con nuestro equipo.
+              ¡Hola! ¿Cómo estás? Contame qué necesitás para tu jardín y te ayudo.
             </div>
 
             {messages.length === 0 ? (
