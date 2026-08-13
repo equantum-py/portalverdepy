@@ -26,7 +26,7 @@ const NavigationLinks = () => (
 
 const Services = () => (
   <ul className="space-y-3 text-sm text-white/70">
-    <li>Instalación de césped</li><li>Paisajismo</li><li>Mantenimiento</li><li>Preparación de terreno</li><li>Asesoramiento</li>
+    {['Paisajismo','Mantenimiento de jardín','Mantenimiento de piscina','Riego automático','Visita técnica'].map((service) => <li key={service}><a href={createWhatsAppUrl(`Hola, quiero consultar por el servicio de ${service}.`)} target="_blank" rel="noopener noreferrer">{service}</a></li>)}
   </ul>
 );
 
