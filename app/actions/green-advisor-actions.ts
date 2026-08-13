@@ -62,7 +62,7 @@ function createVerifiedFallback(
 
   if (/^(hola|hol[aá]|buen(?:os|as)|qué tal|que tal)/i.test(query)) {
     return {
-      answer: '¡Hola! Soy el Asesor Verde. Puedo ayudarte a elegir césped, consultar las plantas publicadas o conocer nuestros servicios. ¿Qué necesitás para tu espacio?',
+      answer: '¡Hola! Soy el Asesor de Portal Verde. Puedo ayudarte a elegir césped, consultar las plantas publicadas o conocer nuestros servicios. ¿Qué necesitás para tu espacio?',
       recommendedProductSlugs: [],
       whatsappMessage,
       needsHuman: false
@@ -127,7 +127,7 @@ export async function askGreenAdvisor(input: unknown): Promise<GreenAdvisorResul
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return { success: false, message: 'El Asesor Verde todavía no está disponible en este entorno.' };
+    return { success: false, message: 'La atención de Portal Verde todavía no está disponible en este entorno.' };
   }
 
   try {
@@ -163,7 +163,7 @@ export async function askGreenAdvisor(input: unknown): Promise<GreenAdvisorResul
 
     const validSlugs = new Set(catalog.map((product) => product.slug));
     const conversation = [...parsed.data.history, { role: 'user' as const, content: parsed.data.message }];
-    const prompt = `Sos el Asesor Verde de Portal Verde Paraguay. Respondé en español paraguayo claro, amable y comercial, sin exageraciones.
+    const prompt = `Sos el Asesor de Portal Verde Paraguay. Respondé en español paraguayo claro, amable y comercial, sin exageraciones.
 
 REGLAS OBLIGATORIAS:
 - Usá únicamente la información incluida en CONTEXTO. No inventes productos, precios, stock, promociones, cobertura, plazos ni condiciones.
