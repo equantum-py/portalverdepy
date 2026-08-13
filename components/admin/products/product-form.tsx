@@ -3,9 +3,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   ArrowLeft,
+  Check,
   Loader2,
   Plus,
   Save,
+  Sparkles,
   Trash2
 } from 'lucide-react';
 import Link from 'next/link';
@@ -21,6 +23,10 @@ import {
   createProductAction,
   updateProductAction
 } from '@/app/admin/(panel)/productos/actions/product-actions';
+import {
+  generateProductCopyAction,
+  type GeminiProductSuggestion
+} from '@/app/admin/(panel)/productos/actions/gemini-product-actions';
 import { ProductImageUploader } from '@/components/admin/products/product-image-uploader';
 import {
   PRODUCT_UNITS,
@@ -91,6 +97,9 @@ export function ProductForm({
   );
   const [serverMessage, setServerMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [isGeneratingCopy, setIsGeneratingCopy] = useState(false);
+  const [geminiMessage, setGeminiMessage] = useState('');
+  const [geminiSuggestion, setGeminiSuggestion] = useState<GeminiProductSuggestion | null>(null);
 
   const {
     register,
@@ -118,6 +127,47 @@ export function ProductForm({
   const seoDescription = watch('seoDescription');
   const relatedProductSlugs = watch('relatedProductSlugs') ?? [];
   const configuredPriceTiers = watch('priceTiers') ?? [];
+  const categoryId = watch('categoryId');
+  const shortDescription = watch('shortDescription');
+  const description = watch('description');
+  const unit = watch('unit');
+
+  async function generateWithGemini() {
+    setGeminiMessage('');
+    setGeminiSuggestion(null);
+    setIsGeneratingCopy(true);
+
+    const category = categories.find((item) => item.id === categoryId)?.name ?? '';
+    const result = await generateProductCopyAction({
+      name,
+      category,
+      unit,
+      shortDescription,
+      description
+    });
+
+    setIsGeneratingCopy(false);
+    if (!result.success) {
+      setGeminiMessage(result.message);
+      return;
+    }
+
+    setGeminiSuggestion(result.suggestion);
+  }
+
+  function applyGeminiSuggestion() {
+    if (!geminiSuggestion) return;
+
+    for (const [field, value] of Object.entries(geminiSuggestion)) {
+      setValue(field as keyof ProductFormValues, value, {
+        shouldDirty: true,
+        shouldValidate: true
+      });
+    }
+
+    setGeminiMessage('Propuesta aplicada. Revisá los campos antes de guardar.');
+    setGeminiSuggestion(null);
+  }
 
   useEffect(() => {
     if (!slugEdited) {
@@ -324,6 +374,50 @@ export function ProductForm({
           title="Información básica"
           description="Nombre, categoría, descripción y forma de venta."
         >
+          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 sm:p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="flex items-center gap-2 font-semibold text-emerald-950">
+                  <Sparkles className="h-5 w-5 text-emerald-700" />
+                  Asistente Gemini
+                </div>
+                <p className="mt-1 text-sm leading-6 text-emerald-900/75">
+                  Genera descripciones y SEO. No guarda ni publica nada automáticamente.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={generateWithGemini}
+                disabled={isGeneratingCopy || name.trim().length < 2}
+                className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isGeneratingCopy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                {isGeneratingCopy ? 'Generando…' : 'Generar con Gemini'}
+              </button>
+            </div>
+
+            {geminiMessage ? <p className="mt-3 text-sm font-medium text-emerald-900">{geminiMessage}</p> : null}
+
+            {geminiSuggestion ? (
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-white p-4">
+                <p className="font-semibold text-slate-900">Vista previa de la propuesta</p>
+                <dl className="mt-3 space-y-3 text-sm">
+                  <div><dt className="font-semibold text-slate-700">Descripción corta</dt><dd className="mt-1 text-slate-600">{geminiSuggestion.shortDescription}</dd></div>
+                  <div><dt className="font-semibold text-slate-700">Descripción completa</dt><dd className="mt-1 whitespace-pre-line text-slate-600">{geminiSuggestion.description}</dd></div>
+                  <div><dt className="font-semibold text-slate-700">SEO</dt><dd className="mt-1 text-slate-600">{geminiSuggestion.seoTitle} — {geminiSuggestion.seoDescription}</dd></div>
+                </dl>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button type="button" onClick={applyGeminiSuggestion} className="inline-flex h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800">
+                    <Check className="h-4 w-4" /> Aplicar propuesta
+                  </button>
+                  <button type="button" onClick={() => setGeminiSuggestion(null)} className="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                    Descartar
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </div>
+
           <div className="grid gap-5 md:grid-cols-2">
             <Field label="Nombre" error={errors.name?.message}>
               <input
