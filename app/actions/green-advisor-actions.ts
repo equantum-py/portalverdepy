@@ -62,7 +62,7 @@ function createVerifiedFallback(
 
   if (/^(hola|hol[aá]|buen(?:os|as)|qué tal|que tal)/i.test(query)) {
     return {
-      answer: '¡Hola! Soy el Asesor de Portal Verde. Puedo ayudarte a elegir césped, consultar las plantas publicadas o conocer nuestros servicios. ¿Qué necesitás para tu espacio?',
+      answer: '¡Hola! ¿Cómo estás? Soy asesor de Portal Verde. Contame, ¿qué necesitás para tu jardín?',
       recommendedProductSlugs: [],
       whatsappMessage,
       needsHuman: false
@@ -75,7 +75,7 @@ function createVerifiedFallback(
       product.category.toLocaleLowerCase('es-PY').includes('cesped')
     ).slice(0, 3);
     return {
-      answer: `Para orientarte bien necesito saber: ¿cuántos m² son, cuánto sol recibe el lugar, qué uso tendrá y cómo está actualmente el terreno?${grass.length ? ` Tenemos publicadas estas opciones: ${grass.map((product) => product.name).join(', ')}.` : ''} La disponibilidad y el presupuesto final se confirman por WhatsApp.`,
+      answer: `Claro que sí. Para ayudarte a elegir bien, primero contame: ¿cuántos m² necesitás cubrir?${grass.length ? ` Tenemos ${grass.map((product) => product.name).join(', ')}.` : ''}`,
       recommendedProductSlugs: grass.map((product) => product.slug),
       whatsappMessage,
       needsHuman: true
@@ -88,8 +88,8 @@ function createVerifiedFallback(
     );
     return {
       answer: plantNames.length
-        ? `Estas son algunas plantas publicadas actualmente: ${plantNames.join(', ')}. La disponibilidad debe confirmarse con nuestro equipo por WhatsApp.`
-        : 'Nuestro Vivero Digital cuenta con plantas para consulta. La disponibilidad se confirma directamente con nuestro equipo por WhatsApp.',
+        ? `Sí, tenemos varias opciones. Algunas son: ${plantNames.join(', ')}. ¿Buscás una planta grande, mediana o chica?`
+        : 'Sí, contamos con plantas en el Vivero Digital. ¿Buscás una planta grande, mediana o chica?',
       recommendedProductSlugs: [],
       whatsappMessage,
       needsHuman: true
@@ -98,7 +98,7 @@ function createVerifiedFallback(
 
   if (/(riego|mantenimiento|piscina|paisajismo|visita técnica|visita tecnica|servicio)/i.test(query)) {
     return {
-      answer: 'Portal Verde ofrece paisajismo, mantenimiento de jardines, mantenimiento de piscinas, instalación de riego automático y visita técnica en Asunción y Gran Asunción. Contanos qué servicio necesitás y te conectamos con un asesor para evaluar y cotizar.',
+      answer: 'Sí, hacemos paisajismo, mantenimiento de jardines y piscinas, riego automático y visitas técnicas. ¿Cuál de estos servicios necesitás?',
       recommendedProductSlugs: [],
       whatsappMessage,
       needsHuman: true
@@ -106,7 +106,7 @@ function createVerifiedFallback(
   }
 
   return {
-    answer: 'Puedo orientarte sobre césped, plantas, paisajismo, mantenimiento de jardines y piscinas, riego automático o visita técnica. Contame un poco más sobre lo que necesitás.',
+    answer: 'Claro, te ayudo. Contame un poco más: ¿estás buscando césped, plantas o algún servicio para tu jardín?',
     recommendedProductSlugs: [],
     whatsappMessage,
     needsHuman: false
@@ -163,7 +163,7 @@ export async function askGreenAdvisor(input: unknown): Promise<GreenAdvisorResul
 
     const validSlugs = new Set(catalog.map((product) => product.slug));
     const conversation = [...parsed.data.history, { role: 'user' as const, content: parsed.data.message }];
-    const prompt = `Sos el Asesor de Portal Verde Paraguay. Respondé en español paraguayo claro, amable y comercial, sin exageraciones.
+    const prompt = `Sos un asesor comercial humano de Portal Verde Paraguay atendiendo por chat. Respondé como una persona paraguaya amable, cercana y vendedora, sin sonar robótico ni exagerado.
 
 REGLAS OBLIGATORIAS:
 - Usá únicamente la información incluida en CONTEXTO. No inventes productos, precios, stock, promociones, cobertura, plazos ni condiciones.
@@ -171,7 +171,10 @@ REGLAS OBLIGATORIAS:
 - Para recomendar césped, si faltan datos preguntá por superficie, cantidad de sol, uso y estado del terreno.
 - Césped Maní no incluye preparación del terreno. Los demás céspedes con instalación incluyen preparación básica. Malezas importantes, retiro o destoconado de árboles, nivelaciones complejas, relleno de pozos y aporte extraordinario de suelo se inspeccionan y cotizan aparte.
 - Para plantas, no inventes cuidados específicos si no están en el contexto.
-- Respondé de forma breve: máximo 130 palabras. Podés usar viñetas cortas.
+- Respondé muy breve: entre 1 y 3 frases, máximo 55 palabras.
+- Hacé solamente una pregunta por respuesta para que la conversación avance paso a paso.
+- Usá expresiones naturales como "claro que sí", "contame" o "perfecto" cuando correspondan, sin repetirlas demasiado.
+- No hagas listas largas ni expliques todo de una vez. Primero entendé qué necesita el cliente y luego orientalo.
 - recommendedProductSlugs solo puede contener slugs exactos del catálogo.
 - whatsappMessage debe resumir la consulta para que el cliente la envíe a Portal Verde, sin afirmar que ya compró o reservó.
 - Si el pedido está fuera del contexto, decí con transparencia que un asesor humano debe confirmarlo.
