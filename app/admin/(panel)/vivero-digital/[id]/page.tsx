@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { DigitalNurseryImageUploader } from '@/components/admin/digital-nursery/digital-nursery-image-uploader';
+import { NurseryGeminiAssistant } from '@/components/admin/digital-nursery/nursery-gemini-assistant';
 import { createClient } from '@/lib/supabase/server';
 import { updateDigitalNurseryItemAction } from '../actions';
 
@@ -33,6 +34,7 @@ export default async function EditDigitalNurseryItemPage({ params }: Props) {
 
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="grid gap-4 sm:grid-cols-2">
+            <NurseryGeminiAssistant />
             <label className="sm:col-span-2"><span className="mb-1.5 block text-sm font-medium">Nombre</span><input name="name" defaultValue={item.name} required className="h-11 w-full rounded-xl border border-slate-200 px-3 outline-none focus:border-green-600" /></label>
             <label><span className="mb-1.5 block text-sm font-medium">Tamaño / variante</span><input name="variant" defaultValue={item.variant ?? ''} className="h-11 w-full rounded-xl border border-slate-200 px-3 outline-none focus:border-green-600" /></label>
             <label><span className="mb-1.5 block text-sm font-medium">Tipo</span><select name="category" defaultValue={item.category} className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3"><option value="Planta">Planta</option><option value="Jardinería / accesorio">Jardinería / accesorio</option></select></label>
