@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
 import { WhatsAppFloating } from '@/components/whatsapp-floating';
+import { GreenAdvisor } from '@/components/green-advisor';
 import type { Category, Product } from '@/lib/types';
 import type { HomeContentValues } from '@/lib/home-content/schema';
 
@@ -33,6 +34,7 @@ export function RouteShell({
       <Header categories={categories} products={products} homeContent={homeContent} />
       {children}
       <Footer />
+      <GreenAdvisor />
       <WhatsAppFloating />
     </>
   );
