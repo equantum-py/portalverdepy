@@ -54,10 +54,16 @@ type AdvisorPlant = { name: string; variant: string | null };
 
 function createVerifiedFallback(
   message: string,
+  history: Array<{ role: 'user' | 'assistant'; content: string }> = [],
   catalog: AdvisorProduct[] = [],
   plants: AdvisorPlant[] = []
 ): GreenAdvisorReply {
   const query = message.toLocaleLowerCase('es-PY');
+  const previousConversation = history
+    .map((item) => item.content)
+    .join(' ')
+    .toLocaleLowerCase('es-PY');
+  const plantContext = /(planta|vivero|árbol|arbol)/i.test(`${previousConversation} ${query}`);
   const whatsappMessage = `Hola, Portal Verde. Quiero consultar sobre: ${message}`;
 
   if (/^(hola|hol[aá]|buen(?:os|as)|qué tal|que tal)/i.test(query)) {
@@ -83,15 +89,27 @@ function createVerifiedFallback(
   }
 
   if (query.includes('planta') || query.includes('vivero')) {
-    const plantNames = plants.slice(0, 6).map((plant) =>
-      plant.variant ? `${plant.name} (${plant.variant})` : plant.name
-    );
+    const plantNames = plants.map((plant) => plant.name);
     return {
       answer: plantNames.length
-        ? `Sí, tenemos varias opciones. Algunas son: ${plantNames.join(', ')}. ¿Buscás una planta grande, mediana o chica?`
-        : 'Sí, contamos con plantas en el Vivero Digital. ¿Buscás una planta grande, mediana o chica?',
+        ? `Tenemos publicadas: ${plantNames.join(', ')}. ¿Cuál te interesa?`
+        : 'Ahora mismo no tengo el listado disponible. ¿Qué planta estás buscando?',
       recommendedProductSlugs: [],
       whatsappMessage,
+      needsHuman: true
+    };
+  }
+
+  if (plantContext) {
+    const requestedPlant = plants.find((plant) =>
+      query.includes(plant.name.toLocaleLowerCase('es-PY'))
+    );
+    return {
+      answer: requestedPlant
+        ? `Sí, ${requestedPlant.name} figura en nuestro vivero. Te confirmo disponibilidad por WhatsApp, ¿querés consultar ahora?`
+        : `Creo que sí podemos conseguir ${message.trim()}, pero prefiero confirmarte bien. ¿Querés que te derive con un asesor por WhatsApp?`,
+      recommendedProductSlugs: [],
+      whatsappMessage: `Hola, Portal Verde. Quiero confirmar si pueden conseguir o tienen disponible: ${message.trim()}`,
       needsHuman: true
     };
   }
@@ -130,6 +148,9 @@ export async function askGreenAdvisor(input: unknown): Promise<GreenAdvisorResul
     return { success: false, message: 'La atención de Portal Verde todavía no está disponible en este entorno.' };
   }
 
+  let fallbackCatalog: AdvisorProduct[] = [];
+  let fallbackPlants: AdvisorPlant[] = [];
+
   try {
     const [products, nurseryResult] = await Promise.all([
       getPublicProducts(),
@@ -160,6 +181,8 @@ export async function askGreenAdvisor(input: unknown): Promise<GreenAdvisorResul
       name: plant.name,
       variant: plant.variant
     }));
+    fallbackCatalog = catalog;
+    fallbackPlants = plants;
 
     const validSlugs = new Set(catalog.map((product) => product.slug));
     const conversation = [...parsed.data.history, { role: 'user' as const, content: parsed.data.message }];
@@ -171,6 +194,9 @@ REGLAS OBLIGATORIAS:
 - Para recomendar césped, si faltan datos preguntá por superficie, cantidad de sol, uso y estado del terreno.
 - Césped Maní no incluye preparación del terreno. Los demás céspedes con instalación incluyen preparación básica. Malezas importantes, retiro o destoconado de árboles, nivelaciones complejas, relleno de pozos y aporte extraordinario de suelo se inspeccionan y cotizan aparte.
 - Para plantas, no inventes cuidados específicos si no están en el contexto.
+- Mantené el tema de toda la conversación. Si estaban hablando de plantas, interpretá el siguiente nombre como una planta consultada.
+- Cuando pregunten qué plantas hay, respondé con los nombres exactos de PLANTAS PUBLICADAS; no preguntes primero por tamaño.
+- Si piden una planta o producto que no figura en el contexto, respondé con confianza: "Creo que sí podemos conseguirlo, pero te confirmo por WhatsApp". No afirmes que está disponible.
 - Respondé muy breve: entre 1 y 3 frases, máximo 55 palabras.
 - Hacé solamente una pregunta por respuesta para que la conversación avance paso a paso.
 - Usá expresiones naturales como "claro que sí", "contame" o "perfecto" cuando correspondan, sin repetirlas demasiado.
@@ -235,20 +261,20 @@ Devolvé exclusivamente JSON válido con esta forma:
       const errorBody = await response.text();
       console.error('Green Advisor Gemini error:', response.status, errorBody);
       if (response.status === 401 || response.status === 403) {
-        return { success: true, reply: createVerifiedFallback(parsed.data.message, catalog, plants) };
+        return { success: true, reply: createVerifiedFallback(parsed.data.message, parsed.data.history, catalog, plants) };
       }
       if (response.status === 429) {
-        return { success: true, reply: createVerifiedFallback(parsed.data.message, catalog, plants) };
+        return { success: true, reply: createVerifiedFallback(parsed.data.message, parsed.data.history, catalog, plants) };
       }
       if (response.status === 400) {
-        return { success: true, reply: createVerifiedFallback(parsed.data.message, catalog, plants) };
+        return { success: true, reply: createVerifiedFallback(parsed.data.message, parsed.data.history, catalog, plants) };
       }
-      return { success: true, reply: createVerifiedFallback(parsed.data.message, catalog, plants) };
+      return { success: true, reply: createVerifiedFallback(parsed.data.message, parsed.data.history, catalog, plants) };
     }
 
     const payload = await response.json();
     const text = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) return { success: true, reply: createVerifiedFallback(parsed.data.message, catalog, plants) };
+    if (!text) return { success: true, reply: createVerifiedFallback(parsed.data.message, parsed.data.history, catalog, plants) };
 
     const normalizedText = text
       .trim()
@@ -257,7 +283,7 @@ Devolvé exclusivamente JSON válido con esta forma:
     const reply = responseSchema.safeParse(JSON.parse(normalizedText));
     if (!reply.success) {
       console.error('Invalid Green Advisor response:', reply.error.flatten());
-      return { success: true, reply: createVerifiedFallback(parsed.data.message, catalog, plants) };
+      return { success: true, reply: createVerifiedFallback(parsed.data.message, parsed.data.history, catalog, plants) };
     }
 
     return {
@@ -270,8 +296,8 @@ Devolvé exclusivamente JSON válido con esta forma:
   } catch (error) {
     console.error('Green Advisor error:', error);
     if (error instanceof Error && error.name === 'TimeoutError') {
-      return { success: true, reply: createVerifiedFallback(parsed.data.message) };
+      return { success: true, reply: createVerifiedFallback(parsed.data.message, parsed.data.history, fallbackCatalog, fallbackPlants) };
     }
-    return { success: true, reply: createVerifiedFallback(parsed.data.message) };
+    return { success: true, reply: createVerifiedFallback(parsed.data.message, parsed.data.history, fallbackCatalog, fallbackPlants) };
   }
 }
