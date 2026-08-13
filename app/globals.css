@@ -142,3 +142,6 @@ body {
   max-width: 100%;
   overflow-x: hidden;
 }
+html[data-green-advisor-open='true'] .whatsapp-floating {
+  display: none;
+}
