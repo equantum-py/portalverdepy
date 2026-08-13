@@ -52,6 +52,18 @@ type AdvisorProduct = {
 
 type AdvisorPlant = { name: string; variant: string | null };
 
+function extractRequestedItem(message: string) {
+  const cleaned = message
+    .trim()
+    .replace(/^(?:hola|hol[aá]|buenos días|buen día|buenas tardes|buenas noches)[,!.?¿¡\s]*/i, '')
+    .replace(/^(?:quiero|quisiera|busco|necesito|tienen|tenés|hay)\s+/i, '')
+    .replace(/\s+(?:tienen|tenés|hay|disponible|disponibles|por favor|porfa)\s*[?.!]*$/i, '')
+    .replace(/^[¿¡\s]+|[?!.\s]+$/g, '')
+    .trim();
+
+  return cleaned || message.trim();
+}
+
 function createVerifiedFallback(
   message: string,
   history: Array<{ role: 'user' | 'assistant'; content: string }> = [],
@@ -69,6 +81,7 @@ function createVerifiedFallback(
     ? previousUserMessage
     : originalQuery;
   const effectiveQuery = effectiveMessage.toLocaleLowerCase('es-PY');
+  const requestedItem = extractRequestedItem(effectiveMessage);
   const previousConversation = history
     .map((item) => item.content)
     .join(' ')
@@ -117,9 +130,9 @@ function createVerifiedFallback(
     return {
       answer: requestedPlant
         ? `Sí, ${requestedPlant.name} figura en nuestro vivero. Te confirmo disponibilidad por WhatsApp, ¿querés consultar ahora?`
-        : `Creo que sí podemos conseguir ${effectiveMessage}, pero prefiero confirmarte bien. ¿Querés que te derive con un asesor por WhatsApp?`,
+        : `Creo que sí podemos conseguir ${requestedItem}. Para confirmarte disponibilidad, te comunico con un asesor por WhatsApp.`,
       recommendedProductSlugs: [],
-      whatsappMessage: `Hola, Portal Verde. Quiero confirmar si pueden conseguir o tienen disponible: ${effectiveMessage}`,
+      whatsappMessage: `Hola, Portal Verde. Quiero confirmar si pueden conseguir o tienen disponible: ${requestedItem}`,
       needsHuman: true
     };
   }
