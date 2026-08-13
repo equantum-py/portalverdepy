@@ -125,7 +125,29 @@ Devolvé exclusivamente JSON válido con esta forma:
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: JSON.stringify({
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { responseMimeType: 'application/json', temperature: 0.2, maxOutputTokens: 700 }
+          generationConfig: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: 'object',
+              properties: {
+                answer: { type: 'string' },
+                recommendedProductSlugs: {
+                  type: 'array',
+                  items: { type: 'string' }
+                },
+                whatsappMessage: { type: 'string' },
+                needsHuman: { type: 'boolean' }
+              },
+              required: [
+                'answer',
+                'recommendedProductSlugs',
+                'whatsappMessage',
+                'needsHuman'
+              ]
+            },
+            temperature: 0.2,
+            maxOutputTokens: 700
+          }
         }),
         cache: 'no-store',
         signal: AbortSignal.timeout(18_000)
@@ -133,9 +155,16 @@ Devolvé exclusivamente JSON válido con esta forma:
     );
 
     if (!response.ok) {
-      console.error('Green Advisor Gemini error:', response.status, await response.text());
+      const errorBody = await response.text();
+      console.error('Green Advisor Gemini error:', response.status, errorBody);
+      if (response.status === 401 || response.status === 403) {
+        return { success: false, message: 'El Asesor Verde necesita revisar su conexión con Gemini.' };
+      }
       if (response.status === 429) {
         return { success: false, message: 'El asesor está recibiendo muchas consultas. Intentá nuevamente en un momento.' };
+      }
+      if (response.status === 400) {
+        return { success: false, message: 'Gemini no pudo procesar esta consulta. Intentá formularla nuevamente.' };
       }
       return { success: false, message: 'No pude responder ahora. Podés consultar directamente por WhatsApp.' };
     }
