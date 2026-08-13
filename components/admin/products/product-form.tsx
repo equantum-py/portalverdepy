@@ -158,12 +158,17 @@ export function ProductForm({
   function applyGeminiSuggestion() {
     if (!geminiSuggestion) return;
 
-    for (const [field, value] of Object.entries(geminiSuggestion)) {
+    const { features: suggestedFeatures, recommendations: suggestedRecommendations, ...textFields } = geminiSuggestion;
+
+    for (const [field, value] of Object.entries(textFields)) {
       setValue(field as keyof ProductFormValues, value, {
         shouldDirty: true,
         shouldValidate: true
       });
     }
+
+    features.replace(suggestedFeatures.map((value) => ({ value })));
+    recommendations.replace(suggestedRecommendations.map((value) => ({ value })));
 
     setGeminiMessage('Propuesta aplicada. Revisá los campos antes de guardar.');
     setGeminiSuggestion(null);
@@ -388,7 +393,7 @@ export function ProductForm({
               <button
                 type="button"
                 onClick={generateWithGemini}
-                disabled={isGeneratingCopy || name.trim().length < 2}
+                disabled={isGeneratingCopy || name.trim().length < 2 || !categoryId}
                 className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isGeneratingCopy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -404,6 +409,8 @@ export function ProductForm({
                 <dl className="mt-3 space-y-3 text-sm">
                   <div><dt className="font-semibold text-slate-700">Descripción corta</dt><dd className="mt-1 text-slate-600">{geminiSuggestion.shortDescription}</dd></div>
                   <div><dt className="font-semibold text-slate-700">Descripción completa</dt><dd className="mt-1 whitespace-pre-line text-slate-600">{geminiSuggestion.description}</dd></div>
+                  <div><dt className="font-semibold text-slate-700">Características</dt><dd className="mt-1 text-slate-600">{geminiSuggestion.features.join(' · ')}</dd></div>
+                  <div><dt className="font-semibold text-slate-700">Recomendaciones</dt><dd className="mt-1 text-slate-600">{geminiSuggestion.recommendations.join(' · ')}</dd></div>
                   <div><dt className="font-semibold text-slate-700">SEO</dt><dd className="mt-1 text-slate-600">{geminiSuggestion.seoTitle} — {geminiSuggestion.seoDescription}</dd></div>
                 </dl>
                 <div className="mt-4 flex flex-wrap gap-2">
