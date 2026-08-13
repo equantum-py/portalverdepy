@@ -29,12 +29,12 @@ export function SectionBannerUploader({ sectionKey, variant, url, onChange, layo
   const isService = layout === 'service';
   const recommended = isService
     ? variant === 'desktop' ? '1200 × 500 px o superior' : '800 × 800 px o superior'
-    : '548 × 882 px o superior';
+    : variant === 'desktop' ? '548 × 882 px o superior' : '548 × 1240 px o superior';
   const ratio = isService
     ? variant === 'desktop' ? 'aspect-[12/5]' : 'aspect-square'
-    : 'aspect-[274/441]';
+    : variant === 'desktop' ? 'aspect-[274/441]' : 'aspect-[137/310]';
   const minimumWidth = isService ? (variant === 'desktop' ? 1200 : 800) : 548;
-  const minimumHeight = isService ? (variant === 'desktop' ? 500 : 800) : 882;
+  const minimumHeight = isService ? (variant === 'desktop' ? 500 : 800) : variant === 'desktop' ? 882 : 1240;
 
   async function upload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
