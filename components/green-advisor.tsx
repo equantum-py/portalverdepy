@@ -73,15 +73,15 @@ export function GreenAdvisor() {
       {open ? (
         <section
           role="dialog"
-          aria-label="Asesor Verde"
+          aria-label="Asesor de Portal Verde"
           className="mb-3 flex h-[min(620px,calc(100dvh-10rem))] w-[calc(100vw-1.5rem)] max-w-[410px] flex-col overflow-hidden rounded-3xl border border-emerald-200 bg-white shadow-2xl"
         >
           <header className="flex items-center justify-between bg-[#0b3d24] px-4 py-3 text-white">
             <div className="flex items-center gap-3">
               <span className="grid h-10 w-10 place-items-center rounded-full bg-white/15"><Leaf className="h-5 w-5" /></span>
-              <div><h2 className="font-semibold">Asesor Verde</h2><p className="text-xs text-emerald-100">Orientación de Portal Verde</p></div>
+              <div><h2 className="font-semibold">Asesor de Portal Verde</h2><p className="text-xs text-emerald-100">Atención y orientación online</p></div>
             </div>
-            <button type="button" onClick={() => setOpen(false)} aria-label="Cerrar Asesor Verde" className="grid h-10 w-10 place-items-center rounded-full hover:bg-white/10"><X className="h-5 w-5" /></button>
+            <button type="button" onClick={() => setOpen(false)} aria-label="Cerrar atención online" className="grid h-10 w-10 place-items-center rounded-full hover:bg-white/10"><X className="h-5 w-5" /></button>
           </header>
 
           <div className="flex-1 space-y-3 overflow-y-auto overscroll-contain bg-[#f7faf7] p-4">
@@ -137,8 +137,8 @@ export function GreenAdvisor() {
         </section>
       ) : null}
 
-      <button type="button" onClick={() => setOpen((current) => !current)} aria-expanded={open} aria-label={open ? 'Cerrar Asesor Verde' : 'Abrir Asesor Verde'} className="ml-auto flex min-h-12 items-center gap-2 rounded-full bg-[#0b3d24] px-4 font-semibold text-white shadow-xl transition hover:bg-[#126235]">
-        {open ? <X className="h-5 w-5" /> : <Bot className="h-5 w-5" />}<span>{open ? 'Cerrar' : 'Asesor Verde'}</span>
+      <button type="button" onClick={() => setOpen((current) => !current)} aria-expanded={open} aria-label={open ? 'Cerrar atención online' : 'Abrir Atención 24'} className="ml-auto flex min-h-12 items-center gap-2 rounded-full bg-[#0b3d24] px-4 font-semibold text-white shadow-xl transition hover:bg-[#126235]">
+        {open ? <X className="h-5 w-5" /> : <Bot className="h-5 w-5" />}<span>{open ? 'Cerrar' : 'Atención 24'}</span>
       </button>
     </div>
   );
