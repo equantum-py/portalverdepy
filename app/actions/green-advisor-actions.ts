@@ -71,23 +71,20 @@ export async function askGreenAdvisor(input: unknown): Promise<GreenAdvisorResul
       })()
     ]);
 
-    const catalog = products.slice(0, 60).map((product) => ({
+    const catalog = products.slice(0, 30).map((product) => ({
       name: product.name,
       slug: product.slug,
       category: product.category,
-      description: product.description,
+      description: product.description.slice(0, 180),
       price: product.price,
       unit: product.unit,
       includesInstallation: product.includesInstallation,
-      publishedAsAvailable: product.inStock,
-      benefits: (product.benefits ?? []).slice(0, 4),
-      recommendations: (product.recommendations ?? []).slice(0, 3)
+      publishedAsAvailable: product.inStock
     }));
 
-    const plants = (nurseryResult.data ?? []).map((plant) => ({
+    const plants = (nurseryResult.data ?? []).slice(0, 30).map((plant) => ({
       name: plant.name,
-      variant: plant.variant,
-      description: plant.description
+      variant: plant.variant
     }));
 
     const validSlugs = new Set(catalog.map((product) => product.slug));
@@ -130,7 +127,8 @@ Devolvé exclusivamente JSON válido con esta forma:
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
           generationConfig: { responseMimeType: 'application/json', temperature: 0.2, maxOutputTokens: 700 }
         }),
-        cache: 'no-store'
+        cache: 'no-store',
+        signal: AbortSignal.timeout(18_000)
       }
     );
 
@@ -146,7 +144,11 @@ Devolvé exclusivamente JSON válido con esta forma:
     const text = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) return { success: false, message: 'No pude preparar la respuesta. Intentá nuevamente.' };
 
-    const reply = responseSchema.safeParse(JSON.parse(text));
+    const normalizedText = text
+      .trim()
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/, '');
+    const reply = responseSchema.safeParse(JSON.parse(normalizedText));
     if (!reply.success) {
       console.error('Invalid Green Advisor response:', reply.error.flatten());
       return { success: false, message: 'La respuesta llegó incompleta. Intentá nuevamente.' };
@@ -161,6 +163,9 @@ Devolvé exclusivamente JSON válido con esta forma:
     };
   } catch (error) {
     console.error('Green Advisor error:', error);
+    if (error instanceof Error && error.name === 'TimeoutError') {
+      return { success: false, message: 'La consulta tardó más de lo esperado. Intentá nuevamente o continuá por WhatsApp.' };
+    }
     return { success: false, message: 'No pude responder ahora. Podés consultar directamente por WhatsApp.' };
   }
 }
