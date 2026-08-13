@@ -30,6 +30,13 @@ export function GreenAdvisor() {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [messages, sending]);
 
+  useEffect(() => {
+    document.documentElement.dataset.greenAdvisorOpen = String(open);
+    return () => {
+      delete document.documentElement.dataset.greenAdvisorOpen;
+    };
+  }, [open]);
+
   if (pathname.startsWith('/admin')) return null;
 
   async function submitQuestion(question: string) {
