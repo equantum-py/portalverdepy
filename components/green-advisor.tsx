@@ -137,8 +137,8 @@ export function GreenAdvisor() {
         </section>
       ) : null}
 
-      <button type="button" onClick={() => setOpen((current) => !current)} aria-expanded={open} aria-label={open ? 'Cerrar atención online' : 'Abrir Atención 24'} className="ml-auto flex min-h-12 items-center gap-2 rounded-full bg-[#0b3d24] px-4 font-semibold text-white shadow-xl transition hover:bg-[#126235]">
-        {open ? <X className="h-5 w-5" /> : <Bot className="h-5 w-5" />}<span>{open ? 'Cerrar' : 'Atención 24'}</span>
+      <button type="button" onClick={() => setOpen((current) => !current)} aria-expanded={open} aria-label={open ? 'Cerrar atención online' : 'Abrir Atención 24/7'} className="ml-auto flex min-h-12 items-center gap-2 rounded-full bg-[#0b3d24] px-4 font-semibold text-white shadow-xl transition hover:bg-[#126235]">
+        {open ? <X className="h-5 w-5" /> : <Bot className="h-5 w-5" />}<span>{open ? 'Cerrar' : 'Atención 24/7'}</span>
       </button>
     </div>
   );
