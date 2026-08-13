@@ -39,6 +39,80 @@ function isRateLimited(key: string) {
   return current.count > 8;
 }
 
+type AdvisorProduct = {
+  name: string;
+  slug: string;
+  category: string;
+  description: string;
+  price: number;
+  unit: string;
+  includesInstallation: boolean;
+  publishedAsAvailable: boolean;
+};
+
+type AdvisorPlant = { name: string; variant: string | null };
+
+function createVerifiedFallback(
+  message: string,
+  catalog: AdvisorProduct[] = [],
+  plants: AdvisorPlant[] = []
+): GreenAdvisorReply {
+  const query = message.toLocaleLowerCase('es-PY');
+  const whatsappMessage = `Hola, Portal Verde. Quiero consultar sobre: ${message}`;
+
+  if (/^(hola|hol[aá]|buen(?:os|as)|qué tal|que tal)/i.test(query)) {
+    return {
+      answer: '¡Hola! Soy el Asesor Verde. Puedo ayudarte a elegir césped, consultar las plantas publicadas o conocer nuestros servicios. ¿Qué necesitás para tu espacio?',
+      recommendedProductSlugs: [],
+      whatsappMessage,
+      needsHuman: false
+    };
+  }
+
+  if (query.includes('césped') || query.includes('cesped') || query.includes('pasto')) {
+    const grass = catalog.filter((product) =>
+      product.category.toLocaleLowerCase('es-PY').includes('césped') ||
+      product.category.toLocaleLowerCase('es-PY').includes('cesped')
+    ).slice(0, 3);
+    return {
+      answer: `Para orientarte bien necesito saber: ¿cuántos m² son, cuánto sol recibe el lugar, qué uso tendrá y cómo está actualmente el terreno?${grass.length ? ` Tenemos publicadas estas opciones: ${grass.map((product) => product.name).join(', ')}.` : ''} La disponibilidad y el presupuesto final se confirman por WhatsApp.`,
+      recommendedProductSlugs: grass.map((product) => product.slug),
+      whatsappMessage,
+      needsHuman: true
+    };
+  }
+
+  if (query.includes('planta') || query.includes('vivero')) {
+    const plantNames = plants.slice(0, 6).map((plant) =>
+      plant.variant ? `${plant.name} (${plant.variant})` : plant.name
+    );
+    return {
+      answer: plantNames.length
+        ? `Estas son algunas plantas publicadas actualmente: ${plantNames.join(', ')}. La disponibilidad debe confirmarse con nuestro equipo por WhatsApp.`
+        : 'Nuestro Vivero Digital cuenta con plantas para consulta. La disponibilidad se confirma directamente con nuestro equipo por WhatsApp.',
+      recommendedProductSlugs: [],
+      whatsappMessage,
+      needsHuman: true
+    };
+  }
+
+  if (/(riego|mantenimiento|piscina|paisajismo|visita técnica|visita tecnica|servicio)/i.test(query)) {
+    return {
+      answer: 'Portal Verde ofrece paisajismo, mantenimiento de jardines, mantenimiento de piscinas, instalación de riego automático y visita técnica en Asunción y Gran Asunción. Contanos qué servicio necesitás y te conectamos con un asesor para evaluar y cotizar.',
+      recommendedProductSlugs: [],
+      whatsappMessage,
+      needsHuman: true
+    };
+  }
+
+  return {
+    answer: 'Puedo orientarte sobre césped, plantas, paisajismo, mantenimiento de jardines y piscinas, riego automático o visita técnica. Contame un poco más sobre lo que necesitás.',
+    recommendedProductSlugs: [],
+    whatsappMessage,
+    needsHuman: false
+  };
+}
+
 export async function askGreenAdvisor(input: unknown): Promise<GreenAdvisorResult> {
   const parsed = requestSchema.safeParse(input);
   if (!parsed.success) {
@@ -77,9 +151,9 @@ export async function askGreenAdvisor(input: unknown): Promise<GreenAdvisorResul
       category: product.category,
       description: product.description.slice(0, 180),
       price: product.price,
-      unit: product.unit,
-      includesInstallation: product.includesInstallation,
-      publishedAsAvailable: product.inStock
+      unit: product.unit ?? 'unidad',
+      includesInstallation: Boolean(product.includesInstallation),
+      publishedAsAvailable: product.inStock !== false
     }));
 
     const plants = (nurseryResult.data ?? []).slice(0, 30).map((plant) => ({
@@ -158,20 +232,20 @@ Devolvé exclusivamente JSON válido con esta forma:
       const errorBody = await response.text();
       console.error('Green Advisor Gemini error:', response.status, errorBody);
       if (response.status === 401 || response.status === 403) {
-        return { success: false, message: 'El Asesor Verde necesita revisar su conexión con Gemini.' };
+        return { success: true, reply: createVerifiedFallback(parsed.data.message, catalog, plants) };
       }
       if (response.status === 429) {
-        return { success: false, message: 'El asesor está recibiendo muchas consultas. Intentá nuevamente en un momento.' };
+        return { success: true, reply: createVerifiedFallback(parsed.data.message, catalog, plants) };
       }
       if (response.status === 400) {
-        return { success: false, message: 'Gemini no pudo procesar esta consulta. Intentá formularla nuevamente.' };
+        return { success: true, reply: createVerifiedFallback(parsed.data.message, catalog, plants) };
       }
-      return { success: false, message: 'No pude responder ahora. Podés consultar directamente por WhatsApp.' };
+      return { success: true, reply: createVerifiedFallback(parsed.data.message, catalog, plants) };
     }
 
     const payload = await response.json();
     const text = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) return { success: false, message: 'No pude preparar la respuesta. Intentá nuevamente.' };
+    if (!text) return { success: true, reply: createVerifiedFallback(parsed.data.message, catalog, plants) };
 
     const normalizedText = text
       .trim()
@@ -180,7 +254,7 @@ Devolvé exclusivamente JSON válido con esta forma:
     const reply = responseSchema.safeParse(JSON.parse(normalizedText));
     if (!reply.success) {
       console.error('Invalid Green Advisor response:', reply.error.flatten());
-      return { success: false, message: 'La respuesta llegó incompleta. Intentá nuevamente.' };
+      return { success: true, reply: createVerifiedFallback(parsed.data.message, catalog, plants) };
     }
 
     return {
@@ -193,8 +267,8 @@ Devolvé exclusivamente JSON válido con esta forma:
   } catch (error) {
     console.error('Green Advisor error:', error);
     if (error instanceof Error && error.name === 'TimeoutError') {
-      return { success: false, message: 'La consulta tardó más de lo esperado. Intentá nuevamente o continuá por WhatsApp.' };
+      return { success: true, reply: createVerifiedFallback(parsed.data.message) };
     }
-    return { success: false, message: 'No pude responder ahora. Podés consultar directamente por WhatsApp.' };
+    return { success: true, reply: createVerifiedFallback(parsed.data.message) };
   }
 }
