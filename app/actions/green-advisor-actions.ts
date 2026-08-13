@@ -58,15 +58,25 @@ function createVerifiedFallback(
   catalog: AdvisorProduct[] = [],
   plants: AdvisorPlant[] = []
 ): GreenAdvisorReply {
-  const query = message.toLocaleLowerCase('es-PY');
+  const originalQuery = message.trim();
+  const query = originalQuery.toLocaleLowerCase('es-PY');
+  const previousUserMessage = [...history]
+    .reverse()
+    .find((item) => item.role === 'user')
+    ?.content.trim();
+  const referencesPreviousMessage = /^(?:mensaje|consulta|pregunta)?\s*(?:de\s+)?(?:arriba|antes|anterior)|^(?:eso|ese|esa|este|esta|lo mismo|el mismo|la misma)(?:\s|$)/i.test(query);
+  const effectiveMessage = referencesPreviousMessage && previousUserMessage
+    ? previousUserMessage
+    : originalQuery;
+  const effectiveQuery = effectiveMessage.toLocaleLowerCase('es-PY');
   const previousConversation = history
     .map((item) => item.content)
     .join(' ')
     .toLocaleLowerCase('es-PY');
-  const plantContext = /(planta|vivero|árbol|arbol)/i.test(`${previousConversation} ${query}`);
-  const whatsappMessage = `Hola, Portal Verde. Quiero consultar sobre: ${message}`;
+  const plantContext = /(planta|vivero|árbol|arbol)/i.test(`${previousConversation} ${effectiveQuery}`);
+  const whatsappMessage = `Hola, Portal Verde. Quiero consultar sobre: ${effectiveMessage}`;
 
-  if (/^(hola|hol[aá]|buen(?:os|as)|qué tal|que tal)/i.test(query)) {
+  if (/^(?:hola|hol[aá]|buenos días|buen día|buenas tardes|buenas noches|qué tal|que tal)[!.?\s]*$/i.test(query)) {
     return {
       answer: '¡Hola! ¿Cómo estás? Soy asesor de Portal Verde. Contame, ¿qué necesitás para tu jardín?',
       recommendedProductSlugs: [],
@@ -75,7 +85,7 @@ function createVerifiedFallback(
     };
   }
 
-  if (query.includes('césped') || query.includes('cesped') || query.includes('pasto')) {
+  if (effectiveQuery.includes('césped') || effectiveQuery.includes('cesped') || effectiveQuery.includes('pasto')) {
     const grass = catalog.filter((product) =>
       product.category.toLocaleLowerCase('es-PY').includes('césped') ||
       product.category.toLocaleLowerCase('es-PY').includes('cesped')
@@ -88,7 +98,7 @@ function createVerifiedFallback(
     };
   }
 
-  if (query.includes('planta') || query.includes('vivero')) {
+  if (effectiveQuery.includes('planta') || effectiveQuery.includes('vivero')) {
     const plantNames = plants.map((plant) => plant.name);
     return {
       answer: plantNames.length
@@ -102,19 +112,19 @@ function createVerifiedFallback(
 
   if (plantContext) {
     const requestedPlant = plants.find((plant) =>
-      query.includes(plant.name.toLocaleLowerCase('es-PY'))
+      effectiveQuery.includes(plant.name.toLocaleLowerCase('es-PY'))
     );
     return {
       answer: requestedPlant
         ? `Sí, ${requestedPlant.name} figura en nuestro vivero. Te confirmo disponibilidad por WhatsApp, ¿querés consultar ahora?`
-        : `Creo que sí podemos conseguir ${message.trim()}, pero prefiero confirmarte bien. ¿Querés que te derive con un asesor por WhatsApp?`,
+        : `Creo que sí podemos conseguir ${effectiveMessage}, pero prefiero confirmarte bien. ¿Querés que te derive con un asesor por WhatsApp?`,
       recommendedProductSlugs: [],
-      whatsappMessage: `Hola, Portal Verde. Quiero confirmar si pueden conseguir o tienen disponible: ${message.trim()}`,
+      whatsappMessage: `Hola, Portal Verde. Quiero confirmar si pueden conseguir o tienen disponible: ${effectiveMessage}`,
       needsHuman: true
     };
   }
 
-  if (/(riego|mantenimiento|piscina|paisajismo|visita técnica|visita tecnica|servicio)/i.test(query)) {
+  if (/(riego|mantenimiento|piscina|paisajismo|visita técnica|visita tecnica|servicio)/i.test(effectiveQuery)) {
     return {
       answer: 'Sí, hacemos paisajismo, mantenimiento de jardines y piscinas, riego automático y visitas técnicas. ¿Cuál de estos servicios necesitás?',
       recommendedProductSlugs: [],
@@ -195,6 +205,9 @@ REGLAS OBLIGATORIAS:
 - Césped Maní no incluye preparación del terreno. Los demás céspedes con instalación incluyen preparación básica. Malezas importantes, retiro o destoconado de árboles, nivelaciones complejas, relleno de pozos y aporte extraordinario de suelo se inspeccionan y cotizan aparte.
 - Para plantas, no inventes cuidados específicos si no están en el contexto.
 - Mantené el tema de toda la conversación. Si estaban hablando de plantas, interpretá el siguiente nombre como una planta consultada.
+- Antes de responder, leé todos los mensajes anteriores. No vuelvas a preguntar algo que el cliente ya respondió.
+- Si el cliente dice "eso", "el de arriba", "mensaje anterior", "ese producto" o algo similar, recuperá la última consulta concreta del historial; nunca tomes esas palabras como nombre de un producto.
+- Un mensaje que empieza con "hola" puede contener además una consulta. Respondé la consulta completa, no solamente el saludo.
 - Cuando pregunten qué plantas hay, respondé con los nombres exactos de PLANTAS PUBLICADAS; no preguntes primero por tamaño.
 - Si piden una planta o producto que no figura en el contexto, respondé con confianza: "Creo que sí podemos conseguirlo, pero te confirmo por WhatsApp". No afirmes que está disponible.
 - Respondé muy breve: entre 1 y 3 frases, máximo 55 palabras.
