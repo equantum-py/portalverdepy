@@ -114,16 +114,27 @@ export function CategoryProductsBannerSection({
           {bannerUrl ? (
             <Link
               href={categoryUrl}
-              className={`${mobileItemWidth} relative shrink-0 snap-start overflow-hidden rounded-2xl shadow-sm ${isGrassBanner && !mobileCardHeight ? 'aspect-[340/548]' : ''} ${!isGrassBanner ? 'border border-border bg-[#f7f5ef]' : ''}`}
+              className={`${mobileItemWidth} relative isolate shrink-0 snap-start overflow-hidden rounded-2xl shadow-sm ${isGrassBanner && !mobileCardHeight ? 'aspect-[340/548]' : ''} ${!isGrassBanner ? 'border border-border bg-[#f7f5ef]' : 'bg-brand-950'}`}
               style={mobileCardHeight ? { height: `${mobileCardHeight}px` } : undefined}
             >
+              {isGrassBanner ? (
+                <Image
+                  src={bannerUrl}
+                  alt=""
+                  aria-hidden="true"
+                  fill
+                  quality={75}
+                  sizes={mobileColumns === 1 ? '78vw' : '46vw'}
+                  className="-z-10 scale-110 object-cover object-center opacity-55 blur-xl"
+                />
+              ) : null}
               <Image
                 src={bannerUrl}
                 alt={`Banner ${title}`}
                 fill
                 quality={isGrassBanner ? 90 : 95}
                 sizes={mobileColumns === 1 ? '78vw' : '46vw'}
-                className={isGrassBanner ? 'object-cover object-center' : 'object-contain object-center'}
+                className="object-contain object-center"
                 priority={false}
               />
             </Link>
