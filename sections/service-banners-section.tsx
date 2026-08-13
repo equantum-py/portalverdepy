@@ -27,12 +27,12 @@ export function ServiceBannersSection({ banners }: { banners: Banner[] }) {
               target={banner.categorySlug.startsWith('http') ? '_blank' : undefined}
               rel={banner.categorySlug.startsWith('http') ? 'noopener noreferrer' : undefined}
               aria-label={banner.title || 'Consultar servicio de Portal Verde'}
-              className="group relative aspect-[16/8] min-h-[190px] overflow-hidden rounded-2xl bg-[#164d2a] shadow-sm sm:aspect-[12/5] sm:min-h-[220px]"
+              className="group relative aspect-square w-full overflow-hidden rounded-2xl bg-[#164d2a] shadow-sm sm:aspect-[12/5] sm:min-h-[220px]"
             >
               {desktopImage ? (
                 <picture>
                   {mobileImage ? <source media="(max-width: 639px)" srcSet={mobileImage} /> : null}
-                  <Image src={desktopImage} alt={banner.title || 'Servicio de Portal Verde'} fill quality={90} sizes="(max-width: 639px) 100vw, 50vw" className="object-cover transition duration-500 group-hover:scale-[1.02]" />
+                  <Image src={desktopImage} alt={banner.title || 'Servicio de Portal Verde'} fill quality={90} sizes="(max-width: 639px) 100vw, 50vw" className="object-contain sm:object-cover sm:transition sm:duration-500 sm:group-hover:scale-[1.02]" />
                 </picture>
               ) : null}
             </a>
