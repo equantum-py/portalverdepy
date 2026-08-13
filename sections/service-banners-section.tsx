@@ -15,7 +15,7 @@ export function ServiceBannersSection({ banners }: { banners: Banner[] }) {
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-700">Servicios especializados</p>
         <h2 className="mt-1 text-[1.65rem] font-semibold leading-tight text-text-strong sm:text-3xl">Cuidamos cada detalle de tu jardín</h2>
       </div>
-      <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0">
+      <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-4 pb-2 touch-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0">
         {visibleBanners.map((banner) => {
           const desktopImage = banner.bannerDesktopUrl || banner.bannerMobileUrl;
           const mobileImage = banner.bannerMobileUrl || banner.bannerDesktopUrl;
