@@ -37,8 +37,10 @@ export function CategoryProductsBannerSection({
   const mobileScrollerRef = useRef<HTMLDivElement>(null);
   const desktopScrollerRef = useRef<HTMLDivElement>(null);
   const firstMobileCardRef = useRef<HTMLDivElement>(null);
+  const firstDesktopCardRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [mobileCardHeight, setMobileCardHeight] = useState<number | null>(null);
+  const [desktopCardHeight, setDesktopCardHeight] = useState<number | null>(null);
 
   const categoryUrl = `/shop?category=${encodeURIComponent(categorySlug)}`;
   const bannerUrl = bannerMobileUrl || bannerDesktopUrl;
@@ -55,6 +57,18 @@ export function CategoryProductsBannerSection({
     observer.observe(element);
     return () => observer.disconnect();
   }, [products.length, mobileColumns]);
+
+  useEffect(() => {
+    const element = firstDesktopCardRef.current;
+    if (!element) return;
+
+    const update = () => setDesktopCardHeight(Math.ceil(element.getBoundingClientRect().height));
+    update();
+
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [products.length]);
 
   if (!bannerUrl && products.length === 0) return null;
 
@@ -149,7 +163,11 @@ export function CategoryProductsBannerSection({
 
       <div className={`hidden lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)] lg:gap-4 ${isGrassBanner ? 'lg:items-start' : 'lg:items-stretch'}`}>
         {bannerDesktopUrl || bannerMobileUrl ? (
-          <Link href={categoryUrl} className={`group relative w-full overflow-hidden rounded-2xl shadow-sm ${isGrassBanner ? 'aspect-[340/548]' : 'h-full min-h-[441px] border border-border bg-white'}`}>
+          <Link
+            href={categoryUrl}
+            className={`group relative w-full overflow-hidden rounded-2xl shadow-sm ${isGrassBanner && !desktopCardHeight ? 'aspect-[274/535]' : ''} ${!isGrassBanner ? 'h-full min-h-[441px] border border-border bg-white' : ''}`}
+            style={isGrassBanner && desktopCardHeight ? { height: `${desktopCardHeight}px` } : undefined}
+          >
             <Image
               src={bannerDesktopUrl || bannerMobileUrl}
               alt={`Banner ${title}`}
@@ -165,8 +183,12 @@ export function CategoryProductsBannerSection({
 
         <div className="relative min-w-0 overflow-hidden">
           <div ref={desktopScrollerRef} className="flex h-full snap-x snap-mandatory items-stretch gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {products.map((product) => (
-              <div key={product.id} className="flex min-w-[calc(33.333%-11px)] basis-[calc(33.333%-11px)] shrink-0 snap-start">
+            {products.map((product, index) => (
+              <div
+                key={product.id}
+                ref={index === 0 ? firstDesktopCardRef : undefined}
+                className="flex min-w-[calc(33.333%-11px)] basis-[calc(33.333%-11px)] shrink-0 snap-start"
+              >
                 <div className="w-full">{renderCard(product)}</div>
               </div>
             ))}
