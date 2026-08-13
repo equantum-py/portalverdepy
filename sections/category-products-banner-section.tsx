@@ -45,7 +45,6 @@ export function CategoryProductsBannerSection({
   const isGrassBanner = categorySlug.trim().toLowerCase() === 'cesped';
 
   useEffect(() => {
-    if (isGrassBanner) return;
     const element = firstMobileCardRef.current;
     if (!element) return;
 
@@ -55,7 +54,7 @@ export function CategoryProductsBannerSection({
     const observer = new ResizeObserver(update);
     observer.observe(element);
     return () => observer.disconnect();
-  }, [isGrassBanner, products.length, mobileColumns]);
+  }, [products.length, mobileColumns]);
 
   if (!bannerUrl && products.length === 0) return null;
 
@@ -115,8 +114,8 @@ export function CategoryProductsBannerSection({
           {bannerUrl ? (
             <Link
               href={categoryUrl}
-              className={`${mobileItemWidth} relative shrink-0 snap-start overflow-hidden rounded-2xl shadow-sm ${isGrassBanner ? 'aspect-[340/548]' : 'border border-border bg-[#f7f5ef]'}`}
-              style={!isGrassBanner && mobileCardHeight ? { height: `${mobileCardHeight}px` } : undefined}
+              className={`${mobileItemWidth} relative shrink-0 snap-start overflow-hidden rounded-2xl shadow-sm ${isGrassBanner && !mobileCardHeight ? 'aspect-[340/548]' : ''} ${!isGrassBanner ? 'border border-border bg-[#f7f5ef]' : ''}`}
+              style={mobileCardHeight ? { height: `${mobileCardHeight}px` } : undefined}
             >
               <Image
                 src={bannerUrl}
