@@ -48,7 +48,11 @@ export function GreenAdvisor() {
     const history = messages.slice(-6).map(({ role, content }) => ({ role, content }));
     setMessages((current) => [...current, { role: 'user', content: cleanQuestion }]);
 
-    const result = await askGreenAdvisor({ message: cleanQuestion, history });
+    const minimumTypingTime = new Promise((resolve) => window.setTimeout(resolve, 1200));
+    const [result] = await Promise.all([
+      askGreenAdvisor({ message: cleanQuestion, history }),
+      minimumTypingTime
+    ]);
     if (result.success) {
       setMessages((current) => [...current, { role: 'assistant', content: result.reply.answer, reply: result.reply }]);
     } else {
@@ -116,7 +120,7 @@ export function GreenAdvisor() {
               </div>
             ))}
 
-            {sending ? <div className="flex w-fit items-center gap-2 rounded-2xl rounded-tl-md border border-emerald-100 bg-white p-3 text-sm text-slate-600"><Loader2 className="h-4 w-4 animate-spin" />Preparando orientación…</div> : null}
+            {sending ? <div className="flex w-fit items-center gap-2 rounded-2xl rounded-tl-md border border-emerald-100 bg-white p-3 text-sm text-slate-600"><Loader2 className="h-4 w-4 animate-spin" />Escribiendo…</div> : null}
             {error ? <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">{error}</div> : null}
             <div ref={endRef} />
           </div>
