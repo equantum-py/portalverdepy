@@ -110,7 +110,7 @@ export function CategoryProductsBannerSection({
         <div
           ref={mobileScrollerRef}
           onScroll={updateProgress}
-          className={`flex snap-x snap-mandatory items-start gap-2.5 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${mobileSwipe ? 'touch-pan-x' : ''}`}
+          className={`flex items-start gap-2.5 overflow-x-auto overscroll-x-contain pb-3 touch-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${mobileSwipe ? 'snap-x snap-mandatory' : ''}`}
         >
           {bannerUrl ? (
             <Link
