@@ -84,7 +84,7 @@ export function Footer() {
         <div><h3 className="text-sm font-semibold uppercase tracking-wide text-brand-200">Contacto</h3><div className="mt-4"><Contact /></div></div>
       </div>
 
-      <div className="border-t border-white/10"><div className="container-shell flex flex-col gap-3 py-5 text-xs text-white/45 sm:flex-row sm:items-center sm:justify-between"><p>© {new Date().getFullYear()} Portal Verde. Todos los derechos reservados.</p><div className="flex flex-wrap gap-x-4 gap-y-2"><Link href="/terminos">Términos</Link><Link href="/privacidad">Privacidad</Link><Link href="/cookies">Cookies</Link></div></div></div>
+      <div className="border-t border-white/10"><div className="container-shell flex flex-col gap-3 py-5 text-xs text-white/45 sm:flex-row sm:items-center sm:justify-between"><div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3"><p>© {new Date().getFullYear()} Portal Verde. Todos los derechos reservados.</p><a href="https://www.equantum.com.py/" target="_blank" rel="noopener noreferrer" className="transition hover:text-white/70">Desarrollado por eQuantum</a></div><div className="flex flex-wrap gap-x-4 gap-y-2"><Link href="/terminos">Términos</Link><Link href="/privacidad">Privacidad</Link><Link href="/cookies">Cookies</Link></div></div></div>
     </footer>
   );
 }
