@@ -22,6 +22,7 @@ import {
 } from '@/lib/quote-storage';
 
 import { WhatsAppIcon } from '@/components/icons';
+import { siteConfig } from '@/lib/site-config';
 
 export function CartClient() {
   const [items, setItems] = useState<QuoteItem[]>([]);
@@ -90,7 +91,7 @@ export function CartClient() {
       .join('\n');
   }, [items, needsInstallation, notes, subtotal, zone]);
 
-  const whatsappUrl = `https://wa.me/595981077600?text=${encodeURIComponent(
+  const whatsappUrl = `https://wa.me/${siteConfig.contact.whatsapp}?text=${encodeURIComponent(
     whatsappMessage
   )}`;
 
