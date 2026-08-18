@@ -129,6 +129,12 @@ export function ProductCard({ product }: { product: Product }) {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
+              data-whatsapp-source="product_card"
+              data-product-name={product.name}
+              data-product-slug={product.slug}
+              data-product-category={product.category}
+              data-product-id={product.id ? String(product.id) : undefined}
+              data-contact-type="product_consultation"
               className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-brand-200 bg-white px-2 text-center text-[11px] font-semibold text-brand-800 transition hover:bg-brand-50 active:scale-[0.98] sm:min-h-11 sm:gap-2 sm:px-4 sm:text-sm"
             >
               <WhatsAppIcon className="h-4 w-4 shrink-0" />

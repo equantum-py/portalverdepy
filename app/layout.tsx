@@ -15,6 +15,7 @@ import '../styles/design-tokens.css';
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
 const googleAnalyticsId = 'G-X4SL2XNW02';
+const googleAdsId = 'AW-18381728232';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -37,11 +38,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang="es-PY">
       <body className={`${manrope.variable} bg-[#f8faf8] font-sans text-[#172019] antialiased`}>
         <Script src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`} strategy="afterInteractive" />
-        <Script id="google-analytics" strategy="afterInteractive">{`
+        <Script id="google-tag" strategy="afterInteractive">{`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
           gtag('config', '${googleAnalyticsId}');
+          gtag('config', '${googleAdsId}');
         `}</Script>
         <WhatsAppTracking />
         <main><RouteShell categories={categories} products={products} homeContent={homeContent}>{children}</RouteShell></main>
