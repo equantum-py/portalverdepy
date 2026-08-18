@@ -83,6 +83,24 @@ function getText(anchor: HTMLAnchorElement) {
   return (anchor.innerText || anchor.getAttribute('aria-label') || 'WhatsApp').trim().replace(/\s+/g, ' ').slice(0, 100);
 }
 
+function getProductSlug(anchor: TrackedAnchor) {
+  if (anchor.dataset.productSlug) return anchor.dataset.productSlug;
+  const match = window.location.pathname.match(/^\/product\/([^/?#]+)/);
+  return match?.[1] ? decodeURIComponent(match[1]) : '';
+}
+
+function getProductName(anchor: TrackedAnchor) {
+  if (anchor.dataset.productName || anchor.dataset.itemName) {
+    return anchor.dataset.productName || anchor.dataset.itemName || '';
+  }
+
+  if (window.location.pathname.startsWith('/product/')) {
+    return document.querySelector('h1')?.textContent?.trim().slice(0, 150) || '';
+  }
+
+  return '';
+}
+
 function shouldSkipDuplicate(anchor: HTMLAnchorElement) {
   const now = Date.now();
   const source = getSource(anchor as TrackedAnchor);
@@ -113,7 +131,7 @@ export function WhatsAppTracking() {
 
       const attribution = captureAttribution();
       const source = getSource(anchor);
-      const productName = anchor.dataset.productName || anchor.dataset.itemName || '';
+      const productName = getProductName(anchor);
       const productCategory = anchor.dataset.productCategory || anchor.dataset.itemCategory || '';
       const buttonText = getText(anchor);
 
@@ -126,16 +144,16 @@ export function WhatsAppTracking() {
         page_url: window.location.href,
         page_title: document.title,
         product_name: productName,
-        product_slug: anchor.dataset.productSlug || '',
+        product_slug: getProductSlug(anchor),
         product_category: productCategory,
         product_id: anchor.dataset.productId || '',
         service_name: anchor.dataset.serviceName || '',
         button_text: buttonText,
         contact_type: anchor.dataset.contactType || 'whatsapp',
         timestamp: new Date().toISOString(),
-        gclid: attribution.gclid || '',
-        gbraid: attribution.gbraid || '',
-        wbraid: attribution.wbraid || '',
+        gclid_present: Boolean(attribution.gclid),
+        gbraid_present: Boolean(attribution.gbraid),
+        wbraid_present: Boolean(attribution.wbraid),
         utm_source: attribution.utm_source || '',
         utm_medium: attribution.utm_medium || '',
         utm_campaign: attribution.utm_campaign || '',
