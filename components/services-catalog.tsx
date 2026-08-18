@@ -50,7 +50,7 @@ export function ServicesCatalog() {
               <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-100 text-brand-700"><Icon className="h-6 w-6" strokeWidth={1.8} /></span>
               <h2 className="mt-5 text-xl font-semibold leading-tight text-text-strong">{service.name}</h2>
               <p className="mt-2 text-sm leading-6 text-text-soft">{service.description}</p>
-              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" data-whatsapp-source={`service-${service.name.toLowerCase().replaceAll(' ', '-')}`} className="mt-auto inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 pt-0 text-sm font-semibold text-white transition hover:bg-brand-800">
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" data-whatsapp-source="service" data-service-name={service.name} data-contact-type="service_consultation" className="mt-auto inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-700 px-4 pt-0 text-sm font-semibold text-white transition hover:bg-brand-800">
                 <WhatsAppIcon className="h-4 w-4" /> Consultar por WhatsApp <ArrowUpRight className="h-4 w-4" />
               </a>
             </article>
