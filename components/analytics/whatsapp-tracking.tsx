@@ -8,48 +8,147 @@ declare global {
   }
 }
 
+const GOOGLE_ADS_ID = 'AW-18381728232';
+const GOOGLE_ADS_CONVERSION_LABEL = '';
+const CLICK_DEDUP_WINDOW_MS = 3000;
+const STORAGE_KEY = 'portalverde_campaign_attribution';
+
+type Attribution = Record<string, string>;
+
+type TrackedAnchor = HTMLAnchorElement & {
+  dataset: DOMStringMap & {
+    whatsappSource?: string;
+    productName?: string;
+    productSlug?: string;
+    productCategory?: string;
+    productId?: string;
+    serviceName?: string;
+    contactType?: string;
+    itemName?: string;
+    itemCategory?: string;
+  };
+};
+
+const CAMPAIGN_KEYS = [
+  'gclid',
+  'gbraid',
+  'wbraid',
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_content',
+  'utm_term'
+] as const;
+
 function isWhatsAppUrl(href: string) {
   return href.includes('wa.me/') || href.includes('api.whatsapp.com/') || href.includes('web.whatsapp.com/');
 }
 
-function getPlacement(anchor: HTMLAnchorElement) {
+function getSource(anchor: TrackedAnchor) {
   const explicit = anchor.dataset.whatsappSource;
   if (explicit) return explicit;
 
   if (anchor.closest('footer')) return 'footer';
-  if (anchor.className.includes('fixed')) return 'floating_button';
+  if (anchor.className.includes('whatsapp-floating') || anchor.className.includes('fixed')) return 'floating';
   if (window.location.pathname.startsWith('/product/')) return 'product_pdp';
-  if (window.location.pathname.startsWith('/shop')) return 'catalog';
-  return 'page_cta';
+  if (window.location.pathname.startsWith('/shop')) return 'product_card';
+  return 'unknown';
+}
+
+function captureAttribution(): Attribution {
+  const params = new URLSearchParams(window.location.search);
+  const current: Attribution = {};
+
+  CAMPAIGN_KEYS.forEach((key) => {
+    const value = params.get(key);
+    if (value) current[key] = value;
+  });
+
+  let stored: Attribution = {};
+  try {
+    stored = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}') as Attribution;
+  } catch {
+    stored = {};
+  }
+
+  const merged = { ...stored, ...current };
+  if (Object.keys(merged).length > 0) {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+  }
+
+  return merged;
+}
+
+function getText(anchor: HTMLAnchorElement) {
+  return (anchor.innerText || anchor.getAttribute('aria-label') || 'WhatsApp').trim().replace(/\s+/g, ' ').slice(0, 100);
+}
+
+function shouldSkipDuplicate(anchor: HTMLAnchorElement) {
+  const now = Date.now();
+  const source = getSource(anchor as TrackedAnchor);
+  const key = `${source}|${window.location.pathname}|${anchor.href.split('?')[0]}`;
+  const storageKey = 'portalverde_last_whatsapp_click';
+
+  try {
+    const previous = JSON.parse(sessionStorage.getItem(storageKey) || '{}') as { key?: string; timestamp?: number };
+    if (previous.key === key && previous.timestamp && now - previous.timestamp < CLICK_DEDUP_WINDOW_MS) {
+      return true;
+    }
+    sessionStorage.setItem(storageKey, JSON.stringify({ key, timestamp: now }));
+  } catch {
+    return false;
+  }
+
+  return false;
 }
 
 export function WhatsAppTracking() {
   useEffect(() => {
+    captureAttribution();
+
     const handleClick = (event: MouseEvent) => {
       const target = event.target as Element | null;
-      const anchor = target?.closest('a[href]') as HTMLAnchorElement | null;
-      if (!anchor || !isWhatsAppUrl(anchor.href)) return;
+      const anchor = target?.closest('a[href]') as TrackedAnchor | null;
+      if (!anchor || !isWhatsAppUrl(anchor.href) || shouldSkipDuplicate(anchor)) return;
 
-      const params = new URLSearchParams(window.location.search);
-      const itemName = anchor.dataset.itemName || '';
-      const itemCategory = anchor.dataset.itemCategory || '';
+      const attribution = captureAttribution();
+      const source = getSource(anchor);
+      const productName = anchor.dataset.productName || anchor.dataset.itemName || '';
+      const productCategory = anchor.dataset.productCategory || anchor.dataset.itemCategory || '';
+      const buttonText = getText(anchor);
 
       window.gtag?.('event', 'whatsapp_click', {
-        event_category: 'engagement',
-        event_label: getPlacement(anchor),
-        whatsapp_source: getPlacement(anchor),
-        link_url: anchor.href.split('?')[0],
-        link_text: (anchor.innerText || anchor.getAttribute('aria-label') || 'WhatsApp').trim().slice(0, 100),
+        event_category: 'lead',
+        event_label: source,
+        source,
+        whatsapp_source: source,
         page_path: `${window.location.pathname}${window.location.search}`,
+        page_url: window.location.href,
         page_title: document.title,
-        item_name: itemName,
-        item_category: itemCategory,
-        campaign_source: params.get('utm_source') || '',
-        campaign_medium: params.get('utm_medium') || '',
-        campaign_name: params.get('utm_campaign') || '',
-        gclid_present: Boolean(params.get('gclid')),
+        product_name: productName,
+        product_slug: anchor.dataset.productSlug || '',
+        product_category: productCategory,
+        product_id: anchor.dataset.productId || '',
+        service_name: anchor.dataset.serviceName || '',
+        button_text: buttonText,
+        contact_type: anchor.dataset.contactType || 'whatsapp',
+        timestamp: new Date().toISOString(),
+        gclid: attribution.gclid || '',
+        gbraid: attribution.gbraid || '',
+        wbraid: attribution.wbraid || '',
+        utm_source: attribution.utm_source || '',
+        utm_medium: attribution.utm_medium || '',
+        utm_campaign: attribution.utm_campaign || '',
+        utm_content: attribution.utm_content || '',
+        utm_term: attribution.utm_term || '',
         transport_type: 'beacon'
       });
+
+      if (GOOGLE_ADS_CONVERSION_LABEL) {
+        window.gtag?.('event', 'conversion', {
+          send_to: `${GOOGLE_ADS_ID}/${GOOGLE_ADS_CONVERSION_LABEL}`
+        });
+      }
     };
 
     document.addEventListener('click', handleClick, true);
