@@ -36,7 +36,7 @@ export function DigitalNurseryCard({ item }: { item: DigitalNurseryPublicItem })
         <p className="mt-1 min-h-4 text-[11px] text-text-soft sm:text-xs">{item.variant ? `Tamaño: ${item.variant}` : '\u00a0'}</p>
         {item.description ? <p className="mt-2 hidden line-clamp-2 text-sm text-text-soft sm:block">{item.description}</p> : null}
         <div className="mt-auto pt-3 sm:pt-4">
-          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-brand-700 px-2 text-xs font-semibold text-white transition hover:bg-brand-800 sm:min-h-11 sm:gap-2 sm:px-3 sm:text-sm">
+          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" data-whatsapp-source="plant" data-product-name={item.name} data-product-category="Plantas" data-product-id={item.id} data-contact-type="plant_consultation" className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-brand-700 px-2 text-xs font-semibold text-white transition hover:bg-brand-800 sm:min-h-11 sm:gap-2 sm:px-3 sm:text-sm">
             <WhatsAppIcon className="h-4 w-4 shrink-0" />
             <span className="sm:hidden">Consultar</span>
             <span className="hidden sm:inline">Consultar por WhatsApp</span>
