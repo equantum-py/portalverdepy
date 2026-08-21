@@ -3,18 +3,24 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import type { HeroSlide } from "@/lib/home-content/hero-schema";
 
-type Props = { slide: HeroSlide; previewViewport?: "desktop" | "mobile"; priority?: boolean; };
+type Props = {
+  slide: HeroSlide;
+  previewViewport?: "desktop" | "mobile";
+  priority?: boolean;
+  primaryHeading?: boolean;
+};
 
 function HeroLink({ href, newTab, children, className }: { href: string; newTab: boolean; children: React.ReactNode; className: string; }) {
   if (/^https?:\/\//.test(href)) return <a href={href} target={newTab ? "_blank" : undefined} rel={newTab ? "noopener noreferrer" : undefined} className={className}>{children}</a>;
   return <Link href={href || "#"} target={newTab ? "_blank" : undefined} className={className}>{children}</Link>;
 }
 
-export function HomeHeroSlide({ slide, previewViewport, priority = false }: Props) {
+export function HomeHeroSlide({ slide, previewViewport, priority = false, primaryHeading = false }: Props) {
   const visible = slide.contentEnabled && (previewViewport === "desktop" ? slide.contentDesktop : previewViewport === "mobile" ? slide.contentMobile : true);
   const deviceVisibility = slide.contentMobile ? (slide.contentDesktop ? "block" : "block lg:hidden") : (slide.contentDesktop ? "hidden lg:block" : "hidden");
   const responsiveContent = previewViewport ? (visible ? "" : "hidden") : (slide.contentEnabled ? deviceVisibility : "hidden");
   const alignment = slide.alignment === "center" ? "items-center text-center" : slide.alignment === "right" ? "items-end text-right" : "items-start text-left";
+  const headingClassName = "text-2xl font-semibold leading-tight text-white sm:text-3xl lg:text-4xl";
 
   return (
     <div className="absolute inset-0">
@@ -25,7 +31,7 @@ export function HomeHeroSlide({ slide, previewViewport, priority = false }: Prop
         <div className={`absolute inset-0 flex flex-col justify-end p-3 sm:p-5 lg:justify-center lg:p-8 xl:p-10 ${alignment} ${responsiveContent}`}>
           <div className="max-w-xl">
             {slide.showLabel && slide.label && <p className="mb-2 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur">{slide.label}</p>}
-            {slide.showTitle && <h1 className="text-2xl font-semibold leading-tight text-white sm:text-3xl lg:text-4xl">{slide.title}</h1>}
+            {slide.showTitle && (primaryHeading ? <h1 className={headingClassName}>{slide.title}</h1> : <h2 className={headingClassName}>{slide.title}</h2>)}
             {slide.showSubtitle && slide.subtitle && <p className="mt-2 font-semibold text-brand-200">{slide.subtitle}</p>}
             {slide.showDescription && slide.description && <p className="mt-2 text-sm text-white/85 sm:text-base">{slide.description}</p>}
             {(slide.showPrice || slide.showInstallationBadge) && <div className="mt-3 flex flex-wrap items-center gap-2">
