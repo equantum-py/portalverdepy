@@ -7,8 +7,16 @@ import { getPublicProducts } from '@/lib/products/catalog-products';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
-  title: 'Catálogo',
-  description: 'Explorá césped, paisajismo, plantas y soluciones para tu jardín en Portal Verde.'
+  title: 'Catálogo de césped, plantas y paisajismo en Paraguay',
+  description:
+    'Explorá Césped Esmeralda, Pasto Kavaju, plantas, jardinería y soluciones de paisajismo para Limpio, Asunción y Gran Asunción.',
+  alternates: { canonical: '/shop' },
+  openGraph: {
+    url: '/shop',
+    title: 'Catálogo de césped, plantas y paisajismo | Portal Verde',
+    description:
+      'Césped Esmeralda, Pasto Kavaju, plantas y soluciones para jardines en Paraguay.'
+  }
 };
 
 type ShopPageProps = {
