@@ -15,7 +15,6 @@ export function DigitalNurserySection({
   title,
   plants,
   limit,
-  showViewAll = true,
 }: Props) {
   const visiblePlants = typeof limit === 'number' ? plants.slice(0, limit) : plants;
 
@@ -48,17 +47,15 @@ export function DigitalNurserySection({
         ))}
       </div>
 
-      {showViewAll ? (
-        <div className="mt-6 flex justify-center sm:mt-8">
-          <Link
-            href="/plantas"
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-700 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800 active:scale-[0.98]"
-          >
-            VER MÁS
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      ) : null}
+      <div className="mt-6 flex justify-center sm:mt-8">
+        <Link
+          href="/plantas"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-700 px-8 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800 active:scale-[0.98]"
+        >
+          VER MÁS
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
     </section>
   );
 }
