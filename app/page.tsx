@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+
 import { CategorySidebar } from "@/components/category-sidebar";
 import { WhatsAppFloating } from "@/components/whatsapp-floating";
 import { getHomeContent } from "@/lib/home-content/public";
@@ -10,6 +12,19 @@ import { ServicesSection } from "@/sections/services-section";
 import { CategoryProductsBannerSection } from "@/sections/category-products-banner-section";
 import { DigitalNurserySection } from "@/sections/digital-nursery-section";
 import { ServiceBannersSection } from "@/sections/service-banners-section";
+
+export const metadata: Metadata = {
+  title: 'Césped Esmeralda y Pasto Kavaju en Gran Asunción',
+  description:
+    'Venta e instalación de Césped Esmeralda y Pasto Kavaju, plantas, jardinería y paisajismo en Limpio, Asunción y Gran Asunción.',
+  alternates: { canonical: '/' },
+  openGraph: {
+    url: '/',
+    title: 'Césped Esmeralda y Pasto Kavaju en Gran Asunción | Portal Verde',
+    description:
+      'Césped, plantas, jardinería y paisajismo para Limpio, Asunción y Gran Asunción.'
+  }
+};
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
