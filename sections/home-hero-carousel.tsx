@@ -66,7 +66,12 @@ export function HomeHeroCarousel({ slides, settings, previewViewport }: Props) {
       <div aria-live="off">
         {activeSlides.map((slide, slideIndex) => (
           <div key={slide.id} aria-hidden={slideIndex !== index} className={`absolute inset-0 transition-opacity duration-500 motion-reduce:transition-none ${slideIndex === index ? "z-10 opacity-100" : "pointer-events-none opacity-0"}`}>
-            <HomeHeroSlide slide={slide} previewViewport={previewViewport} priority={slideIndex === 0} />
+            <HomeHeroSlide
+              slide={slide}
+              previewViewport={previewViewport}
+              priority={slideIndex === 0}
+              primaryHeading={slideIndex === 0}
+            />
           </div>
         ))}
       </div>
