@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: 'Portal Verde',
   description:
-    'Venta e instalación de césped, productos de jardinería, paisajismo y mantenimiento en Asunción y Gran Asunción.',
+    'Venta e instalación de césped, productos de jardinería, paisajismo y mantenimiento en Limpio, Asunción y Gran Asunción.',
 
   // Dominio canónico de producción. El dominio raíz redirige a www en Vercel.
   url: 'https://www.portalverdepy.com',
@@ -11,7 +11,7 @@ export const siteConfig = {
     phoneRaw: '+595984053683',
     whatsapp: '595984053683',
     email: 'hola@portalverde.com.py',
-    coverage: 'Asunción y Gran Asunción',
+    coverage: 'Limpio, Asunción y Gran Asunción',
     schedule: 'Lunes a sábado'
   },
 
