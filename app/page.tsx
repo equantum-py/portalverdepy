@@ -103,7 +103,7 @@ export default async function HomePage() {
               key={section.key}
               title={section.title}
               plants={nurseryPlants}
-              limit={4}
+              limit={8}
               showViewAll={section.showViewAll}
             />
           );
