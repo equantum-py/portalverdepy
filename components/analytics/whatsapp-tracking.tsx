@@ -9,7 +9,7 @@ declare global {
 }
 
 const GOOGLE_ADS_ID = 'AW-18381728232';
-const GOOGLE_ADS_CONVERSION_LABEL = '';
+const GOOGLE_ADS_CONVERSION_LABEL = process.env.NEXT_PUBLIC_GOOGLE_ADS_WHATSAPP_CONVERSION_LABEL || '';
 const CLICK_DEDUP_WINDOW_MS = 3000;
 const STORAGE_KEY = 'portalverde_campaign_attribution';
 
@@ -135,7 +135,7 @@ export function WhatsAppTracking() {
       const productCategory = anchor.dataset.productCategory || anchor.dataset.itemCategory || '';
       const buttonText = getText(anchor);
 
-      window.gtag?.('event', 'whatsapp_click', {
+      const eventPayload = {
         event_category: 'lead',
         event_label: source,
         source,
@@ -160,11 +160,16 @@ export function WhatsAppTracking() {
         utm_content: attribution.utm_content || '',
         utm_term: attribution.utm_term || '',
         transport_type: 'beacon'
-      });
+      };
+
+      window.gtag?.('event', 'whatsapp_click', eventPayload);
 
       if (GOOGLE_ADS_CONVERSION_LABEL) {
         window.gtag?.('event', 'conversion', {
-          send_to: `${GOOGLE_ADS_ID}/${GOOGLE_ADS_CONVERSION_LABEL}`
+          send_to: `${GOOGLE_ADS_ID}/${GOOGLE_ADS_CONVERSION_LABEL}`,
+          value: 1,
+          currency: 'PYG',
+          event_callback: () => undefined
         });
       }
     };
