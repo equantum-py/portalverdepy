@@ -1,7 +1,7 @@
 import {getHomeContent} from '@/lib/home-content/public';
 export async function ServicesSection() {
   const content=await getHomeContent(); if(!content.servicesEnabled)return null;
-  const whatsappNumber = '595981077600';
+  const whatsappNumber = '595984053683';
   const message = 'Hola, quiero consultar sobre servicios de Portal Verde.';
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
   const primaryButton=content.buttons.find(button=>button.placement==='services-primary'&&button.isActive);

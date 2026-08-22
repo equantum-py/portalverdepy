@@ -62,7 +62,7 @@ const projects = [
   }
 ];
 
-const whatsappNumber = '595981077600';
+const whatsappNumber = '595984053683';
 const whatsappMessage =
   'Hola, quiero solicitar un presupuesto para un trabajo similar a los proyectos publicados en Portal Verde.';
 const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(

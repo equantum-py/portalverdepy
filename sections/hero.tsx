@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export function HeroSection() {
-  const whatsappNumber = '595981077600';
+  const whatsappNumber = '595984053683';
   const message = 'Hola, quiero consultar sobre césped e instalación.';
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 

@@ -157,7 +157,7 @@ export default async function ProductPage({
     )
     .filter((item: Product | undefined): item is Product => Boolean(item));
 
-  const whatsappNumber = '595981077600';
+  const whatsappNumber = '595984053683';
 
   const message = `Hola, quiero solicitar un presupuesto para ${product.name}. ¿Podrían brindarme información sobre precio final, instalación y disponibilidad?`;
 
