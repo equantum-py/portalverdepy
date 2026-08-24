@@ -30,6 +30,10 @@ export const metadata: Metadata = {
   authors: [{ name: siteConfig.name }],
   creator: siteConfig.name,
   publisher: siteConfig.name,
+  icons: {
+    icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
+    shortcut: ['/icon.svg']
+  },
   keywords: [
     'Césped Esmeralda',
     'Pasto Kavaju',
