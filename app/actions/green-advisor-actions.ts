@@ -262,7 +262,7 @@ ${JSON.stringify(conversation)}
 Devolvé exclusivamente JSON válido con esta forma:
 {"answer":"...","recommendedProductSlugs":[],"whatsappMessage":"Hola, Portal Verde...","needsHuman":false}`;
 
-    const model = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
       {
