@@ -458,7 +458,7 @@ export function ProductForm({
                   <div><dt className="font-semibold text-slate-700">SEO</dt><dd className="mt-1 text-slate-600">{geminiSuggestion.seoTitle} — {geminiSuggestion.seoDescription}</dd></div>
                 </dl>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <button type="button" onClick={applyGeminiSuggestion} className="inline-flex h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800">
+                  <button type="button" onClick={() => applyGeminiSuggestion()} className="inline-flex h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800">
                     <Check className="h-4 w-4" /> Aplicar propuesta
                   </button>
                   <button type="button" onClick={() => setGeminiSuggestion(null)} className="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50">
