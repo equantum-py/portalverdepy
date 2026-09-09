@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import {
   useFieldArray,
   useForm,
+  type FieldErrors,
   type UseFormRegisterReturn
 } from 'react-hook-form';
 
@@ -107,6 +108,7 @@ export function ProductForm({
     handleSubmit,
     watch,
     setValue,
+    setFocus,
     reset,
     formState: { errors }
   } = useForm<
@@ -131,6 +133,11 @@ export function ProductForm({
   const shortDescription = watch('shortDescription');
   const description = watch('description');
   const unit = watch('unit');
+  const priceTiersError = errors.priceTiers as
+    | { message?: string; root?: { message?: string } }
+    | undefined;
+  const priceTiersErrorMessage =
+    priceTiersError?.message ?? priceTiersError?.root?.message;
 
   async function generateWithGemini() {
     setGeminiMessage('');
@@ -152,13 +159,13 @@ export function ProductForm({
       return;
     }
 
-    setGeminiSuggestion(result.suggestion);
+    applyGeminiSuggestion(result.suggestion);
   }
 
-  function applyGeminiSuggestion() {
-    if (!geminiSuggestion) return;
+  function applyGeminiSuggestion(suggestion = geminiSuggestion) {
+    if (!suggestion) return;
 
-    const { features: suggestedFeatures, recommendations: suggestedRecommendations, ...textFields } = geminiSuggestion;
+    const { features: suggestedFeatures, recommendations: suggestedRecommendations, ...textFields } = suggestion;
 
     for (const [field, value] of Object.entries(textFields)) {
       setValue(field as keyof ProductFormValues, value, {
@@ -170,7 +177,7 @@ export function ProductForm({
     features.replace(suggestedFeatures.map((value) => ({ value })));
     recommendations.replace(suggestedRecommendations.map((value) => ({ value })));
 
-    setGeminiMessage('Propuesta aplicada. Revisá los campos antes de guardar.');
+    setGeminiMessage('Contenido generado y aplicado. Revisá los campos antes de guardar.');
     setGeminiSuggestion(null);
   }
 
@@ -202,22 +209,59 @@ export function ProductForm({
     name: 'recommendations'
   });
 
+  function findFirstError(
+    formErrors: FieldErrors<ProductFormInput>,
+    parentPath = ''
+  ): { path: string; message: string } | null {
+    for (const [key, value] of Object.entries(formErrors)) {
+      if (!value) continue;
+
+      const path = parentPath ? `${parentPath}.${key}` : key;
+      if ('message' in value && typeof value.message === 'string') {
+        return { path, message: value.message };
+      }
+
+      if (typeof value === 'object') {
+        const nestedError = findFirstError(
+          value as FieldErrors<ProductFormInput>,
+          path
+        );
+        if (nestedError) return nestedError;
+      }
+    }
+
+    return null;
+  }
+
   function invalidSubmit(formErrors: typeof errors) {
     console.error('Errores del formulario de producto:', formErrors);
 
-    const firstError = Object.values(formErrors)
-      .map((error) => error?.message)
-      .find((message): message is string => Boolean(message));
+    const firstError = findFirstError(formErrors);
 
     setServerMessage(
-      firstError ||
+      firstError?.message ||
         'Hay campos incompletos o con datos inválidos. Revisá los campos marcados en rojo.'
     );
 
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    window.setTimeout(() => {
+      if (firstError?.path.startsWith('priceTiers')) {
+        document.getElementById('price-tiers-section')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+        return;
+      }
+
+      if (firstError?.path) {
+        setFocus(firstError.path as Parameters<typeof setFocus>[0]);
+        document
+          .querySelector<HTMLElement>(`[name="${firstError.path}"]`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 0);
   }
 
   async function submit(values: ProductFormValues) {
@@ -414,7 +458,7 @@ export function ProductForm({
                   <div><dt className="font-semibold text-slate-700">SEO</dt><dd className="mt-1 text-slate-600">{geminiSuggestion.seoTitle} — {geminiSuggestion.seoDescription}</dd></div>
                 </dl>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <button type="button" onClick={applyGeminiSuggestion} className="inline-flex h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800">
+                  <button type="button" onClick={() => applyGeminiSuggestion()} className="inline-flex h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800">
                     <Check className="h-4 w-4" /> Aplicar propuesta
                   </button>
                   <button type="button" onClick={() => setGeminiSuggestion(null)} className="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50">
@@ -584,7 +628,14 @@ export function ProductForm({
             </Field>
           </div>
 
-          <div className="mt-7 border-t border-slate-100 pt-6">
+          <div
+            id="price-tiers-section"
+            className={`mt-7 scroll-mt-24 border-t pt-6 ${
+              priceTiersErrorMessage
+                ? 'rounded-xl border border-red-300 bg-red-50/40 p-4'
+                : 'border-slate-100'
+            }`}
+          >
             <label className="mb-5 flex cursor-pointer items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4">
               <input type="checkbox" checked={configuredPriceTiers.length > 0} onChange={(event) => event.target.checked ? priceTiers.append({ minQuantity: Number(watch('minOrderQuantity') || 1), maxQuantity: undefined, priceAmount: Number(watch('priceAmount') || 1), isPromo: false, label: '' }) : priceTiers.replace([])} className="mt-1 h-4 w-4 accent-green-700" />
               <span><strong className="block text-sm text-green-950">Activar precios por escala</strong><span className="mt-1 block text-xs leading-5 text-green-800">La calculadora aparecerá en la página del producto. Al desactivar, se utilizará el precio normal.</span></span>
@@ -618,9 +669,9 @@ export function ProductForm({
               </button>
             </div>
 
-            {errors.priceTiers?.message ? (
-              <p className="mt-3 text-sm text-red-600">
-                {errors.priceTiers.message}
+            {priceTiersErrorMessage ? (
+              <p role="alert" className="mt-3 font-medium text-red-700">
+                {priceTiersErrorMessage}
               </p>
             ) : null}
 
