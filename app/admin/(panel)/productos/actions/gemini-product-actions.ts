@@ -82,7 +82,7 @@ aspecto, instalación, ubicación ni elementos visuales porque todavía no viste
 Generá entre 2 y 5 características comerciales prudentes, sin datos técnicos inventados,
 y entre 2 y 4 recomendaciones útiles formuladas como sugerencias generales.`;
 
-    const model = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
       {
