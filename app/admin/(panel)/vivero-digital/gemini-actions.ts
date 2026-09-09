@@ -82,7 +82,7 @@ Reglas obligatorias:
 - El mensaje de WhatsApp debe ser breve, amable y pedir disponibilidad e información.
 - Usá español paraguayo natural.`;
 
-    const model = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
       {
@@ -171,7 +171,7 @@ No identifiques ni corrijas la especie. No inventes resolución ni dimensiones e
 Estado: "apta" si puede publicarse profesionalmente; "revisar" si conviene corregir detalles;
 "reemplazar" solo si el problema visual es grave. Sé concreto y escribí en español sencillo.`;
 
-    const model = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
       {
