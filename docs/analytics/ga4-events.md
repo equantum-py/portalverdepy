@@ -102,7 +102,7 @@ No introducir variantes. Cualquier valor nuevo se agrega en `taxonomy.ts`, aquí
 | `shop` | CTA propio del catálogo (consulta de plantas a medida) |
 | `services` | Catálogo de servicios y botones de la sección Servicios de la home |
 | `projects` | Página de trabajos (3 CTA) |
-| `footer` | Footer (3 enlaces) |
+| `footer` | Footer (4 puntos de anclaje en código; 3 enlaces de contacto + 5 enlaces de servicio renderizados con un mismo anchor) |
 | `cart` | Botón "Enviar presupuesto por WhatsApp" del carrito |
 | `advisor` | "Continuar por WhatsApp" dentro del Asesor Verde |
 
@@ -151,7 +151,7 @@ Contrato: `data-wa-cta` (obligatorio) + opcionales `data-wa-product-id|name|slug
 | 10 | `components/digital-nursery-card.tsx` | `product_card` (`product_category=Plantas`) | 1 por planta |
 | 11 | `components/digital-nursery-catalog.tsx` | `shop` (`contact_type=plant_request`) | 1 |
 | 12 | `app/trabajos/page.tsx` | `projects` | 3 |
-| 13 | `components/footer.tsx` | `footer` | 3 |
+| 13 | `components/footer.tsx` | `footer` | 4 |
 | 14 | `components/cart-client.tsx` | `cart` (+`item_count`, `value`, `currency`) | 1 |
 | 15 | `components/green-advisor.tsx` | `advisor` | 1 |
 

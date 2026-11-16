@@ -487,21 +487,21 @@ export function CatalogClient({
   return (
     <div>
       {/* Hero catálogo */}
-      <section className="rounded-3xl bg-brand-950 px-5 py-7 text-white sm:px-8 sm:py-9">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-200">
+      <section className="rounded-2xl bg-brand-950 px-4 py-4 text-white sm:rounded-3xl sm:px-8 sm:py-9">
+        <p className="hidden text-xs font-semibold uppercase tracking-[0.16em] text-brand-200 sm:block">
           Catálogo Portal Verde
         </p>
 
-        <h1 className="mt-2 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
+        <h1 className="max-w-2xl text-xl font-semibold leading-tight tracking-tight sm:mt-2 sm:text-4xl">
           Encontrá la solución ideal para tu espacio
         </h1>
 
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70 sm:text-base">
+        <p className="mt-3 hidden max-w-2xl text-sm leading-6 text-white/70 sm:block sm:text-base">
           Filtrá por precio, categoría, instalación, ofertas y
           disponibilidad para encontrar exactamente lo que necesitás.
         </p>
 
-        <div className="relative mt-6 max-w-2xl">
+        <div className="relative mt-3 max-w-2xl sm:mt-6">
           <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
           <input
@@ -510,7 +510,7 @@ export function CatalogClient({
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Buscar césped, pisos, granza..."
             aria-label="Buscar productos del catálogo"
-            className="h-12 w-full rounded-2xl border border-white/10 bg-white pl-12 pr-11 text-sm text-text-strong outline-none placeholder:text-slate-400 focus:ring-4 focus:ring-brand-300/30"
+            className="h-11 w-full rounded-2xl border border-white/10 bg-white pl-12 pr-11 sm:h-12 text-sm text-text-strong outline-none placeholder:text-slate-400 focus:ring-4 focus:ring-brand-300/30"
           />
 
           {search ? (
@@ -527,7 +527,7 @@ export function CatalogClient({
       </section>
 
       {/* Categorías mobile */}
-      <div className="mt-4 flex snap-x gap-2 overflow-x-auto pb-2 lg:hidden">
+      <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 sm:mt-4 sm:pb-2 lg:hidden">
         {categoryLabels.slice(0, 5).map((category) => (
           <button
             key={category}
@@ -545,7 +545,7 @@ export function CatalogClient({
         ))}
       </div>
 
-      <div className="mt-6 grid items-start gap-6 lg:grid-cols-[270px_minmax(0,1fr)]">
+      <div className="mt-3 grid items-start gap-4 sm:mt-6 sm:gap-6 lg:grid-cols-[270px_minmax(0,1fr)]">
         {/* Sidebar desktop */}
         <aside className="sticky top-32 hidden max-h-[calc(100vh-150px)] overflow-y-auto rounded-3xl border border-border bg-white p-5 shadow-sm lg:block">
           <div className="mb-6 flex items-center justify-between">

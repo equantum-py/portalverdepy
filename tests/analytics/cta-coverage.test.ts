@@ -24,7 +24,7 @@ const INSTRUMENTED: Record<string, Record<string, number>> = {
   'components/digital-nursery-card.tsx': { product_card: 1 },
   'components/digital-nursery-catalog.tsx': { shop: 1 },
   'app/trabajos/page.tsx': { projects: 3 },
-  'components/footer.tsx': { footer: 3 },
+  'components/footer.tsx': { footer: 4 },
   'components/cart-client.tsx': { cart: 1 },
   'components/green-advisor.tsx': { advisor: 1 }
 };

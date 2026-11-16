@@ -8,6 +8,7 @@ import { Bot, ExternalLink, Leaf, Loader2, MessageCircle, Send, X } from 'lucide
 import { askGreenAdvisor, type GreenAdvisorReply } from '@/app/actions/green-advisor-actions';
 import { trackFormSubmit } from '@/lib/analytics/events';
 import { createWhatsAppUrl } from '@/lib/site-config';
+import { useYieldToControls } from '@/lib/ui/use-yield-to-controls';
 
 type Message = { role: 'user' | 'assistant'; content: string; reply?: GreenAdvisorReply };
 
@@ -26,6 +27,8 @@ export function GreenAdvisor() {
   const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const yielded = useYieldToControls(wrapperRef, !open);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -76,7 +79,7 @@ export function GreenAdvisor() {
   );
 
   return (
-    <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-3 z-[70] sm:bottom-28 sm:right-6">
+    <div ref={wrapperRef} data-floating-widget inert={yielded || undefined} className={`${yielded ? 'pointer-events-none opacity-0 ' : ''}transition-opacity fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-3 z-[70] max-sm:[body:has([data-wa-cta*=sticky])_&]:bottom-[calc(9rem+env(safe-area-inset-bottom))] sm:bottom-28 sm:right-6`}>
       {open ? (
         <section
           role="dialog"
@@ -144,8 +147,8 @@ export function GreenAdvisor() {
         </section>
       ) : null}
 
-      <button type="button" onClick={() => setOpen((current) => !current)} aria-expanded={open} aria-label={open ? 'Cerrar atención online' : 'Abrir Atención 24/7'} className="ml-auto flex min-h-12 items-center gap-2 rounded-full bg-[#0b3d24] px-4 font-semibold text-white shadow-xl transition hover:bg-[#126235]">
-        {open ? <X className="h-5 w-5" /> : <Bot className="h-5 w-5" />}<span>{open ? 'Cerrar' : 'Atención 24/7'}</span>
+      <button type="button" onClick={() => setOpen((current) => !current)} aria-expanded={open} aria-label={open ? 'Cerrar atención online' : 'Abrir Atención 24/7'} className="ml-auto flex min-h-12 items-center gap-2 rounded-full bg-[#0b3d24] px-4 font-semibold max-sm:h-12 max-sm:w-12 max-sm:justify-center max-sm:px-0 text-white shadow-xl transition hover:bg-[#126235]">
+        {open ? <X className="h-5 w-5" /> : <Bot className="h-5 w-5" />}<span className="max-sm:sr-only">{open ? 'Cerrar' : 'Atención 24/7'}</span>
       </button>
     </div>
   );
