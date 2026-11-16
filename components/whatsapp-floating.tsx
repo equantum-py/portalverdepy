@@ -15,6 +15,7 @@ export function WhatsAppFloating({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
+      data-wa-cta="floating"
       aria-label={text || 'Contactar con Portal Verde por WhatsApp'}
       className="whatsapp-floating fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-3 z-50 flex items-center gap-3 rounded-full bg-[#25D366] p-2 text-white shadow-[0_12px_35px_rgba(0,0,0,0.25)] transition hover:-translate-y-1 hover:bg-[#20bd5a] sm:bottom-6 sm:right-6 sm:px-3 sm:py-2.5"
     >

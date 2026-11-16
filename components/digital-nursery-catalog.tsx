@@ -42,8 +42,8 @@ export function DigitalNurseryCatalog({ items }: { items: DigitalNurseryPublicIt
           href={customPlantWhatsAppUrl}
           target="_blank"
           rel="noopener noreferrer"
-          data-whatsapp-source="plantas_custom_request"
-          data-contact-type="plant_request"
+          data-wa-cta="shop"
+          data-wa-contact-type="plant_request"
           className="mt-4 inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-95 active:scale-[0.98] sm:mt-0"
         >
           <MessageCircle className="h-4 w-4" />

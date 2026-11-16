@@ -12,9 +12,11 @@ import {
   Star,
   X
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ProductCard } from '@/components/product-card';
+import { createCatalogSearchTracker } from '@/lib/analytics/catalog-search-tracker';
+import type { ItemListName } from '@/lib/analytics/taxonomy';
 import { formatPricePYG } from '@/lib/format-price';
 import type { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -170,6 +172,29 @@ export function CatalogClient({
     selectedCategory,
     sort
   ]);
+
+  // --- Analytics: `search` del catálogo (solo término estable, ≥2 caracteres, que modifica resultados).
+  // La línea base inicial es la búsqueda que llegó por ?search= desde el header (ya medida allí).
+  const resultsKey = useMemo(() => filteredProducts.map((product) => product.id).join(','), [filteredProducts]);
+  const searchTrackerRef = useRef<ReturnType<typeof createCatalogSearchTracker> | null>(null);
+
+  useEffect(() => {
+    searchTrackerRef.current = createCatalogSearchTracker(initialSearch, resultsKey);
+    return () => searchTrackerRef.current?.cancel();
+    // Se crea una sola vez con el estado inicial.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    searchTrackerRef.current?.update(search, resultsKey, filteredProducts.length);
+  }, [search, resultsKey, filteredProducts.length]);
+
+  // Contexto del listado para `select_item`.
+  const itemListName: ItemListName = search.trim()
+    ? 'search_results'
+    : selectedCategory !== 'Todos'
+      ? 'category'
+      : 'shop';
 
   const activeFiltersCount = [
     selectedCategory !== 'Todos',
@@ -693,7 +718,7 @@ export function CatalogClient({
           {filteredProducts.length > 0 ? (
             <div className="mt-5 grid grid-cols-2 gap-2.5 sm:gap-4 xl:grid-cols-3">
               {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product.id} product={product} listName={itemListName} />
               ))}
             </div>
           ) : (

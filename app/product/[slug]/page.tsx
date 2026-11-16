@@ -24,6 +24,7 @@ import type { Product } from '@/lib/types';
 import { getPublicProductBySlug } from '@/lib/products/public-products';
 import { WhatsAppIcon } from '@/components/icons';
 import { TieredPriceCalculator } from '@/components/products/tiered-price-calculator';
+import { ViewItemTracker } from '@/components/analytics/view-item-tracker';
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -167,8 +168,25 @@ export default async function ProductPage({
   const activePriceTiers = databaseProduct?.priceTiers ?? [];
   const hasTieredPricing = activePriceTiers.length > 0;
 
+  // Contexto de producto para analytics (atributos de datos; sin impacto visual).
+  const waProductAttrs = {
+    'data-wa-product-id': String(databaseProduct?.id ?? product.slug ?? slug),
+    'data-wa-product-name': product.name,
+    'data-wa-product-slug': slug,
+    'data-wa-product-category': product.category
+  };
+
   return (
     <>
+      <ViewItemTracker
+        product={{
+          id: databaseProduct?.id ?? undefined,
+          slug,
+          name: product.name,
+          category: product.category,
+          price: product.price
+        }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -323,6 +341,9 @@ export default async function ProductPage({
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-wa-cta="product_page"
+                  data-wa-contact-type="product_quote"
+                  {...waProductAttrs}
                   className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-[#20bd5a]"
                 >
                   <WhatsAppIcon className="h-5 w-5" />
@@ -562,7 +583,7 @@ export default async function ProductPage({
                   key={relatedProduct.id}
                   className="w-[72%] shrink-0 snap-start sm:w-auto"
                 >
-                  <ProductCard product={relatedProduct} />
+                  <ProductCard product={relatedProduct} listName="related_products" />
                 </div>
               ))}
             </div>
@@ -587,6 +608,9 @@ export default async function ProductPage({
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
+            data-wa-cta="product_page_sticky"
+            data-wa-contact-type="product_quote"
+            {...waProductAttrs}
             className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 text-sm font-semibold text-white"
           >
             <WhatsAppIcon className="h-5 w-5" />

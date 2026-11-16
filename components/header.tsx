@@ -15,6 +15,7 @@ import { LawnMowerIcon, WhatsAppIcon } from '@/components/icons';
 import { QuoteCounter } from '@/components/quote-counter';
 import { Logo } from '@/components/logo';
 import { MegaMenu } from '@/components/navigation/mega-menu';
+import { trackSearch, trackSelectItem } from '@/lib/analytics/events';
 import { formatPricePYG } from '@/lib/format-price';
 import type { Category, Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -29,7 +30,7 @@ export function Header({ categories, products, homeContent }: { categories: Cate
 
   const router = useRouter();
 
-  const suggestions = useMemo(() => {
+  const matches = useMemo(() => {
     const term = search.trim().toLowerCase();
 
     if (!term) return [];
@@ -46,9 +47,10 @@ export function Header({ categories, products, homeContent }: { categories: Cate
           : true;
 
         return matchesSearch && matchesCategory;
-      })
-      .slice(0, 6);
+      });
   }, [products, search, selectedCategory]);
+
+  const suggestions = useMemo(() => matches.slice(0, 6), [matches]);
 
   const handleSearch = () => {
     const query = search.trim();
@@ -60,6 +62,9 @@ export function Header({ categories, products, homeContent }: { categories: Cate
       return;
     }
 
+    // Búsqueda real por Enter / botón / "Ver todos". trackSearch descarta vacíos, <2 caracteres y PII.
+    if (query) trackSearch(query, { source: 'header', resultsCount: matches.length });
+
     const params = new URLSearchParams();
 
     if (query) params.set('search', query);
@@ -70,6 +75,15 @@ export function Header({ categories, products, homeContent }: { categories: Cate
   };
 
   const handleSuggestionClick = (slug: string) => {
+    const selected = products.find((product) => product.slug === slug);
+    if (selected) {
+      // Elegir una sugerencia = intención de búsqueda + selección de producto.
+      trackSearch(search, { source: 'header_suggestion', resultsCount: matches.length });
+      trackSelectItem(
+        { id: selected.id, slug: selected.slug, name: selected.name, category: selected.category, price: selected.price },
+        'search_results'
+      );
+    }
     setSearch('');
     setIsFocused(false);
     router.push(`/product/${slug}`);
@@ -94,6 +108,7 @@ export function Header({ categories, products, homeContent }: { categories: Cate
 
           <a
             href={homeContent.promoUrl || createWhatsAppUrl('Hola, quiero recibir asesoramiento de Portal Verde.')}
+            data-wa-cta="header"
             target={homeContent.promoNewTab?'_blank':undefined}
             rel="noopener noreferrer"
             className="inline-flex shrink-0 items-center gap-1.5 font-semibold text-brand-800 transition hover:text-brand-600"
@@ -415,6 +430,7 @@ export function Header({ categories, products, homeContent }: { categories: Cate
 
           <a
             href={createWhatsAppUrl('Hola, quiero recibir asesoramiento de Portal Verde.')}
+            data-wa-cta="header"
             target="_blank"
             rel="noopener noreferrer"
             onClick={closeMobileMenu}

@@ -4,7 +4,9 @@ import Script from 'next/script';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 import { siteConfig } from '@/lib/site-config';
-import { WhatsAppTracking } from '@/components/analytics/whatsapp-tracking';
+import { AnalyticsProvider } from '@/components/analytics/analytics-provider';
+import { getAnalyticsGuardScript } from '@/lib/analytics/admin-guard';
+import { GA4_MEASUREMENT_ID, GOOGLE_ADS_ID, GOOGLE_TAG_ID } from '@/lib/analytics/config';
 import { RouteShell } from '@/components/route-shell';
 import { getPublicCategories } from '@/lib/categories/public-categories';
 import { getPublicProducts } from '@/lib/products/catalog-products';
@@ -14,9 +16,9 @@ import './globals.css';
 import '../styles/design-tokens.css';
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
-const googleTagId = 'GT-MKR6HCPJ';
-const googleAnalyticsId = 'G-X4SL2XNW02';
-const googleAdsId = 'AW-18381728232';
+const googleTagId = GOOGLE_TAG_ID;
+const googleAnalyticsId = GA4_MEASUREMENT_ID;
+const googleAdsId = GOOGLE_ADS_ID;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -103,6 +105,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="es-PY">
       <body className={`${manrope.variable} bg-[#f8faf8] font-sans text-[#172019] antialiased`}>
+        <Script id="analytics-admin-guard" strategy="beforeInteractive">{getAnalyticsGuardScript()}</Script>
         <Script src={`https://www.googletagmanager.com/gtag/js?id=${googleTagId}`} strategy="afterInteractive" />
         <Script id="google-tag" strategy="afterInteractive">{`
           window.dataLayer = window.dataLayer || [];
@@ -118,7 +121,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             __html: JSON.stringify(localBusinessSchema).replace(/</g, '\\u003c')
           }}
         />
-        <WhatsAppTracking />
+        <AnalyticsProvider />
         <RouteShell categories={categories} products={products} homeContent={homeContent}>
           {children}
         </RouteShell>

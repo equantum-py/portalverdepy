@@ -361,8 +361,11 @@ export function CartClient() {
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          data-whatsapp-source="budget"
-          data-contact-type="budget_request"
+          data-wa-cta="cart"
+          data-wa-contact-type="budget_request"
+          data-wa-item-count={items.length}
+          data-wa-value={subtotal > 0 ? subtotal : undefined}
+          data-wa-currency="PYG"
           className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-[#20bd5a]"
         >
           <WhatsAppIcon className="h-5 w-5" />

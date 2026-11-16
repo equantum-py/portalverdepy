@@ -85,7 +85,7 @@ export function CategoryProductsBannerSection({
         }}
       />
     ) : (
-      <ProductCard product={product} />
+      <ProductCard product={product} listName="home_featured" />
     );
 
   function scrollDesktop(direction: -1 | 1) {

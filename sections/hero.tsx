@@ -37,6 +37,7 @@ export function HeroSection() {
             <a
               href={whatsappUrl}
               target="_blank"
+              data-wa-cta="hero"
               className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-ink"
             >
               Solicitar cotización

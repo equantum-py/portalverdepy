@@ -11,13 +11,30 @@ import {
 import { formatPricePYG } from '@/lib/format-price';
 import type { Product } from '@/lib/types';
 import { WhatsAppIcon } from '@/components/icons';
+import type { ItemListName } from '@/lib/analytics/taxonomy';
 import { createWhatsAppUrl } from '@/lib/site-config';
 import {
   installationNoteShort,
   shouldShowInstallationNote
 } from '@/lib/product-installation-note';
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  listName
+}: {
+  product: Product;
+  /** Contexto del listado para `select_item` (taxonomía cerrada). */
+  listName?: ItemListName;
+}) {
+  // Atributos de datos para analytics (sin impacto visual). Ver docs/analytics/ga4-events.md.
+  const selectItemAttrs = {
+    'data-select-item': 'true',
+    'data-item-id': String(product.id || product.slug),
+    'data-item-name': product.name,
+    'data-item-category': product.category,
+    'data-item-price': String(product.price ?? ''),
+    ...(listName ? { 'data-item-list': listName } : {})
+  };
   const whatsappMessage = `Hola, equipo de Portal Verde. Estoy interesado/a en el producto “${product.name}”. ¿Podrían confirmarme la disponibilidad y brindarme más información? Gracias.`;
   const whatsappUrl = createWhatsAppUrl(whatsappMessage);
   const saleUnit = product.unit ?? 'unidad';
@@ -33,7 +50,7 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-soft">
-      <Link href={`/product/${product.slug}`} className="block">
+      <Link href={`/product/${product.slug}`} className="block" {...selectItemAttrs}>
         <div className="relative aspect-square overflow-hidden bg-white">
           <Image
             src={product.image}
@@ -74,7 +91,7 @@ export function ProductCard({ product }: { product: Product }) {
             {product.category}
           </p>
 
-          <Link href={`/product/${product.slug}`}>
+          <Link href={`/product/${product.slug}`} {...selectItemAttrs}>
             <h3 className="mt-1 line-clamp-2 min-h-[36px] text-sm font-semibold leading-5 text-text-strong transition group-hover:text-brand-800 sm:min-h-[48px] sm:text-base sm:leading-6">
               {product.name}
             </h3>
@@ -129,12 +146,12 @@ export function ProductCard({ product }: { product: Product }) {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              data-whatsapp-source="product_card"
-              data-product-name={product.name}
-              data-product-slug={product.slug}
-              data-product-category={product.category}
-              data-product-id={product.id ? String(product.id) : undefined}
-              data-contact-type="product_consultation"
+              data-wa-cta="product_card"
+              data-wa-product-name={product.name}
+              data-wa-product-slug={product.slug}
+              data-wa-product-category={product.category}
+              data-wa-product-id={product.id ? String(product.id) : undefined}
+              data-wa-contact-type="product_consultation"
               className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-brand-200 bg-white px-2 text-center text-[11px] font-semibold text-brand-800 transition hover:bg-brand-50 active:scale-[0.98] sm:min-h-11 sm:gap-2 sm:px-4 sm:text-sm"
             >
               <WhatsAppIcon className="h-4 w-4 shrink-0" />

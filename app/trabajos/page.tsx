@@ -104,6 +104,7 @@ export default function TrabajosPage() {
               <a
                 href={whatsappUrl}
                 target="_blank"
+                data-wa-cta="projects"
                 rel="noopener noreferrer"
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-[#20bd5a]"
               >
@@ -231,6 +232,7 @@ export default function TrabajosPage() {
                 </ul>
 
                 <a
+                  data-wa-cta="projects"
                   href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
                     `Hola, quiero consultar por un trabajo similar a: ${project.title}.`
                   )}`}
@@ -318,6 +320,7 @@ export default function TrabajosPage() {
 
           <a
             href={whatsappUrl}
+            data-wa-cta="projects"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-6 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-[#20bd5a]"

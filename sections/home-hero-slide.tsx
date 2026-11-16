@@ -11,7 +11,7 @@ type Props = {
 };
 
 function HeroLink({ href, newTab, children, className }: { href: string; newTab: boolean; children: React.ReactNode; className: string; }) {
-  if (/^https?:\/\//.test(href)) return <a href={href} target={newTab ? "_blank" : undefined} rel={newTab ? "noopener noreferrer" : undefined} className={className}>{children}</a>;
+  if (/^https?:\/\//.test(href)) return <a href={href} data-wa-cta="hero" target={newTab ? "_blank" : undefined} rel={newTab ? "noopener noreferrer" : undefined} className={className}>{children}</a>;
   return <Link href={href || "#"} target={newTab ? "_blank" : undefined} className={className}>{children}</Link>;
 }
 

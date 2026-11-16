@@ -6,6 +6,7 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Bot, ExternalLink, Leaf, Loader2, MessageCircle, Send, X } from 'lucide-react';
 
 import { askGreenAdvisor, type GreenAdvisorReply } from '@/app/actions/green-advisor-actions';
+import { trackFormSubmit } from '@/lib/analytics/events';
 import { createWhatsAppUrl } from '@/lib/site-config';
 
 type Message = { role: 'user' | 'assistant'; content: string; reply?: GreenAdvisorReply };
@@ -54,6 +55,8 @@ export function GreenAdvisor() {
       minimumTypingTime
     ]);
     if (result.success) {
+      // Solo tras respuesta exitosa del servidor; sin pregunta, respuesta ni contenido del usuario.
+      trackFormSubmit('green_advisor', 'advisor_widget');
       setMessages((current) => [...current, { role: 'assistant', content: result.reply.answer, reply: result.reply }]);
     } else {
       setError(result.message);
@@ -127,7 +130,7 @@ export function GreenAdvisor() {
 
           <div className="border-t border-slate-100 bg-white p-3">
             {messages.length || error ? (
-              <a href={whatsappUrl} target="_blank" rel="noreferrer" className="mb-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 text-sm font-semibold text-emerald-800 hover:bg-emerald-50">
+              <a href={whatsappUrl} target="_blank" rel="noreferrer" data-wa-cta="advisor" data-wa-contact-type="advisor_handoff" className="mb-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 text-sm font-semibold text-emerald-800 hover:bg-emerald-50">
                 <MessageCircle className="h-4 w-4" /> Continuar por WhatsApp
               </a>
             ) : null}

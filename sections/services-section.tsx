@@ -25,6 +25,7 @@ export async function ServicesSection() {
           <div className="mt-3 flex gap-2">
             {primaryButton&&<a
               href={primaryButton.url||whatsappUrl}
+              data-wa-cta="services"
               target={primaryButton.newTab?'_blank':undefined}
               className="rounded-md bg-dark-green px-4 py-2 text-xs font-semibold text-white hover:bg-primary"
             >
@@ -33,6 +34,7 @@ export async function ServicesSection() {
 
             {secondaryButton&&<a
               href={secondaryButton.url}
+              data-wa-cta="services"
               target={secondaryButton.newTab?'_blank':undefined}
               className="rounded-md border px-4 py-2 text-xs font-semibold"
             >
