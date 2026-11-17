@@ -35,7 +35,7 @@ export function RouteShell({
       {children}
       <Footer />
       <GreenAdvisor />
-      <WhatsAppFloating />
+      {homeContent.whatsappEnabled ? <WhatsAppFloating url={homeContent.whatsappUrl} text={homeContent.whatsappText} /> : null}
     </>
   );
 }

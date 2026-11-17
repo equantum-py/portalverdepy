@@ -12,31 +12,30 @@ type WhatsAppFloatingProps = {
   text?: string;
 };
 
-export function WhatsAppFloating({
-  url: urlProp,
-  text = 'Escribinos por WhatsApp',
-}: WhatsAppFloatingProps) {
-  const url = urlProp ?? createWhatsAppUrl('Hola, equipo de Portal Verde. Estoy visitando su página web y quisiera recibir asesoramiento. ¿Podrían ayudarme? Gracias.');
+export function WhatsAppFloating({ url: urlProp, text: textProp }: WhatsAppFloatingProps) {
+  // `url`/`text` vienen de la configuración guardada del panel (home_page_settings). Si la URL es solo el
+  // valor base del sitio (número sin mensaje) o no hay configuración, no hay personalización y se
+  // mantiene el comportamiento predeterminado: mensaje precargado y rótulo habituales.
+  const isCustomized =
+    urlProp !== undefined &&
+    urlProp.trim() !== '' &&
+    urlProp.trim().replace(/\/+$/, '') !== `https://wa.me/${siteConfig.contact.whatsapp}`;
+  const url = isCustomized
+    ? (urlProp as string)
+    : createWhatsAppUrl('Hola, equipo de Portal Verde. Estoy visitando su página web y quisiera recibir asesoramiento. ¿Podrían ayudarme? Gracias.');
+  const text = (isCustomized ? textProp : undefined) || 'Escribinos por WhatsApp';
+
   const pathname = usePathname();
-  const isCustomized = urlProp !== undefined && urlProp.replace(/\/+$/, '') !== `https://wa.me/${siteConfig.contact.whatsapp}`;
   const ref = useRef<HTMLAnchorElement>(null);
   const [isDuplicate, setIsDuplicate] = useState(false);
   const yielded = useYieldToControls(ref, !isDuplicate);
 
-  // La burbuja se monta desde el layout compartido (route-shell, valores por defecto) y, en la Home,
-  // también desde app/page.tsx con el número/texto configurados en el panel. Debe quedar una sola:
-  // gana la instancia con configuración personalizada desde el panel; si el panel solo contiene el
-  // valor base (número del sitio sin mensaje) no hay personalización y se conserva la del layout,
-  // que es la que los usuarios veían y usaban hasta ahora (con mensaje precargado).
+  // El layout (route-shell) y, en la Home, app/page.tsx montan este componente con la misma
+  // configuración. Debe quedar una sola burbuja: se conserva la última del DOM. Se reevalúa al cambiar
+  // de ruta, porque la instancia del layout persiste entre páginas.
   useEffect(() => {
-    const all = Array.from(document.querySelectorAll<HTMLElement>("a[data-wa-cta='floating']"));
-    if (all.length < 2) {
-      setIsDuplicate(false);
-      return;
-    }
-    const winner = all.filter((el) => el.dataset.waConfigured === 'true').pop() ?? all[all.length - 1];
-    setIsDuplicate(winner !== ref.current);
-    // Se reevalúa al cambiar de ruta: la instancia del layout persiste entre páginas.
+    const all = document.querySelectorAll("a[data-wa-cta='floating']");
+    setIsDuplicate(all.length > 1 && all[all.length - 1] !== ref.current);
   }, [pathname]);
 
   if (isDuplicate) return null;
@@ -49,7 +48,6 @@ export function WhatsAppFloating({
       rel="noopener noreferrer"
       data-wa-cta="floating"
       data-floating-widget
-      data-wa-configured={isCustomized ? 'true' : undefined}
       aria-hidden={yielded || undefined}
       tabIndex={yielded ? -1 : undefined}
       aria-label={text || 'Contactar con Portal Verde por WhatsApp'}
