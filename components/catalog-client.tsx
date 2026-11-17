@@ -189,6 +189,32 @@ export function CatalogClient({
     searchTrackerRef.current?.update(search, resultsKey, filteredProducts.length);
   }, [search, resultsKey, filteredProducts.length]);
 
+  // Sincroniza el estado con la URL cuando el componente ya está montado y llega una navegación nueva
+  // (p. ej. búsqueda desde el header: /shop → /shop?search=...). Solo reacciona a cambios de las props.
+  const previousUrlStateRef = useRef({ search: initialSearch, category: initialCategory });
+  useEffect(() => {
+    const previous = previousUrlStateRef.current;
+    if (previous.search !== initialSearch) {
+      searchTrackerRef.current?.rebase(initialSearch);
+      setSearch(initialSearch);
+    }
+    if (previous.category !== initialCategory) {
+      setSelectedCategory(initialCategory || 'Todos');
+    }
+    previousUrlStateRef.current = { search: initialSearch, category: initialCategory };
+  }, [initialSearch, initialCategory]);
+
+  // La URL refleja el término escrito en el catálogo (sin recargar ni navegar).
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const current = url.searchParams.get('search') ?? '';
+    const next = search.trim();
+    if (current === next) return;
+    if (next) url.searchParams.set('search', next);
+    else url.searchParams.delete('search');
+    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+  }, [search]);
+
   // Contexto del listado para `select_item`.
   const itemListName: ItemListName = search.trim()
     ? 'search_results'

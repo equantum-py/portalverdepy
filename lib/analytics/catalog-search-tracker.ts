@@ -63,6 +63,14 @@ export function createCatalogSearchTracker(
         emit(clean, resultsCount);
       }, CATALOG_SEARCH_SETTLE_MS);
     },
+    /**
+     * El término cambió por navegación (p. ej. búsqueda desde el header, ya medida allí): se toma como
+     * línea base para no emitir un `search` duplicado desde el catálogo.
+     */
+    rebase(term: string) {
+      clearPending();
+      lastTerm = sanitizeSearchTerm(term) ?? '';
+    },
     cancel: clearPending
   };
 }

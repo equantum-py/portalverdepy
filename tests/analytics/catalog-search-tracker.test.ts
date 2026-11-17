@@ -90,4 +90,15 @@ describe('buscador del catálogo', () => {
     vi.advanceTimersByTime(5000);
     expect(emit).not.toHaveBeenCalled();
   });
+
+  it('rebase(): una búsqueda llegada por navegación (header) no se vuelve a emitir desde el catálogo', () => {
+    const { tracker, emit } = make('', 'all');
+    tracker.rebase('piedra');
+    tracker.update('piedra', 'k-piedra', 2);
+    vi.advanceTimersByTime(CATALOG_SEARCH_SETTLE_MS + 10);
+    expect(emit).not.toHaveBeenCalled();
+    tracker.update('césped', 'k-cesped', 1);
+    vi.advanceTimersByTime(CATALOG_SEARCH_SETTLE_MS + 10);
+    expect(emit).toHaveBeenCalledTimes(1);
+  });
 });
