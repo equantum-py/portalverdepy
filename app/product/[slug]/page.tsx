@@ -16,6 +16,7 @@ import { ProductCard } from '@/components/product-card';
 import {
   emeraldInstallationBadge,
   emeraldMaintenancePromo,
+  emeraldPriceFromLabel,
   installationNote,
   isEmeraldProduct,
   shouldShowInstallationNote
@@ -619,7 +620,9 @@ export default async function ProductPage({
         <div className="container-shell flex items-center gap-3 px-0">
           <div className="min-w-0 flex-1">
             <p className="text-[10px] uppercase tracking-wide text-text-soft">
-              Desde
+              {hasTieredPricing && isEmeraldProduct(product as Product)
+                ? emeraldPriceFromLabel
+                : 'Desde'}
             </p>
 
             <p className="truncate text-lg font-bold text-brand-700">

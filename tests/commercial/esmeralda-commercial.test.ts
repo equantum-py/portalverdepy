@@ -4,6 +4,7 @@ import { defaultHomeContent } from '@/lib/home-content/public';
 import {
   emeraldInstallationBadge,
   emeraldMaintenancePromo,
+  emeraldPriceFromLabel,
   isEmeraldProduct
 } from '@/lib/product-installation-note';
 
@@ -23,6 +24,10 @@ describe('OT-004 · condiciones comerciales del Césped Esmeralda', () => {
     expect(defaultHomeContent.promoText).toContain('Gs. 32.000/m²');
     expect(defaultHomeContent.promoText).toContain('desde 40 m²');
     expect(defaultHomeContent.promoText).toContain('Instalación incluida');
+  });
+
+  it('la barra fija mobile aclara que el precio mínimo aplica desde 40 m²', () => {
+    expect(emeraldPriceFromLabel).toBe('Desde 40 m²');
   });
 
   it('solo la ficha del Césped Esmeralda recibe el contenido nuevo', () => {

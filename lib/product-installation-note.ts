@@ -29,6 +29,8 @@ export const emeraldProductSlug = 'cesped-esmeralda-m2';
 
 export const emeraldInstallationBadge = 'Instalación incluida en el precio';
 
+export const emeraldPriceFromLabel = 'Desde 40 m²';
+
 export const emeraldMaintenancePromo =
   'Comprá desde 100 m² de Césped Esmeralda y recibí una visita de mantenimiento GRATIS, dentro de los 30 días posteriores a tu compra.';
 
