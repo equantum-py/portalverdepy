@@ -14,7 +14,11 @@ import {
 
 import { ProductCard } from '@/components/product-card';
 import {
+  emeraldInstallationBadge,
+  emeraldMaintenancePromo,
+  emeraldPriceFromLabel,
   installationNote,
+  isEmeraldProduct,
   shouldShowInstallationNote
 } from '@/lib/product-installation-note';
 import { ProductGallery } from '@/components/products/product-gallery';
@@ -286,6 +290,26 @@ export default async function ProductPage({
             </p>
 
             {hasTieredPricing ? <TieredPriceCalculator product={product as Product} tiers={activePriceTiers} minimumQuantity={Number(databaseProduct?.min_order_quantity ?? 1)} unit={databaseProduct?.unit ?? 'unidad'} whatsappNumber={whatsappNumber} /> : null}
+
+            {hasTieredPricing && isEmeraldProduct(product as Product) ? (
+              <div className="mt-3 grid gap-3">
+                <div className="inline-flex w-fit items-center gap-2 rounded-full bg-green-100 px-3 py-1.5 text-sm font-semibold text-green-800">
+                  <CheckCircle2 className="h-4 w-4" />
+                  {emeraldInstallationBadge}
+                </div>
+
+                <div className="rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm font-medium leading-6 text-brand-900">
+                  {emeraldMaintenancePromo}
+                </div>
+
+                {shouldShowInstallationNote(product as Product) ? (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+                    <strong className="font-semibold">Aclaración sobre el terreno:</strong>{' '}
+                    {installationNote}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
 
             {/* Precio y conversión */}
             {!hasTieredPricing ? <div className="mt-4 rounded-2xl border border-brand-100 bg-white p-4 shadow-soft sm:mt-6 sm:rounded-3xl sm:p-6">
@@ -596,7 +620,9 @@ export default async function ProductPage({
         <div className="container-shell flex items-center gap-3 px-0">
           <div className="min-w-0 flex-1">
             <p className="text-[10px] uppercase tracking-wide text-text-soft">
-              Desde
+              {hasTieredPricing && isEmeraldProduct(product as Product)
+                ? emeraldPriceFromLabel
+                : 'Desde'}
             </p>
 
             <p className="truncate text-lg font-bold text-brand-700">
