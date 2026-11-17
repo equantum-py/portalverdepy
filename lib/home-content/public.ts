@@ -44,7 +44,7 @@ const defaultServiceBanners = [
 
 export const defaultHomeContent: HomeContentValues = {
   promoEnabled: true,
-  promoText: 'Césped Esmeralda desde Gs. 31.000 m² con instalación incluida',
+  promoText: 'Césped Esmeralda desde Gs. 32.000/m², para compras desde 40 m². Instalación incluida.',
   promoIcon: '🌱',
   promoUrl: 'https://wa.me/595984053683',
   promoButtonText: 'WhatsApp',

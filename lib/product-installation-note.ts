@@ -20,3 +20,18 @@ export function shouldShowInstallationNote(product: Product) {
 
   return category.includes('cesped') && !name.includes('mani');
 }
+
+/**
+ * OT-004: condiciones comerciales confirmadas del Césped Esmeralda.
+ * Solo texto; los precios y reglas de cálculo viven en el sistema (escalas de precio).
+ */
+export const emeraldProductSlug = 'cesped-esmeralda-m2';
+
+export const emeraldInstallationBadge = 'Instalación incluida en el precio';
+
+export const emeraldMaintenancePromo =
+  'Comprá desde 100 m² de Césped Esmeralda y recibí una visita de mantenimiento GRATIS, dentro de los 30 días posteriores a tu compra.';
+
+export function isEmeraldProduct(product: Pick<Product, 'slug'>) {
+  return product.slug === emeraldProductSlug;
+}
