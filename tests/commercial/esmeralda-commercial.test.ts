@@ -21,9 +21,9 @@ describe('OT-004 · condiciones comerciales del Césped Esmeralda', () => {
   });
 
   it('el texto del banner aclara que el precio aplica desde 40 m²', () => {
-    expect(defaultHomeContent.promoText).toContain('Gs. 32.000/m²');
-    expect(defaultHomeContent.promoText).toContain('desde 40 m²');
-    expect(defaultHomeContent.promoText).toContain('Instalación incluida');
+    expect(defaultHomeContent.promoText).toBe(
+      'Césped Esmeralda desde Gs. 32.000/m² (desde 40 m²) · Instalación incluida'
+    );
   });
 
   it('la barra fija mobile aclara que el precio mínimo aplica desde 40 m²', () => {
