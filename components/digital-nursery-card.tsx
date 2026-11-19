@@ -1,6 +1,7 @@
 import { Sprout } from 'lucide-react';
 import Image from 'next/image';
 
+import { DigitalNurseryGallery, type PublicNurseryGalleryPhoto } from '@/components/digital-nursery-gallery';
 import { DigitalNurseryPrice } from '@/components/digital-nursery-price';
 import { buildNurseryWhatsAppMessage, getNurseryPricing } from '@/lib/digital-nursery-pricing';
 import { WhatsAppIcon } from '@/components/icons';
@@ -13,6 +14,7 @@ export type DigitalNurseryPublicItem = {
   description: string;
   imageUrl: string | null;
   whatsappMessage: string;
+  gallery?: PublicNurseryGalleryPhoto[];
   prices?: {
     normal: number | null;
     promotional: number | null;
@@ -55,6 +57,7 @@ export function DigitalNurseryCard({ item }: { item: DigitalNurseryPublicItem })
         {item.description ? <p className="mt-2 hidden line-clamp-2 text-sm text-text-soft sm:block">{item.description}</p> : null}
         <DigitalNurseryPrice pricing={pricing} />
         <div className="mt-auto pt-3 sm:pt-4">
+          {!!item.gallery?.length && <DigitalNurseryGallery name={item.name} photos={item.gallery} />}
           <a href={whatsappUrl} aria-label="Consultar por WhatsApp" target="_blank" rel="noopener noreferrer" data-wa-cta="product_card" data-wa-product-name={item.name} data-wa-product-category="Plantas" data-wa-product-id={item.id} data-wa-contact-type="plant_consultation" className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-brand-700 px-2 text-xs font-semibold text-white transition hover:bg-brand-800 sm:min-h-11 sm:gap-2 sm:px-3 sm:text-sm">
             <WhatsAppIcon className="h-4 w-4 shrink-0" />
             {item.prices ? (

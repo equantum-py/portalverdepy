@@ -12,9 +12,10 @@ type Props = {
   itemName: string;
   initialUrl?: string | null;
   initialPath?: string | null;
+  gallery?: boolean;
 };
 
-const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+const imageExtensions = new Map([['image/jpeg', 'jpg'], ['image/png', 'png'], ['image/webp', 'webp']]);
 const maxSize = 5 * 1024 * 1024;
 
 function safeName(value: string) {
@@ -26,7 +27,7 @@ function safeName(value: string) {
     .replace(/^-|-$/g, '') || 'planta';
 }
 
-export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, initialPath }: Props) {
+export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, initialPath, gallery = false }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState(initialUrl ?? '');
   const [path, setPath] = useState(initialPath ?? '');
@@ -37,7 +38,8 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
     const file = event.target.files?.[0];
     if (!file) return;
     event.currentTarget.value = '';
-    if (!allowedTypes.includes(file.type)) {
+    const extension = imageExtensions.get(file.type);
+    if (!extension) {
       setMessage('Usá JPG, PNG o WebP.');
       return;
     }
@@ -45,6 +47,12 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
       setMessage('La imagen supera 5 MB.');
       return;
     }
+    const form = event.currentTarget.form;
+    const preventEarlySave = (submitEvent: SubmitEvent) => {
+      submitEvent.preventDefault();
+      setMessage('Esperá a que termine la carga antes de guardar.');
+    };
+    form?.addEventListener('submit', preventEarlySave);
     setUploading(true);
     setMessage('');
     try {
@@ -55,7 +63,6 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
       }
 
       const supabase = createClient();
-      const extension = file.name.split('.').pop()?.toLowerCase() || 'webp';
       const nextPath = `digital-nursery/${itemId}/${safeName(itemName)}-${crypto.randomUUID()}.${extension}`;
       const { error } = await supabase.storage.from('product-images').upload(nextPath, file, {
         cacheControl: '31536000',
@@ -71,6 +78,7 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'No se pudo subir la imagen.');
     } finally {
+      form?.removeEventListener('submit', preventEarlySave);
       setUploading(false);
     }
   }
@@ -83,8 +91,8 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
 
   return (
     <div>
-      <input type="hidden" name="image_url" value={url} />
-      <input type="hidden" name="storage_path" value={path} />
+      {!gallery && <input type="hidden" name="image_url" value={url} />}
+      <input type="hidden" name={gallery ? 'gallery_path' : 'storage_path'} value={path} />
       <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={onFile} className="hidden" />
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
