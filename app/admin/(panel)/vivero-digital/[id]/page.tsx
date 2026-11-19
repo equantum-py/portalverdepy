@@ -2,6 +2,8 @@ import { ArrowLeft, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { NurseryGalleryFields } from '@/components/admin/digital-nursery/nursery-gallery-fields';
+import type { NurseryGalleryPhoto } from '@/lib/nursery-gallery';
 import { DigitalNurseryImageUploader } from '@/components/admin/digital-nursery/digital-nursery-image-uploader';
 import { NurseryPublicPriceFields } from '@/components/admin/digital-nursery/nursery-public-price-fields';
 import { NurseryGeminiAssistant } from '@/components/admin/digital-nursery/nursery-gemini-assistant';
@@ -16,6 +18,7 @@ type NurseryEditorItem = {
   description: string;
   image_url: string | null;
   storage_path: string | null;
+  gallery_photos?: NurseryGalleryPhoto[];
   portal_price: number | null;
   public_price: number | null;
   promotional_price: number | null;
@@ -31,6 +34,10 @@ export default async function EditDigitalNurseryItemPage({ params }: Props) {
   const supabase = await createClient();
   const { data: item } = await supabase.rpc('get_admin_nursery_item', { item_id: id }).single<NurseryEditorItem>();
   if (!item) notFound();
+  const bucket = supabase.storage.from('product-images');
+  const gallery = item.gallery_photos?.map((photo) => ({
+    ...photo, url: bucket.getPublicUrl(photo.path).data.publicUrl
+  }));
 
   return (
     <div className="mx-auto w-full max-w-5xl">
@@ -73,8 +80,11 @@ export default async function EditDigitalNurseryItemPage({ params }: Props) {
             </label>
           </div>
 
-          <div className="mt-6 flex justify-end"><button type="submit" className="h-11 rounded-xl bg-green-700 px-6 text-sm font-semibold text-white hover:bg-green-800">Guardar cambios</button></div>
         </section>
+
+        {gallery && <NurseryGalleryFields itemId={item.id} itemName={item.name} photos={gallery} />}
+
+        <div className="flex justify-end lg:col-span-2"><button type="submit" className="h-11 rounded-xl bg-green-700 px-6 text-sm font-semibold text-white hover:bg-green-800">Guardar cambios</button></div>
       </form>
     </div>
   );

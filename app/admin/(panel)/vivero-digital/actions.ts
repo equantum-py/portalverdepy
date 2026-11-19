@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { getNurseryPricing, isNurseryPrice } from '@/lib/digital-nursery-pricing';
+import { isNurseryPhotoContext, nurseryGalleryLimit, type NurseryGalleryPhoto } from '@/lib/nursery-gallery';
 import { createClient } from '@/lib/supabase/server';
 
 function readPublicPrice(formData: FormData, field: string) {
@@ -13,6 +14,25 @@ function readPublicPrice(formData: FormData, field: string) {
   const value = Number(raw);
   if (!isNurseryPrice(value)) throw new Error('Ingresá un precio público válido en guaraníes enteros.');
   return value;
+}
+
+function readGallery(formData: FormData, id: string): NurseryGalleryPhoto[] {
+  const paths = formData.getAll('gallery_path');
+  const contexts = formData.getAll('gallery_context');
+  if (paths.length !== contexts.length || paths.length > nurseryGalleryLimit) {
+    throw new Error('La galería admite hasta seis fotos.');
+  }
+
+  return paths.flatMap((path, index) => {
+    if (path === '') return [];
+    const context = contexts[index];
+    if (typeof path !== 'string' || !path.startsWith(`digital-nursery/${id}/`) ||
+        !/^[a-z0-9-]+\.(jpe?g|png|webp)$/.test(path.split('/').at(-1) ?? '') ||
+        path.split('/').length !== 3 || !isNurseryPhotoContext(context)) {
+      throw new Error('La galería contiene una foto inválida.');
+    }
+    return [{ path, context }];
+  });
 }
 
 export async function updateDigitalNurseryItemAction(formData: FormData) {
@@ -30,6 +50,7 @@ export async function updateDigitalNurseryItemAction(formData: FormData) {
   }
 
   const payload = {
+    ...(formData.has('gallery_present') ? { gallery_photos: readGallery(formData, id) } : {}),
     public_price: publicPrice,
     promotional_price: promotionalPrice,
     promotion_enabled: promotionEnabled,
