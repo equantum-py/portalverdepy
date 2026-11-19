@@ -2,6 +2,8 @@ import { ImageOff, Pencil, Search, Sprout } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { DigitalNurseryPrice } from '@/components/digital-nursery-price';
+import { getNurseryPricing } from '@/lib/digital-nursery-pricing';
 import { createClient } from '@/lib/supabase/server';
 import { toggleDigitalNurseryItemAction } from './actions';
 
@@ -16,7 +18,7 @@ export default async function DigitalNurseryPage({ searchParams }: PageProps) {
   const status = filters.status ?? 'all';
   const supabase = await createClient();
 
-  const { data, error } = await supabase.from('digital_nursery_items').select('*').order('sort_order', { ascending: true });
+  const { data, error } = await supabase.from('digital_nursery_items').select('id,name,variant,category,image_url,is_active,public_price,promotional_price,promotion_enabled').order('sort_order', { ascending: true });
 
   if (error) return <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900"><p className="font-semibold">No se pudo cargar Vivero Digital.</p><p className="mt-1">{error.message}</p></div>;
 
@@ -34,7 +36,7 @@ export default async function DigitalNurseryPage({ searchParams }: PageProps) {
   return (
     <div className="mx-auto w-full max-w-[1500px]">
       <section className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-        <div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-green-700">Catálogo vegetal</p><h1 className="mt-2 flex items-center gap-3 text-3xl font-semibold tracking-tight text-slate-950"><Sprout className="h-8 w-8 text-green-700" /> Vivero Digital</h1><p className="mt-2 max-w-2xl text-sm text-slate-500">Administrá plantas, fotografías y visibilidad. Los precios no se muestran al cliente: la consulta se realiza por WhatsApp.</p></div>
+        <div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-green-700">Catálogo vegetal</p><h1 className="mt-2 flex items-center gap-3 text-3xl font-semibold tracking-tight text-slate-950"><Sprout className="h-8 w-8 text-green-700" /> Vivero Digital</h1><p className="mt-2 max-w-2xl text-sm text-slate-500">Administrá plantas, fotografías, precios públicos y visibilidad.</p></div>
         <div className="flex gap-3 text-sm"><div className="rounded-xl border border-green-100 bg-green-50 px-4 py-3"><strong>{plants}</strong> plantas</div><div className="rounded-xl border border-slate-200 bg-white px-4 py-3"><strong>{active}</strong> activos</div></div>
       </section>
 
@@ -56,7 +58,7 @@ export default async function DigitalNurseryPage({ searchParams }: PageProps) {
               <div className="p-4">
                 <div className="flex items-start justify-between gap-3"><div><p className="text-xs uppercase tracking-wide text-green-700">{item.category}</p><h2 className="mt-1 font-semibold text-slate-950">{item.name}</h2>{item.variant ? <p className="mt-1 text-xs text-slate-500">Tamaño: {item.variant}</p> : null}</div><Link href={`/admin/vivero-digital/${item.id}`} title="Editar" className="rounded-lg border border-slate-200 p-2 text-slate-500 hover:border-green-200 hover:text-green-700"><Pencil className="h-4 w-4" /></Link></div>
 
-                <div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-500">Precio oculto en la tienda · Consulta por WhatsApp</div>
+                <DigitalNurseryPrice pricing={getNurseryPricing(item.public_price, item.promotional_price, item.promotion_enabled)} />
 
                 <div className="mt-3 flex items-center justify-between gap-3">
                   <span className={`rounded-full px-2.5 py-1 text-xs ${item.is_active ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>{item.is_active ? 'Activo' : 'Desactivado'}</span>

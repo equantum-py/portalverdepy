@@ -3,16 +3,33 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { DigitalNurseryImageUploader } from '@/components/admin/digital-nursery/digital-nursery-image-uploader';
+import { NurseryPublicPriceFields } from '@/components/admin/digital-nursery/nursery-public-price-fields';
 import { NurseryGeminiAssistant } from '@/components/admin/digital-nursery/nursery-gemini-assistant';
 import { createClient } from '@/lib/supabase/server';
 import { updateDigitalNurseryItemAction } from '../actions';
+
+type NurseryEditorItem = {
+  id: string;
+  name: string;
+  variant: string;
+  category: string;
+  description: string;
+  image_url: string | null;
+  storage_path: string | null;
+  portal_price: number | null;
+  public_price: number | null;
+  promotional_price: number | null;
+  promotion_enabled: boolean;
+  whatsapp_message: string;
+  is_active: boolean;
+};
 
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditDigitalNurseryItemPage({ params }: Props) {
   const { id } = await params;
   const supabase = await createClient();
-  const { data: item } = await supabase.from('digital_nursery_items').select('*').eq('id', id).single();
+  const { data: item } = await supabase.rpc('get_admin_nursery_item', { item_id: id }).single<NurseryEditorItem>();
   if (!item) notFound();
 
   return (
@@ -45,6 +62,8 @@ export default async function EditDigitalNurseryItemPage({ params }: Props) {
               <p className="mt-1 text-xs text-amber-800">Podés guardar un precio para administración, pero no aparecerá en el catálogo público del Vivero Digital.</p>
               <input name="portal_price" type="number" min="0" step="1" defaultValue={item.portal_price ?? ''} placeholder="Ej. 150000" className="mt-3 h-11 w-full rounded-xl border border-amber-200 bg-white px-3 sm:max-w-xs" />
             </div>
+
+            <NurseryPublicPriceFields normal={item.public_price} promotional={item.promotional_price} enabled={item.promotion_enabled} />
 
             <label className="sm:col-span-2"><span className="mb-1.5 flex items-center gap-2 text-sm font-medium"><MessageCircle className="h-4 w-4 text-green-700" />Mensaje de WhatsApp</span><textarea name="whatsapp_message" defaultValue={item.whatsapp_message ?? ''} rows={3} placeholder={`Hola, quiero consultar por ${item.name}.`} className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-green-600" /></label>
 
