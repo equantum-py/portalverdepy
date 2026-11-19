@@ -57,8 +57,9 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
     setMessage('');
     try {
       const { width, height } = await readImageDimensions(file);
-      if (Math.max(width, height) < 1200 || Math.min(width, height) < 900) {
-        setMessage(`La imagen mide ${width} × ${height} px. Usá al menos 1200 px en el lado largo y 900 px en el corto.`);
+      const minimumShortSide = gallery ? 675 : 900;
+      if (Math.max(width, height) < 1200 || Math.min(width, height) < minimumShortSide) {
+        setMessage(`La imagen mide ${width} × ${height} px. Usá al menos 1200 px en el lado largo y ${minimumShortSide} px en el corto.`);
         return;
       }
 
