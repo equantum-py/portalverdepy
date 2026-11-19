@@ -21,11 +21,11 @@ export function AdminHeader({
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
-      <div className="flex min-h-[72px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+      <div className="flex min-h-16 lg:min-h-[72px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-3">
           <AdminMobileNav />
 
-          <div className="min-w-0">
+          <div className="hidden min-w-0 lg:block">
             <p className="truncate text-sm font-semibold text-slate-950">
               Panel administrativo
             </p>
@@ -49,7 +49,7 @@ export function AdminHeader({
           <button
             type="button"
             aria-label="Notificaciones"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50"
+            className="hidden h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 lg:inline-flex"
           >
             <Bell className="h-4 w-4" />
           </button>
