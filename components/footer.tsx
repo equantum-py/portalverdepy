@@ -34,7 +34,15 @@ const Contact = () => (
   <ul className="space-y-4 text-sm text-white/70">
     <li className="flex items-start gap-3"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-300" />{siteConfig.contact.coverage}</li>
     <li className="flex items-start gap-3"><Phone className="mt-0.5 h-4 w-4 shrink-0 text-brand-300" /><a href={`tel:${siteConfig.contact.phoneRaw}`}>{siteConfig.contact.phoneDisplay}</a></li>
-    <li className="flex items-start gap-3"><Mail className="mt-0.5 h-4 w-4 shrink-0 text-brand-300" /><a href={`mailto:${siteConfig.contact.email}`}>Escribinos por correo</a></li>
+    <li>
+      <a
+        href={`mailto:${siteConfig.contact.email}`}
+        className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-brand-300 bg-brand-100 px-4 py-2 font-semibold text-brand-950 transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+      >
+        <Mail aria-hidden="true" className="h-4 w-4 shrink-0" />
+        Escribinos por correo
+      </a>
+    </li>
     <li className="flex items-start gap-3"><Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-brand-300" />{siteConfig.contact.schedule}</li>
   </ul>
 );
