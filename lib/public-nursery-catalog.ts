@@ -1,4 +1,5 @@
 import type { DigitalNurseryPublicItem } from '@/components/digital-nursery-card';
+import { isNurseryPrice } from '@/lib/digital-nursery-pricing';
 import { createClient } from '@/lib/supabase/server';
 
 const catalogColumns = 'id,name,variant,description,image_url,whatsapp_message';
@@ -31,7 +32,12 @@ export async function getPublicNurseryPlants({ includeAccessories = false } = {}
     result = await query(catalogColumns);
   }
 
-  return (result.data ?? []).map((item) => ({
+  const orderedItems = [...(result.data ?? [])].sort(
+    (first, second) => Number(isNurseryPrice(second.public_price ?? null)) -
+      Number(isNurseryPrice(first.public_price ?? null))
+  );
+
+  return orderedItems.map((item) => ({
     id: item.id,
     name: item.name,
     variant: item.variant ?? '',
