@@ -3,7 +3,17 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { getNurseryPricing, isNurseryPrice } from '@/lib/digital-nursery-pricing';
 import { createClient } from '@/lib/supabase/server';
+
+function readPublicPrice(formData: FormData, field: string) {
+  const raw = String(formData.get(field) ?? '').trim();
+  if (raw === '') return null;
+
+  const value = Number(raw);
+  if (!isNurseryPrice(value)) throw new Error('Ingresá un precio público válido en guaraníes enteros.');
+  return value;
+}
 
 export async function updateDigitalNurseryItemAction(formData: FormData) {
   const id = String(formData.get('id') ?? '');
@@ -12,7 +22,17 @@ export async function updateDigitalNurseryItemAction(formData: FormData) {
   const supabase = await createClient();
   const portalPriceRaw = String(formData.get('portal_price') ?? '').trim();
 
+  const publicPrice = readPublicPrice(formData, 'public_price');
+  const promotionalPrice = readPublicPrice(formData, 'promotional_price');
+  const promotionEnabled = formData.get('promotion_enabled') === 'on';
+  if (promotionEnabled && getNurseryPricing(publicPrice, promotionalPrice, true)?.previous == null) {
+    throw new Error('El precio promocional debe ser menor que el precio normal.');
+  }
+
   const payload = {
+    public_price: publicPrice,
+    promotional_price: promotionalPrice,
+    promotion_enabled: promotionEnabled,
     name: String(formData.get('name') ?? '').trim(),
     variant: String(formData.get('variant') ?? '').trim(),
     category: String(formData.get('category') ?? 'Planta').trim(),
@@ -38,6 +58,7 @@ export async function updateDigitalNurseryItemAction(formData: FormData) {
   revalidatePath('/admin/vivero-digital');
   revalidatePath('/');
   revalidatePath('/shop');
+  revalidatePath('/plantas');
   redirect('/admin/vivero-digital?updated=1');
 }
 
@@ -61,4 +82,5 @@ export async function toggleDigitalNurseryItemAction(formData: FormData) {
   revalidatePath('/admin/vivero-digital');
   revalidatePath('/');
   revalidatePath('/shop');
+  revalidatePath('/plantas');
 }
