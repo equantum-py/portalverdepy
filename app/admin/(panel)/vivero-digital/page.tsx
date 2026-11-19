@@ -51,18 +51,18 @@ export default async function DigitalNurseryPage({ searchParams }: PageProps) {
         </form>
         <div className="border-b border-slate-100 px-4 py-3 text-sm text-slate-500">Mostrando {items.length} de {allItems.length} registros</div>
 
-        <div className="grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div className="grid gap-2 p-2 sm:grid-cols-2 sm:gap-4 sm:p-4 xl:grid-cols-3 2xl:grid-cols-4">
           {items.map((item) => (
-            <article key={item.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-              <div className="relative flex aspect-[4/3] items-center justify-center bg-slate-50">{item.image_url ? <Image src={item.image_url} alt={item.name} fill quality={90} sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw" className="object-contain p-1" /> : <div className="flex flex-col items-center gap-2 text-slate-400"><ImageOff className="h-8 w-8" /><span className="text-xs">Foto pendiente</span></div>}</div>
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-3"><div><p className="text-xs uppercase tracking-wide text-green-700">{item.category}</p><h2 className="mt-1 font-semibold text-slate-950">{item.name}</h2>{item.variant ? <p className="mt-1 text-xs text-slate-500">Tamaño: {item.variant}</p> : null}</div><Link href={`/admin/vivero-digital/${item.id}`} title="Editar" className="rounded-lg border border-slate-200 p-2 text-slate-500 hover:border-green-200 hover:text-green-700"><Pencil className="h-4 w-4" /></Link></div>
+            <article key={item.id} className="grid min-w-0 grid-cols-[5rem_minmax(0,1fr)] items-start overflow-hidden rounded-2xl border border-slate-200 bg-white sm:block">
+              <div className="relative m-2 flex aspect-square self-center overflow-hidden rounded-xl sm:m-0 sm:aspect-[4/3] sm:rounded-none items-center justify-center bg-slate-50">{item.image_url ? <Image src={item.image_url} alt={item.name} fill quality={90} sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw" className="object-contain p-1" /> : <div className="flex flex-col items-center gap-2 text-slate-400"><ImageOff className="h-8 w-8" /><span className="hidden text-xs sm:inline">Foto pendiente</span></div>}</div>
+              <div className="min-w-0 p-2.5 sm:p-4">
+                <div className="flex items-start justify-between gap-3"><div><p className="text-xs uppercase tracking-wide text-green-700">{item.category}</p><h2 className="mt-1 font-semibold text-slate-950">{item.name}</h2>{item.variant ? <p className="mt-1 text-xs text-slate-500">Tamaño: {item.variant}</p> : null}</div><Link href={`/admin/vivero-digital/${item.id}`} title="Editar" aria-label={`Editar ${item.name}`} className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:border-green-200 hover:text-green-700"><Pencil className="h-4 w-4" /></Link></div>
 
                 <DigitalNurseryPrice pricing={getNurseryPricing(item.public_price, item.promotional_price, item.promotion_enabled)} />
 
-                <div className="mt-3 flex items-center justify-between gap-3">
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                   <span className={`rounded-full px-2.5 py-1 text-xs ${item.is_active ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>{item.is_active ? 'Activo' : 'Desactivado'}</span>
-                  <form action={toggleDigitalNurseryItemAction}><input type="hidden" name="id" value={item.id} /><input type="hidden" name="next_active" value={String(!item.is_active)} /><button className={`rounded-lg px-3 py-2 text-xs font-semibold ${item.is_active ? 'border border-slate-200 text-slate-600 hover:bg-slate-50' : 'bg-green-700 text-white hover:bg-green-800'}`}>{item.is_active ? 'Desactivar' : 'Activar'}</button></form>
+                  <form action={toggleDigitalNurseryItemAction}><input type="hidden" name="id" value={item.id} /><input type="hidden" name="next_active" value={String(!item.is_active)} /><button className={`min-h-11 rounded-lg px-3 py-2 text-xs font-semibold ${item.is_active ? 'border border-slate-200 text-slate-600 hover:bg-slate-50' : 'bg-green-700 text-white hover:bg-green-800'}`}>{item.is_active ? 'Desactivar' : 'Activar'}</button></form>
                 </div>
               </div>
             </article>

@@ -49,7 +49,7 @@ export default async function EditDigitalNurseryItemPage({ params }: Props) {
         <p className="mt-2 text-sm text-slate-500">Configurá la ficha que verá el cliente. El precio interno no se mostrará en la tienda.</p>
       </div>
 
-      <form action={updateDigitalNurseryItemAction} className="mt-7 grid gap-6 lg:grid-cols-[340px_1fr]">
+      <form action={updateDigitalNurseryItemAction} className="mt-7 grid min-w-0 gap-6 pb-20 lg:grid-cols-[340px_minmax(0,1fr)] lg:pb-0">
         <input type="hidden" name="id" value={item.id} />
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="mb-4 font-semibold text-slate-950">Fotografía</h2>
@@ -84,7 +84,7 @@ export default async function EditDigitalNurseryItemPage({ params }: Props) {
 
         {gallery && <NurseryGalleryFields itemId={item.id} itemName={item.name} photos={gallery} />}
 
-        <div className="flex justify-end lg:col-span-2"><button type="submit" className="h-11 rounded-xl bg-green-700 px-6 text-sm font-semibold text-white hover:bg-green-800">Guardar cambios</button></div>
+        <div className="fixed inset-x-0 bottom-0 z-20 flex justify-end border-t border-slate-200 bg-white p-2 [padding-bottom:max(0.5rem,env(safe-area-inset-bottom))] lg:static lg:col-span-2 lg:border-0 lg:bg-transparent lg:p-0"><button type="submit" className="h-11 w-full rounded-xl sm:w-auto bg-green-700 px-6 text-sm font-semibold text-white hover:bg-green-800">Guardar cambios</button></div>
       </form>
     </div>
   );

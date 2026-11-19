@@ -54,8 +54,8 @@ export function ProductStockToggle({
           aria-label={`Marcar ${productName} como disponible`}
           className={
             inStock
-              ? 'flex min-h-8 flex-1 items-center justify-center rounded-lg bg-white px-2 text-xs font-semibold text-green-700 shadow-sm'
-              : 'flex min-h-8 flex-1 items-center justify-center rounded-lg px-2 text-xs font-medium text-slate-500 hover:text-green-700'
+              ? 'flex min-h-11 flex-1 lg:min-h-8 items-center justify-center rounded-lg bg-white px-2 text-xs font-semibold text-green-700 shadow-sm'
+              : 'flex min-h-11 flex-1 lg:min-h-8 items-center justify-center rounded-lg px-2 text-xs font-medium text-slate-500 hover:text-green-700'
           }
         >
           {isPending && !inStock ? (
@@ -72,8 +72,8 @@ export function ProductStockToggle({
           aria-label={`Marcar ${productName} como agotado`}
           className={
             !inStock
-              ? 'flex min-h-8 flex-1 items-center justify-center rounded-lg bg-white px-2 text-xs font-semibold text-red-600 shadow-sm'
-              : 'flex min-h-8 flex-1 items-center justify-center rounded-lg px-2 text-xs font-medium text-slate-500 hover:text-red-600'
+              ? 'flex min-h-11 flex-1 lg:min-h-8 items-center justify-center rounded-lg bg-white px-2 text-xs font-semibold text-red-600 shadow-sm'
+              : 'flex min-h-11 flex-1 lg:min-h-8 items-center justify-center rounded-lg px-2 text-xs font-medium text-slate-500 hover:text-red-600'
           }
         >
           {isPending && inStock ? (
@@ -87,7 +87,7 @@ export function ProductStockToggle({
       {message ? (
         <div
           role="alert"
-          className="absolute right-0 top-12 z-30 w-64 rounded-xl border border-red-200 bg-white p-3 text-xs text-red-700 shadow-xl"
+          className="absolute right-0 top-12 z-30 w-64 max-w-full rounded-xl border border-red-200 bg-white p-3 text-xs text-red-700 shadow-xl"
         >
           {message}
         </div>

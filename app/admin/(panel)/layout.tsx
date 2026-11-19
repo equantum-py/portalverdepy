@@ -45,7 +45,7 @@ export default async function AdminPanelLayout({
           role={profile.role}
         />
 
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="min-w-0 p-3 sm:p-6 lg:p-8 max-sm:[&_input:not([type=checkbox]):not([type=radio]):not([type=file])]:text-base max-sm:[&_textarea]:text-base max-sm:[&_select]:text-base">
           {children}
         </main>
       </div>
