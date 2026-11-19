@@ -44,10 +44,8 @@ export async function updateDigitalNurseryItemAction(formData: FormData) {
 
   const publicPrice = readPublicPrice(formData, 'public_price');
   const promotionalPrice = readPublicPrice(formData, 'promotional_price');
-  const promotionEnabled = formData.get('promotion_enabled') === 'on';
-  if (promotionEnabled && getNurseryPricing(publicPrice, promotionalPrice, true)?.previous == null) {
-    throw new Error('El precio promocional debe ser menor que el precio normal.');
-  }
+  const pricing = getNurseryPricing(publicPrice, promotionalPrice, formData.get('promotion_enabled') === 'on');
+  const promotionEnabled = pricing?.previous != null;
 
   const payload = {
     ...(formData.has('gallery_present') ? { gallery_photos: readGallery(formData, id) } : {}),

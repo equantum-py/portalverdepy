@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import { DigitalNurseryPrice } from '@/components/digital-nursery-price';
-import { getNurseryPricing, isNurseryPrice, MAX_NURSERY_PRICE } from '@/lib/digital-nursery-pricing';
+import { getNurseryPricing, MAX_NURSERY_PRICE } from '@/lib/digital-nursery-pricing';
 
 type Props = {
   normal: number | null;
@@ -18,7 +18,6 @@ export function NurseryPublicPriceFields({ normal, promotional, enabled }: Props
   const normalPrice = normalInput === '' ? null : Number(normalInput);
   const promotionalPrice = promotionInput === '' ? null : Number(promotionInput);
   const pricing = getNurseryPricing(normalPrice, promotionalPrice, promotionEnabled);
-  const validNormal = isNurseryPrice(normalPrice);
   const invalidPromotion = promotionEnabled && pricing?.previous == null;
   const inputClass = 'h-11 w-full rounded-xl border border-slate-200 bg-white px-3';
 
@@ -29,14 +28,14 @@ export function NurseryPublicPriceFields({ normal, promotional, enabled }: Props
         <label className="grid gap-1.5 text-sm font-medium">
           Precio normal (Gs.)
           <input name="public_price" type="number" min={1} max={MAX_NURSERY_PRICE} step={1}
-            required={promotionEnabled} value={normalInput} className={inputClass}
+            value={normalInput} className={inputClass}
             onChange={(event) => setNormalInput(event.target.value)} />
         </label>
         <label className="grid gap-1.5 text-sm font-medium">
           Precio promocional (Gs.)
           <input name="promotional_price" type="number" min={1}
-            max={promotionEnabled && validNormal ? normalPrice - 1 : MAX_NURSERY_PRICE}
-            step={1} required={promotionEnabled} value={promotionInput} className={inputClass}
+            max={MAX_NURSERY_PRICE}
+            step={1} value={promotionInput} className={inputClass}
             aria-describedby={invalidPromotion ? 'nursery-promotion-error' : undefined}
             onChange={(event) => setPromotionInput(event.target.value)} />
         </label>
@@ -47,8 +46,8 @@ export function NurseryPublicPriceFields({ normal, promotional, enabled }: Props
         Activar promoción
       </label>
       {invalidPromotion && (
-        <p id="nursery-promotion-error" className="text-sm text-red-800">
-          Para activar la promoción, cargá un precio promocional menor que el normal.
+        <p id="nursery-promotion-error" className="text-sm text-slate-600">
+          Podés guardar sin promoción. Para activarla, cargá ambos precios y asegurate de que el promocional sea menor.
         </p>
       )}
       <div className="rounded-xl border border-green-100 bg-white p-3" aria-live="polite">
