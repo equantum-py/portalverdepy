@@ -18,7 +18,7 @@ export default async function DigitalNurseryPage({ searchParams }: PageProps) {
   const status = filters.status ?? 'all';
   const supabase = await createClient();
 
-  const { data, error } = await supabase.from('digital_nursery_items').select('id,name,variant,category,image_url,is_active,public_price,promotional_price,promotion_enabled').order('sort_order', { ascending: true });
+  const { data, error } = await supabase.from('digital_nursery_items').select('id,name,variant,category,image_url,is_active,public_price,promotional_price,promotion_enabled').order('is_active', { ascending: false }).order('sort_order', { ascending: true });
 
   if (error) return <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900"><p className="font-semibold">No se pudo cargar Vivero Digital.</p><p className="mt-1">{error.message}</p></div>;
 
