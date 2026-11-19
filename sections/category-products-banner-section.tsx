@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-import { DigitalNurseryCard } from '@/components/digital-nursery-card';
+import { DigitalNurseryCard, type DigitalNurseryPublicItem } from '@/components/digital-nursery-card';
 import { ProductCard } from '@/components/product-card';
 import type { Product } from '@/lib/types';
 
@@ -14,12 +14,11 @@ type Props = {
   categorySlug: string;
   bannerDesktopUrl: string;
   bannerMobileUrl: string;
-  products: Product[];
+  products: Product[] | DigitalNurseryPublicItem[];
   showViewAll: boolean;
   mobileColumns: 1 | 2;
   mobileSwipe: boolean;
   mobileShowProgress: boolean;
-  nurseryMode?: boolean;
 };
 
 export function CategoryProductsBannerSection({
@@ -32,7 +31,6 @@ export function CategoryProductsBannerSection({
   mobileColumns,
   mobileSwipe,
   mobileShowProgress,
-  nurseryMode = false,
 }: Props) {
   const mobileScrollerRef = useRef<HTMLDivElement>(null);
   const desktopScrollerRef = useRef<HTMLDivElement>(null);
@@ -72,18 +70,9 @@ export function CategoryProductsBannerSection({
 
   if (!bannerUrl && products.length === 0) return null;
 
-  const renderCard = (product: Product) =>
-    nurseryMode ? (
-      <DigitalNurseryCard
-        item={{
-          id: product.id,
-          name: product.name,
-          variant: product.unit?.replace(/^Tamaño:\s*/i, '') ?? '',
-          description: product.description,
-          imageUrl: product.image,
-          whatsappMessage: '',
-        }}
-      />
+  const renderCard = (product: Product | DigitalNurseryPublicItem) =>
+    'whatsappMessage' in product ? (
+      <DigitalNurseryCard item={product} />
     ) : (
       <ProductCard product={product} listName="home_featured" />
     );

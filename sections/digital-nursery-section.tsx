@@ -1,12 +1,11 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
-import { DigitalNurseryCard } from '@/components/digital-nursery-card';
-import type { Product } from '@/lib/types';
+import { DigitalNurseryCard, type DigitalNurseryPublicItem } from '@/components/digital-nursery-card';
 
 type Props = {
   title: string;
-  plants: Product[];
+  plants: DigitalNurseryPublicItem[];
   limit?: number;
   showViewAll?: boolean;
 };
@@ -33,17 +32,7 @@ export function DigitalNurserySection({
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6">
         {visiblePlants.map((plant) => (
-          <DigitalNurseryCard
-            key={plant.id}
-            item={{
-              id: plant.id,
-              name: plant.name,
-              variant: plant.unit?.replace(/^Tamaño:\s*/i, '') ?? '',
-              description: plant.description,
-              imageUrl: plant.image,
-              whatsappMessage: '',
-            }}
-          />
+          <DigitalNurseryCard key={plant.id} item={plant} />
         ))}
       </div>
 
