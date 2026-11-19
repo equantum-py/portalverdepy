@@ -3,16 +3,17 @@ import { createClient } from '@/lib/supabase/server';
 
 const catalogColumns = 'id,name,variant,description,image_url,whatsapp_message';
 
-export async function getPublicNurseryPlants(): Promise<DigitalNurseryPublicItem[]> {
+export async function getPublicNurseryPlants({ includeAccessories = false } = {}): Promise<DigitalNurseryPublicItem[]> {
   const supabase = await createClient();
-  const query = (columns: string) => supabase
-    .from('digital_nursery_items')
-    .select(columns)
-    .eq('category', 'Planta')
-    .eq('is_active', true)
-    .eq('is_published', true)
-    .order('sort_order', { ascending: true })
-    .returns<Array<{
+  const query = (columns: string) => {
+    const published = supabase
+      .from('digital_nursery_items')
+      .select(columns)
+      .eq('is_active', true)
+      .eq('is_published', true)
+      .order('sort_order', { ascending: true });
+
+    return (includeAccessories ? published : published.eq('category', 'Planta')).returns<Array<{
       id: string;
       name: string;
       variant: string | null;
@@ -23,6 +24,7 @@ export async function getPublicNurseryPlants(): Promise<DigitalNurseryPublicItem
       promotional_price?: number | null;
       promotion_enabled?: boolean;
     }>>();
+  };
 
   let result = await query(`${catalogColumns},public_price,promotional_price,promotion_enabled`);
   if (result.error?.code === '42703') {

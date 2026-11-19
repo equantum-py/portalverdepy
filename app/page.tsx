@@ -4,8 +4,7 @@ import { CategorySidebar } from "@/components/category-sidebar";
 import { WhatsAppFloating } from "@/components/whatsapp-floating";
 import { getHomeContent } from "@/lib/home-content/public";
 import { getPublicProducts } from "@/lib/products/catalog-products";
-import { createClient } from "@/lib/supabase/server";
-import type { Product } from "@/lib/types";
+import { getPublicNurseryPlants } from "@/lib/public-nursery-catalog";
 import { HomeHero } from "@/sections/home-hero";
 import { ProductSection } from "@/sections/product-section";
 import { ServicesSection } from "@/sections/services-section";
@@ -33,40 +32,11 @@ function normalizeCategory(value: string) {
   return value.trim().toLowerCase();
 }
 
-async function getActiveNurseryPlants(): Promise<Product[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("digital_nursery_items")
-    .select("id,name,variant,description,image_url,sort_order,is_active,is_published")
-    .eq("is_active", true)
-    .eq("is_published", true)
-    .order("sort_order", { ascending: true });
-
-  if (error) {
-    console.error("No se pudieron cargar las plantas activas del Vivero Digital en la Home:", error);
-    return [];
-  }
-
-  return (data ?? []).map((item) => ({
-    id: item.id,
-    slug: `vivero-${item.id}`,
-    name: item.name,
-    description: item.description ?? "",
-    price: 0,
-    category: "Plantas",
-    categorySlug: "plantas",
-    image: item.image_url || "/images/product-placeholder.webp",
-    images: item.image_url ? [{ imageUrl: item.image_url, altText: item.name }] : [],
-    unit: item.variant ? `Tamaño: ${item.variant}` : undefined,
-    inStock: true,
-  }));
-}
-
 export default async function HomePage() {
   const [products, content, nurseryPlants] = await Promise.all([
     getPublicProducts(),
     getHomeContent(),
-    getActiveNurseryPlants(),
+    getPublicNurseryPlants({ includeAccessories: true }),
   ]);
   const cesped = products.filter((product) => product.categorySlug === "cesped");
   const piedras = products.filter((product) =>
@@ -91,7 +61,7 @@ export default async function HomePage() {
             ? nurseryPlants
             : products.filter((product) => normalizeCategory(product.categorySlug ?? "") === normalizeCategory(section.categorySlug))
           ).slice(0, section.productLimit);
-          return <CategoryProductsBannerSection key={section.key} title={section.title} categorySlug={section.categorySlug} bannerDesktopUrl={section.bannerDesktopUrl} bannerMobileUrl={section.bannerMobileUrl} products={categoryProducts} showViewAll={section.showViewAll} mobileColumns={section.mobileColumns} mobileSwipe={section.mobileSwipe} mobileShowProgress={section.mobileShowProgress} nurseryMode={isPlantsSection} />;
+          return <CategoryProductsBannerSection key={section.key} title={section.title} categorySlug={section.categorySlug} bannerDesktopUrl={section.bannerDesktopUrl} bannerMobileUrl={section.bannerMobileUrl} products={categoryProducts} showViewAll={section.showViewAll} mobileColumns={section.mobileColumns} mobileSwipe={section.mobileSwipe} mobileShowProgress={section.mobileShowProgress} />;
         }
         const isStandardPlantsSection =
           section.sectionType === "standard" &&
