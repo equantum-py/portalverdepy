@@ -4,7 +4,7 @@ import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { type ChangeEvent, useRef, useState } from 'react';
 
-import { validateMinimumImageSize } from '@/lib/images/client-image-validation';
+import { readImageDimensions } from '@/lib/images/client-image-validation';
 import { createClient } from '@/lib/supabase/client';
 
 type Props = {
@@ -36,6 +36,7 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
   async function onFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
+    event.currentTarget.value = '';
     if (!allowedTypes.includes(file.type)) {
       setMessage('Usá JPG, PNG o WebP.');
       return;
@@ -44,15 +45,15 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
       setMessage('La imagen supera 5 MB.');
       return;
     }
-    const dimensionError = await validateMinimumImageSize(file, 1200, 900);
-    if (dimensionError) {
-      setMessage(dimensionError);
-      return;
-    }
-
     setUploading(true);
     setMessage('');
     try {
+      const { width, height } = await readImageDimensions(file);
+      if (Math.max(width, height) < 1200 || Math.min(width, height) < 900) {
+        setMessage(`La imagen mide ${width} × ${height} px. Usá al menos 1200 px en el lado largo y 900 px en el corto.`);
+        return;
+      }
+
       const supabase = createClient();
       const extension = file.name.split('.').pop()?.toLowerCase() || 'webp';
       const nextPath = `digital-nursery/${itemId}/${safeName(itemName)}-${crypto.randomUUID()}.${extension}`;
@@ -71,7 +72,6 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
       setMessage(error instanceof Error ? error.message : 'No se pudo subir la imagen.');
     } finally {
       setUploading(false);
-      if (inputRef.current) inputRef.current.value = '';
     }
   }
 
@@ -104,7 +104,7 @@ export function DigitalNurseryImageUploader({ itemId, itemName, initialUrl, init
         </button>
         {url ? <button type="button" onClick={remove} className="inline-flex h-10 items-center gap-2 rounded-xl border border-red-100 px-3 text-sm text-red-600 hover:bg-red-50"><Trash2 className="h-4 w-4" />Quitar</button> : null}
       </div>
-      {message ? <p className="mt-2 text-xs text-slate-500">{message}</p> : null}
+      {message ? <p role="status" className="mt-2 text-xs text-slate-600">{message}</p> : null}
     </div>
   );
 }
