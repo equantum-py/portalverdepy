@@ -10,7 +10,7 @@ export const siteConfig = {
     phoneDisplay: '+595 984 053 683',
     phoneRaw: '+595984053683',
     whatsapp: '595984053683',
-    email: 'hola@portalverde.com.py',
+    email: 'portalverde026@gmail.com',
     coverage: 'Limpio, Asunción y Gran Asunción',
     schedule: 'Lunes a sábado'
   },
